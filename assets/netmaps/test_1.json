@@ -9,7 +9,7 @@
       },
       "name": "node-1",
       "desc": "the very first node.",
-      "image": "satellite",
+      "image": "nodeLMM",
       "ownedByUser": true,
       "connectedNodes": [
         "node-2", "node-3"
@@ -22,7 +22,7 @@
       },
       "name": "node-2",
       "desc": "the very second node.",
-      "image": "satellite",
+      "image": "nodeLMM",
       "ownedByUser": false,
       "connectedNodes": [
         "node-1"
@@ -35,7 +35,7 @@
       },
       "name": "node-3",
       "desc": "the very third node.",
-      "image": "satellite",
+      "image": "nodeLMM",
       "ownedByUser": false,
       "connectedNodes": [
         "node-1", "node-4"
@@ -48,7 +48,7 @@
       },
       "name": "node-4",
       "desc": "the very fourth node.",
-      "image": "satellite",
+      "image": "nodeLMM",
       "ownedByUser": false,
       "connectedNodes": [
         "node-3"

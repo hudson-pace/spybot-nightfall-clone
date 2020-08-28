@@ -1,0 +1,675 @@
+{
+  "width": 2100,
+  "height": 1700,
+  "nodes": [
+    {
+      "name": "S.M.A.R.T. HQ",
+      "owner": "S.M.A.R.T",
+      "desc": "Center for information about S.M.A.R.T. and its operations.",
+      "image": "nodeSmart",
+      "ownedByUser": true,
+      "securityLevel": 1,
+      "coords": {
+        "x": 350,
+        "y": 850
+      },
+      "connectedNodes": [
+        "Leo's Shop",
+        "PR Database",
+        "Tech Support"
+      ]
+    },
+    {
+      "name": "Leo's Shop",
+      "owner": "Warez",
+      "desc": "A quality shop of basic programs at low prices. Come and see what we've got to offer.",
+      "image": "nodeWarez",
+      "ownedByUser": false,
+      "coords": {
+        "x": 250,
+        "y": 550
+      },
+      "connectedNodes": [
+        "S.M.A.R.T. HQ"
+      ]
+    },
+    {
+      "name": "PR Database",
+      "owner": "Pharmhaus",
+      "desc": "This node is infected with an unknown corrupted program. Destroy all the corrupted software to proceed.",
+      "image": "nodePharmhaus",
+      "ownedByUser": false,
+      "securityLevel": 1,
+      "coords": {
+        "x": 550,
+        "y": 825
+      },
+      "connectedNodes": [
+        "S.M.A.R.T. HQ",
+        "Memory Tower #43",
+        "Employee Records"
+      ]
+    },
+    {
+      "name": "Memory Tower #43",
+      "owner": "Cellular Automata Research",
+      "desc": "This node is infected with an unknown corrupted program. Destroy all the corrupted software to proceed.",
+      "image": "nodeCAR",
+      "ownedByUser": false,
+      "securityLevel": 1,
+      "coords": {
+        "x": 500,
+        "y": 650
+      },
+      "connectedNodes": [
+        "PR Database",
+        "Sydney Project",
+        "Government Affairs",
+        "Eastern Distribution Site"
+      ]
+    },
+    {
+      "name": "Sydney Project",
+      "owner": "Cellular Automata Research",
+      "desc": "This node contains the level 2 access codes. Capture the code to access level 2 nodes.",
+      "image": "nodeCAR",
+      "ownedByUser": false,
+      "securityLevel": 1,
+      "coords": {
+        "x": 350,
+        "y": 450
+      },
+      "connectedNodes": [
+        "Memory Tower #43"
+      ]
+    },
+    {
+      "name": "Government Affairs",
+      "owner": "Pharmhaus",
+      "desc": "Pharmhaus offered this mission in exchange for a new piece of software. Deactivate all the malfunctioning security units.",
+      "image": "nodePharmhaus",
+      "ownedByUser": false,
+      "securityLevel": 1,
+      "coords": {
+        "x": 650,
+        "y": 450
+      },
+      "connectedNodes": [
+        "Memory Tower #43"
+      ]
+    },
+    {
+      "name": "Eastern Distribution Site",
+      "owner": "Luck Monkey Media",
+      "desc": "This node contains the logs related to the Pharmhaus and Cellular Automata corrupted programs. Retrieve the logs to succeed in this mission.",
+      "image": "nodeLMM",
+      "ownedByUser": false,
+      "securityLevel": 2,
+      "coords": {
+        "x": 500,
+        "y": 500
+      },
+      "connectedNodes": [
+        "Memory Tower #43",
+        "Clinical Trial Database"
+      ]
+    },
+    {
+      "name": "Clinical Trial Database",
+      "owner": "Pharmhaus",
+      "desc": "Superphreak asked for the logs of this node to find a pattern in the corrupt program attacks. Collect the logs to succeed",
+      "image": "nodePharmhaus",
+      "ownedByUser": false,
+      "securityLevel": 2,
+      "coords": {
+        "x": 550,
+        "y": 350
+      },
+      "connectedNodes": [
+        "Eastern Distribution Site",
+        "Toy Properties"
+      ]
+    },
+    {
+      "name": "Toy Properties",
+      "owner": "Luckey Monkey Media",
+      "desc": "Disarray said he took care of this node, but security seems unusually active...",
+      "image": "nodeLMM",
+      "ownedByUser": false,
+      "securityLevel": 3,
+      "coords": {
+        "x": 650,
+        "y": 250
+      },
+      "connectedNodes": [
+        "Clinical Trial Database",
+        "Ready To Ware",
+        "Off-Shore Transactions"
+      ]
+    },
+    {
+      "name": "Ready To Ware",
+      "owner": "Warez",
+      "desc": "A selection of the finer software on the net. For the discerning customer only.",
+      "image": "nodeWarez",
+      "ownedByUser": false,
+      "securityLevel": 3,
+      "coords": {
+        "x": 850,
+        "y": 200
+      },
+      "connectedNodes": [
+        "Toy Properties"
+      ]
+    },
+    {
+      "name": "Off-Shore Transactions",
+      "owner": "Parker Ellington Davis Consulting",
+      "desc": "Firewalls and heavy defenses are keeping all users out. Disable all the defenses to keep moving.",
+      "image": "nodePEDC",
+      "ownedByUser": false,
+      "securityLevel": 3,
+      "coords": {
+        "x": 850,
+        "y": 550
+      },
+      "connectedNodes": [
+        "Toy Properties",
+        "Vaccine Database"
+      ]
+    },
+    {
+      "name": "Vaccine Database",
+      "owner": "Pharmhaus",
+      "desc": "Firewalls and heavy defenses are keeping all users out. Disable all the defenses to reopen the node.",
+      "image": "nodePharmhaus",
+      "ownedByUser": false,
+      "securityLevel": 3,
+      "coords": {
+        "x": 1000,
+        "y": 700
+      },
+      "connectedNodes": [
+        "Off-Shore Transactions",
+        "HMO Procedure Management"
+      ]
+    },
+    {
+      "name": "HMO Procedure Management",
+      "owner": "Pharmhaus",
+      "desc": "This node contains the level 4 access codes. Capture the code to access level 4 nodes.",
+      "image": "nodePharmhaus",
+      "ownedByUser": false,
+      "securityLevel": 3,
+      "coords": {
+        "x": 650,
+        "y": 650
+      },
+      "connectedNodes": [
+        "Vaccine Database"
+      ]
+    },
+    {
+      "name": "Employee Records",
+      "owner": "Pharmhaus",
+      "desc": "This node is infected with an unknown corrupted program. Destroy all the corrupted software to proceed.",
+      "image": "nodePharmhaus",
+      "ownedByUser": false,
+      "securityLevel": 1,
+      "coords": {
+        "x": 700,
+        "y": 1000
+      },
+      "connectedNodes": [
+        "PR Database"
+      ]
+    },
+    {
+      "name": "Tech Support",
+      "owner": "Lucky Monkey Media",
+      "desc": "S.M.A.R.T. uses this node's security as a test mission. Defeat all the security software to proceed.",
+      "image": "nodeLMM",
+      "ownedByUser": false,
+      "securityLevel": 1,
+      "coords": {
+        "x": 200,
+        "y": 1000
+      },
+      "connectedNodes": [
+        "S.M.A.R.T. HQ",
+        "Club Center"
+      ]
+    },
+    {
+      "name": "Club Center",
+      "owner": "Lucky Monkey Media",
+      "desc": "This node has reported a security bug that has locked down its internal network. Defeat the security software to proceed.",
+      "image": "nodeLMM",
+      "ownedByUser": false,
+      "securityLevel": 2,
+      "coords": {
+        "x": 450,
+        "y": 1050
+      },
+      "connectedNodes": [
+        "Tech Support",
+        "Inventory Archives",
+        "Communications Hub"
+      ]
+    },
+    {
+      "name": "Inventory Archives",
+      "owner": "Cellular Authomata Research",
+      "desc": "This node's secuirty is hyperalert after a recent hack job. Disable it to proceed to the Warez node.",
+      "image": "nodeCAR",
+      "ownedByUser": false,
+      "securityLevel": 2,
+      "coords": {
+        "x": 250,
+        "y": 1200
+      },
+      "connectedNodes": [
+        "Club Center",
+        "Network City"
+      ]
+    },
+    {
+      "name": "Network City",
+      "owner": "Warez",
+      "desc": "Brought to you by New Future Technologies- Software options for the here and beyond.",
+      "image": "nodeWarez",
+      "ownedByUser": false,
+      "securityLevel": 2,
+      "coords": {
+        "x": 450,
+        "y": 1200
+      },
+      "connectedNodes": [
+        "Inventory Archives"
+      ]
+    },
+    {
+      "name": "Communications Hub",
+      "owner": "Cellular Automata Research",
+      "desc": "This node is reporting corrupted program problems similar to the Pharmhaus intrusions. Destroy the corrupted software.",
+      "image": "nodeCAR",
+      "ownedByUser": false,
+      "securityLevel": 2,
+      "coords": {
+        "x": 700,
+        "y": 1200
+      },
+      "connectedNodes": [
+        "Club Center",
+        "Print Assets",
+        "Supply Management"
+      ]
+    },
+    {
+      "name": "Print Assets",
+      "owner": "Lucky Media Media",
+      "desc": "Deactivate the security at this node in order to proceed.",
+      "image": "nodeLMM",
+      "ownedByUser": false,
+      "securityLevel": 2,
+      "coords": {
+        "x": 650,
+        "y": 1400
+      },
+      "connectedNodes": [
+        "Communications Hub",
+        "Banane System"
+      ]
+    },
+    {
+      "name": "Banane System",
+      "owner": "Lucky Monkey Media",
+      "desc": "This node contains the level 3 access codes. Capture the code to access level 3 nodes.",
+      "image": "nodeLMM",
+      "ownedByUser": false,
+      "securityLevel": 2,
+      "coords": {
+        "x": 450,
+        "y": 1350
+      },
+      "connectedNodes": [
+        "Print Assets"
+      ]
+    },
+    {
+      "name": "Supply Management",
+      "owner": "Dr. Donut",
+      "desc": "This is one of the malfunctioning nodes Wintermutant mentioned. Disable the security to repair the damage.",
+      "image": "nodeDD",
+      "ownedByUser": false,
+      "securityLevel": 2,
+      "coords": {
+        "x": 1000,
+        "y": 1150
+      },
+      "connectedNodes": [
+        "Communications Hub",
+        "Franchise Office"
+      ]
+    },
+    {
+      "name": "Franchise Office",
+      "owner": "Dr. Donut",
+      "desc": "This is one of the malfunctioning nodes Wintermutant mentioned. Disable the security to repair the damage.",
+      "image": "nodeDD",
+      "ownedByUser": false,
+      "securityLevel": 2,
+      "coords": {
+        "x": 1100,
+        "y": 1050
+      },
+      "connectedNodes": [
+        "Supply Management",
+        "Fiduciary Node",
+        "Market Research"
+      ]
+    },
+    {
+      "name": "Fiduciary Node",
+      "owner": "Parker Ellington Davis Consulting",
+      "desc": "This node is a backdoor entrance to the cellular automata S.A. archives. Disable the security here to proceed.",
+      "image": "nodePEDC",
+      "ownedByUser": false,
+      "securityLevel": 3,
+      "coords": {
+        "x": 1300,
+        "y": 1100
+      },
+      "connectedNodes": [
+        "Franchise Office",
+        "Re-Insurance Database",
+        "Sub-Station Gamma"
+      ]
+    },
+    {
+      "name": "Re-Insurance Database",
+      "owner": "Parker Ellington Davis Consulting",
+      "desc": "There is a large reward to recover stolen files from A PEDC executive. Pick up the files before security stops you.",
+      "image": "nodePEDC",
+      "ownedByUser": false,
+      "securityLevel": 3,
+      "coords": {
+        "x": 1400,
+        "y": 1100
+      },
+      "connectedNodes": [
+        "Fiduciary Node"
+      ]
+    },
+    {
+      "name": "Sub-Station Gamma",
+      "owner": "Cellular Automata Research",
+      "desc": "This node is the gateway to the S.A. archives. Disable the security here to proceed.",
+      "image": "nodeCAR",
+      "ownedByUser": false,
+      "securityLevel": 3,
+      "coords": {
+        "x": 1200,
+        "y": 950
+      },
+      "connectedNodes": [
+        "Fiduciary Node",
+        "S.A. Archives"
+      ]
+    },
+    {
+      "name": "S.A. Archives",
+      "owner": "Cellular Automata Research",
+      "desc": "This node is currently locked down, and Cellular Automata needs a file from it. Retrieve the file to win a new piece of software.",
+      "image": "nodeCAR",
+      "ownedByUser": false,
+      "securityLevel": 3,
+      "coords": {
+        "x": 1150,
+        "y": 800
+      },
+      "connectedNodes": [
+        "Sub-Station Gamma"
+      ]
+    },
+    {
+      "name": "Market Research",
+      "owner": "Dr. Donut",
+      "desc": "This node connects to the two nodes containing the program Disarray wanted. Disable security here to access these two nodes.",
+      "image": "nodeDD",
+      "ownedByUser": false,
+      "securityLevel": 3,
+      "coords": {
+        "x": 1200,
+        "y": 1200
+      },
+      "connectedNodes": [
+        "Franchise Office",
+        "Lucky Jungle Central",
+        "Flavor Evaluation Lab",
+        "Beverage Subsidiaries"
+      ]
+    },
+    {
+      "name": "Flavor Evaluation Lab",
+      "owner": "Dr. Donut",
+      "desc": "Half of the program Disarray wants is here. Collect the keys to temporarily shut down the node's surveillance and allow Disarray access.",
+      "image": "nodeDD",
+      "ownedByUser": false,
+      "securityLevel": 3,
+      "coords": {
+        "x": 1000,
+        "y": 1250
+      },
+      "connectedNodes": [
+        "Market Research"
+      ]
+    },
+    {
+      "name": "Lucky Jungle Central",
+      "owner": "Lucky Monkey Media",
+      "desc": "Half of the program Disarray wants is here. Collect the keys to temporarily shut down the node's surveillance and allow Disarray access.",
+      "image": "nodeLMM",
+      "ownedByUser": false,
+      "securityLevel": 3,
+      "coords": {
+        "x": 1300,
+        "y": 1200
+      },
+      "connectedNodes": [
+        "Market Research"
+      ]
+    },
+    {
+      "name": "Beverage Subsidiaries",
+      "owner": "Dr. Donut",
+      "desc": "Disable the security software in this node to proceed.",
+      "image": "nodeDD",
+      "ownedByUser": false,
+      "securityLevel": 3,
+      "coords": {
+        "x": 1150,
+        "y": 1400
+      },
+      "connectedNodes": [
+        "Market Research",
+        "Assimilation Timetable"
+      ]
+    },
+    {
+      "name": "Assimilation Timetable",
+      "owner": "Lucky Monkey Media",
+      "desc": "An enemy hacker has heightened the security in this node and locked out all users. Defeat these programs to proceed.",
+      "image": "nodeLMM",
+      "ownedByUser": false,
+      "securityLevel": 4,
+      "coords": {
+        "x": 1350,
+        "y": 1350
+      },
+      "connectedNodes": [
+        "Beverage Subsidiaries",
+        "Agora",
+        "Recipe Database"
+      ]
+    },
+    {
+      "name": "Agora",
+      "owner": "Warez",
+      "desc": "The expert hacker's choice. This Warez shop deals excluesively in the rarest and most powerful software anywhere.",
+      "image": "nodeWarez",
+      "ownedByUser": false,
+      "securityLevel": 4,
+      "coords": {
+        "x": 1500,
+        "y": 1400
+      },
+      "connectedNodes": [
+        "Assimilation Timetable"
+      ]
+    },
+    {
+      "name": "Recipe Database",
+      "owner": "Dr. Donut",
+      "desc": "The Nightfall hacker has heightened the security in this node and locked out all users. Defeat these programs to proceed.",
+      "image": "nodeDD",
+      "ownedByUser": false,
+      "securityLevel": 4,
+      "coords": {
+        "x": 1800,
+        "y": 1100
+      },
+      "connectedNodes": [
+        "Assimilation Timetable",
+        "Film Properties",
+        "R&D Backup"
+      ]
+    },
+    {
+      "name": "Film Properties",
+      "owner": "Lucky Monkey Media",
+      "desc": "Wintermutant found an experimental piece of software here. Retrieve the program before the corrupted programs left to protect it can disconnect you.",
+      "image": "nodeLMM",
+      "ownedByUser": false,
+      "securityLevel": 4,
+      "coords": {
+        "x": 1600,
+        "y": 1300
+      },
+      "connectedNodes": [
+        "Recipe Database"
+      ]
+    },
+    {
+      "name": "R&D Backup",
+      "owner": "Parker Ellington Davis Consulting",
+      "desc": "The Nightfall hacker has heightened the security in this node and locked out all users. Defeat these programs to proceed.",
+      "image": "nodePEDC",
+      "ownedByUser": false,
+      "securityLevel": 4,
+      "coords": {
+        "x": 1850,
+        "y": 1000
+      },
+      "connectedNodes": [
+        "Recipe Database",
+        "System Core"
+      ]
+    },
+    {
+      "name": "System Core",
+      "owner": "Pharmhaus",
+      "desc": "Deactivate the security system here and allow Joana to set up a link to Disarray's headquarters.",
+      "image": "nodePharmhaus",
+      "ownedByUser": false,
+      "securityLevel": 4,
+      "coords": {
+        "x": 1650,
+        "y": 900
+      },
+      "connectedNodes": [
+        "R&D Backup",
+        "Unknown Node",
+        "Executive Protocol"
+      ]
+    },
+    {
+      "name": "Unknown Node",
+      "owner": "Unknown",
+      "desc": "Disarray's headquarters. Defeat all of his security to disable the Nightfall software and prevent Midnight.",
+      "image": "nodeUnknown",
+      "ownedByUser": false,
+      "securityLevel": 5,
+      "coords": {
+        "x": 1750,
+        "y": 700
+      },
+      "connectedNodes": [
+        "System Core"
+      ]
+    },
+    {
+      "name": "Executive Protocol",
+      "owner": "Parker Ellington Davis Consulting",
+      "desc": "Disarray has filled this node with corrupt programs set to attack anyone who logs in. Destroy these corrupted programs to proceed.",
+      "image": "nodePEDC",
+      "ownedByUser": false,
+      "securityLevel": 4,
+      "coords": {
+        "x": 1550,
+        "y": 800
+      },
+      "connectedNodes": [
+        "System Core",
+        "Treasury Funds"
+      ]
+    },
+    {
+      "name": "Treasury Funds",
+      "owner": "Parker Ellington Davis Consulting",
+      "desc": "Disarray has filled this node with corrupt programs set to attack anyone who logs in. Destroy these corrupted programs to proceed.",
+      "image": "nodePEDC",
+      "ownedByUser": false,
+      "securityLevel": 4,
+      "coords": {
+        "x": 1450,
+        "y": 700
+      },
+      "connectedNodes": [
+        "Executive Protocol",
+        "Proprietary Research",
+        "Privileged Accounts"
+      ]
+    },
+    {
+      "name": "Proprietary Research",
+      "owner": "Pharmhaus",
+      "desc": "This node contains the access codes to a private security level. Capture the code to access security level 5.",
+      "image": "nodePharmhaus",
+      "ownedByUser": false,
+      "securityLevel": 4,
+      "coords": {
+        "x": 1300,
+        "y": 650
+      },
+      "connectedNodes": [
+        "Treasury Funds"
+      ]
+    },
+    {
+      "name": "Privileged Accounts",
+      "owner": "Parker Ellington Davis Consulting",
+      "desc": "PEDC has offered a large credit reward to the agent who can destroy a malfunctioning memory cell. Eliminate the corrupted programs to succeed.",
+      "image": "nodePEDC",
+      "ownedByUser": false,
+      "securityLevel": 4,
+      "coords": {
+        "x": 1400,
+        "y": 850
+      },
+      "connectedNodes": [
+        "Treasury Funds"
+      ]
+    }
+  ]
+}
