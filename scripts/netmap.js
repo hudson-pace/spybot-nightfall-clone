@@ -30,6 +30,10 @@ function ownNode(node) {
 }
 
 export default function NetMap(url, images, mapLoadedCallback) {
+  let mapWidth;
+  let mapHeight;
+  let maxZoom;
+  let showingGrid = false;
   const canvas = $('canvas')[0];
   const context = canvas.getContext('2d');
   const screenPosition = [0, 0];
@@ -38,18 +42,46 @@ export default function NetMap(url, images, mapLoadedCallback) {
   let zoomFactor = 1;
 
   $.getJSON(url, (data) => {
+    mapWidth = data.width;
+    mapHeight = data.height;
+    maxZoom = Math.min(mapWidth / 1000, mapHeight / 500);
     data.nodes.forEach((node) => {
       nodes.push(new NetworkNode(node, images[node.image]));
     });
     createInitialConnections();
+
+    const hqNode = nodes.find((node) => node.name === 'S.M.A.R.T. HQ');
+    this.moveScreen(hqNode.center.x - (canvas.width / 2), hqNode.center.y - (canvas.height / 2));
+
     mapLoadedCallback();
 
     this.draw();
   });
 
+  this.drawGrid = function drawGrid() {
+    for (let i = -1 * (screenPosition[1] % 100); i < canvas.height; i += 100) {
+      context.beginPath();
+      context.strokeStyle = 'grey';
+      context.moveTo(0, i);
+      context.lineTo(mapWidth, i);
+      context.stroke();
+    }
+    for (let i = -1 * (screenPosition[0] % 100); i < mapWidth; i += 100) {
+      context.beginPath();
+      context.strokeStyle = 'grey';
+      context.moveTo(i, 0);
+      context.lineTo(i, mapHeight);
+      context.stroke();
+    }
+  };
+
   this.draw = function draw() {
     console.log('Redrawing netmap.');
     context.clearRect(0, 0, canvas.width, canvas.height);
+    if (showingGrid) {
+      this.drawGrid();
+    }
+    context.lineWidth = 4;
     connections.forEach((connection) => {
       const startNode = nodes.find((node) => node.name === connection[0]);
       const endNode = nodes.find((node) => node.name === connection[1]);
@@ -60,6 +92,7 @@ export default function NetMap(url, images, mapLoadedCallback) {
       context.lineTo(endNode.center.x - screenPosition[0], endNode.center.y - screenPosition[1]);
       context.stroke();
     });
+    context.lineWidth = 1;
     nodes.forEach((node) => {
       if (node.isVisible) {
         node.draw(context, screenPosition);
@@ -87,9 +120,13 @@ export default function NetMap(url, images, mapLoadedCallback) {
     screenPosition[1] += y * zoomFactor;
     if (screenPosition[0] < 0) {
       screenPosition[0] = 0;
+    } else if (screenPosition[0] + canvas.width > mapWidth) {
+      screenPosition[0] = mapWidth - canvas.width;
     }
     if (screenPosition[1] < 0) {
       screenPosition[1] = 0;
+    } else if (screenPosition[1] + canvas.height > mapHeight) {
+      screenPosition[1] = mapHeight - canvas.height;
     }
     this.draw();
   };
@@ -101,15 +138,17 @@ export default function NetMap(url, images, mapLoadedCallback) {
     }
     if (zoomFactor < 0.5) {
       zoomFactor = 0.5;
-    } else if (zoomFactor > 3) {
-      zoomFactor = 3;
+    } else if (zoomFactor > maxZoom) {
+      zoomFactor = maxZoom;
     }
     const oldWidth = canvas.width;
     const oldHeight = canvas.height;
     canvas.width = 1000 * zoomFactor;
     canvas.height = 500 * zoomFactor;
-    this.moveScreen(((oldWidth - canvas.width) / 2) * relativeMousePosition[0],
-      ((oldHeight - canvas.height) / 2) * relativeMousePosition[1]);
+
+    // Divide by zoom factor to counteract zoom in the moveScreen function.
+    this.moveScreen(((oldWidth - canvas.width) * relativeMousePosition[0]) / zoomFactor,
+      ((oldHeight - canvas.height) * (relativeMousePosition[1])) / zoomFactor);
   };
   let mouseIsDown = false;
   let isDragging = false;
@@ -146,4 +185,10 @@ export default function NetMap(url, images, mapLoadedCallback) {
     .bind('mousewheel', (event) => {
       this.zoomScreen(event.originalEvent.wheelDelta / 120);
     });
+  $(document).keydown((event) => {
+    if (event.keyCode === 71) {
+      showingGrid = !showingGrid;
+      this.draw();
+    }
+  });
 }
