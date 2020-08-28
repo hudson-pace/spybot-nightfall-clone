@@ -14,42 +14,29 @@ function preloadImages(allImagesLoadedCallback) {
   function imageLoadedCallback(name, image) {
     loadedCount += 1;
     images[name] = image;
-    console.log(`image ${loadedCount} loaded.`);
-    console.log(image);
+    console.log(`Image ${loadedCount} loaded.`);
     if (loadedCount === totalImages) {
       allImagesLoadedCallback(images);
     }
   }
-  preloadImage('satellite', `${sourcePath}/satellite.png`, imageLoadedCallback);
+  preloadImage('satelliteDish', `${sourcePath}/satelliteDish.png`, imageLoadedCallback);
 }
-let context;
+let canvas;
 let currentView;
 let netMap;
-
-function draw() {
-  if (currentView) {
-    currentView.draw(context);
-  }
-}
 
 function startGame() {
   netMap = new NetMap('../assets/netmaps/test_1.json', images, () => {
     currentView = netMap;
-    setInterval(draw, 10);
   });
 }
 
 $(document).ready(() => {
-  const canvas = $('canvas')[0];
+  [canvas] = $('canvas');
   canvas.height = 500;
   canvas.width = 1000;
-  context = canvas.getContext('2d');
   preloadImages(() => {
-    console.log('all images loaded.');
+    console.log('All images loaded.');
     startGame();
   });
-});
-
-$('canvas').on('click', (event) => {
-  currentView.onClick(event);
 });

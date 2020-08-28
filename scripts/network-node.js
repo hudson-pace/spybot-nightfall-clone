@@ -18,7 +18,7 @@ export default function NetworkNode(node, image) {
   this.isOwned = node.ownedByUser;
   this.connectedNodes = node.connectedNodes;
 
-  this.draw = function draw(context) {
+  this.draw = function draw(context, screenPosition) {
     const imageSource = {
       x: 0,
       y: 0,
@@ -30,10 +30,12 @@ export default function NetworkNode(node, image) {
     }
     context.drawImage(this.image,
       imageSource.x, imageSource.y, imageSource.width, imageSource.height,
-      this.rect.x, this.rect.y, this.rect.width, this.rect.height);
+      this.rect.x - screenPosition[0], this.rect.y - screenPosition[1],
+      this.rect.width, this.rect.height);
     context.beginPath();
     context.strokeStyle = 'red';
-    context.rect(this.rect.x, this.rect.y, this.rect.width, this.rect.height);
+    context.rect(this.rect.x - screenPosition[0], this.rect.y - screenPosition[1],
+      this.rect.width, this.rect.height);
     context.stroke();
   };
   this.containsPoint = function containsPoint(point) {
