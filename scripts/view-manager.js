@@ -62,7 +62,7 @@ export default function ViewManager(url, images) {
     setCurrentView(netMap);
   }
   function startDataBattle(name) {
-    const dataBattle = new DataBattle(name, `${url}/battles.json`, () => {
+    const dataBattle = new DataBattle(name, `${url}/battles.json`, images, () => {
       console.log('Databattle laoded.');
       setCurrentView(dataBattle);
     }, switchToNetMap);

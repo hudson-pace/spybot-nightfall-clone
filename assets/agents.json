@@ -1,0 +1,202 @@
+[
+	{
+		"imgSource": 0,
+		"name": "Attack Dog"
+	},
+	{
+		"imgSource": 1,
+		"name": "Bit-Man"
+	},
+	{
+		"imgSource": 2,
+		"name": "Black Widow"
+	},
+	{
+		"imgSource": 3,
+		"name": "Boss"
+	},
+	{
+		"imgSource": 4,
+		"name": "Bug"
+	},
+	{
+		"imgSource": 5,
+		"name": "Buzz-Bomb"
+	},
+	{
+		"imgSource": 6,
+		"name": "Clog"
+	},
+	{
+		"imgSource": 7,
+		"name": "Clog 2.0"
+	},
+	{
+		"imgSource": 8,
+		"name": "Clog 3.0"
+	},
+	{
+		"imgSource": 9,
+		"name": "Data Doctor"
+	},
+	{
+		"imgSource": 10,
+		"name": "Data Doctor Pro"
+  },
+  {
+		"imgSource": 11,
+		"name": "Fiddle"
+  },
+  {
+		"imgSource": 12,
+		"name": "Firewall"
+  },
+  {
+		"imgSource": 13,
+		"name": "Clay Golem"
+  },
+  {
+		"imgSource": 14,
+		"name": "Mud Golem"
+  },
+  {
+		"imgSource": 15,
+		"name": "Stone Golem"
+  },
+  {
+		"imgSource": 16,
+		"name": "Guard Dog"
+  },
+  {
+		"imgSource": 17,
+		"name": "Guard Pup"
+  },
+  {
+		"imgSource": 18,
+		"name": "Guru"
+  },
+  {
+		"imgSource": 19,
+		"name": "Hack"
+  },
+  {
+		"imgSource": 20,
+		"name": "Hack 2.0"
+  },
+  {
+		"imgSource": 21,
+		"name": "Hack 3.0"
+  },
+  {
+		"imgSource": 22,
+		"name": "Heisenbug"
+  },
+  {
+		"imgSource": 23,
+		"name": "Laser Satellite"
+  },
+  {
+		"imgSource": 24,
+		"name": "Logic Bomb"
+  },
+  {
+		"imgSource": 25,
+		"name": "Mandelbug"
+  },
+  {
+		"imgSource": 26,
+		"name": "Medic"
+  },
+  {
+		"imgSource": 27,
+		"name": "Memory Hog"
+  },
+  {
+		"imgSource": 28,
+		"name": "Mobile Tower"
+  },
+  {
+		"imgSource": 29,
+		"name": "Radar"
+  },
+  {
+		"imgSource": 30,
+		"name": "Satellite"
+  },
+  {
+		"imgSource": 31,
+		"name": "Seeker"
+  },
+  {
+		"imgSource": 32,
+		"name": "Seeker 2.0"
+  },
+  {
+		"imgSource": 33,
+		"name": "Seeker 3.0"
+  },
+  {
+		"imgSource": 34,
+		"name": "Sensor"
+  },
+  {
+		"imgSource": 35,
+		"name": "Sentinel"
+  },
+  {
+		"imgSource": 36,
+		"name": "Sentinel 2.0"
+  },
+  {
+		"imgSource": 37,
+		"name": "Sentinel 3.0"
+  },
+  {
+		"imgSource": 38,
+		"name": "Slingshot"
+  },
+  {
+		"imgSource": 39,
+		"name": "Sonar"
+  },
+  {
+		"imgSource": 40,
+		"name": "Trantula"
+  },
+  {
+		"imgSource": 41,
+		"name": "Tower"
+  },
+  {
+		"imgSource": 42,
+		"name": "Turbo"
+  },
+  {
+		"imgSource": 43,
+		"name": "Warden"
+  },
+  {
+		"imgSource": 44,
+		"name": "Warden+"
+  },
+  {
+		"imgSource": 45,
+		"name": "Warden++"
+  },
+  {
+		"imgSource": 46,
+		"name": "Watchman"
+  },
+  {
+		"imgSource": 47,
+		"name": "Watchman SP"
+  },
+  {
+		"imgSource": 48,
+		"name": "Watchman X"
+  },
+  {
+		"imgSource": 49,
+		"name": "Wolf Spider"
+	}
+]
