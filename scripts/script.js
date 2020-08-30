@@ -1,4 +1,4 @@
-import NetMap from './netmap.js';
+import ViewManager from './view-manager.js';
 
 function preloadImage(name, src, imageLoadedCallback) {
   const image = new Image();
@@ -25,23 +25,13 @@ function preloadImages(allImagesLoadedCallback) {
     preloadImage(imageName, `${sourcePath}/${imageName}.png`, imageLoadedCallback);
   });
 }
-let canvas;
-let currentView;
-let netMap;
-
-function startGame() {
-  netMap = new NetMap('../assets/netmaps/nightfall_incident.json', images, () => {
-    console.log('map loaded.');
-    currentView = netMap;
-  });
-}
 
 $(document).ready(() => {
-  [canvas] = $('canvas');
+  const canvas = $('canvas')[0];
   canvas.height = 500;
   canvas.width = 1000;
   preloadImages(() => {
     console.log('All images loaded.');
-    startGame();
+    ViewManager('../assets/worlds/nightfall_incident', images);
   });
 });

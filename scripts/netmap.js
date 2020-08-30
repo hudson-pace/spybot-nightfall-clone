@@ -1,4 +1,5 @@
 import NetworkNode from './network-node.js'
+import NodeMenu from './node_menu.js'
 
 const nodes = [];
 const connections = [];
@@ -29,7 +30,7 @@ function ownNode(node) {
   addConnectionsFromNode(node);
 }
 
-export default function NetMap(url, images, mapLoadedCallback) {
+export default function NetMap(url, images, mapLoadedCallback, startDataBattleCallback) {
   let mapWidth;
   let mapHeight;
   let maxZoom;
@@ -37,6 +38,7 @@ export default function NetMap(url, images, mapLoadedCallback) {
   const canvas = $('canvas')[0];
   const context = canvas.getContext('2d');
   const screenPosition = [0, 0];
+  let nodeMenu;
   // Gives mouse position as fraction of element width. Used to zoom in on cursor.
   const relativeMousePosition = [0, 0];
   let zoomFactor = 1;
@@ -59,7 +61,7 @@ export default function NetMap(url, images, mapLoadedCallback) {
   });
 
   this.drawGrid = function drawGrid() {
-    for (let i = -1 * (screenPosition[1] % 100); i < canvas.height; i += 100) {
+    for (let i = -1 * (screenPosition[1] % 100); i < mapHeight; i += 100) {
       context.beginPath();
       context.strokeStyle = 'grey';
       context.moveTo(0, i);
@@ -78,9 +80,11 @@ export default function NetMap(url, images, mapLoadedCallback) {
   this.draw = function draw() {
     console.log('Redrawing netmap.');
     context.clearRect(0, 0, canvas.width, canvas.height);
+    context.scale(zoomFactor, zoomFactor);
     if (showingGrid) {
       this.drawGrid();
     }
+
     context.lineWidth = 4;
     connections.forEach((connection) => {
       const startNode = nodes.find((node) => node.name === connection[0]);
@@ -98,97 +102,101 @@ export default function NetMap(url, images, mapLoadedCallback) {
         node.draw(context, screenPosition);
       }
     });
-  };
-
-  this.onClick = function onClick(event) {
-    const coords = {
-      x: ((event.offsetX / canvas.clientWidth) * canvas.width) + screenPosition[0],
-      y: ((event.offsetY / canvas.clientHeight) * canvas.height) + screenPosition[1],
-    };
-    nodes.forEach((node) => {
-      if (node.isVisible && node.containsPoint(coords)) {
-        if (!node.isOwned) {
-          ownNode(node);
-          this.draw();
-        }
-      }
-    });
+    context.scale(1 / zoomFactor, 1 / zoomFactor);
+    if (nodeMenu) {
+      nodeMenu.draw(context);
+    }
   };
 
   this.moveScreen = function moveScreen(x, y) {
-    screenPosition[0] += x * zoomFactor;
-    screenPosition[1] += y * zoomFactor;
+    screenPosition[0] += x / zoomFactor;
+    screenPosition[1] += y / zoomFactor;
     if (screenPosition[0] < 0) {
       screenPosition[0] = 0;
-    } else if (screenPosition[0] + canvas.width > mapWidth) {
-      screenPosition[0] = mapWidth - canvas.width;
+    } else if (screenPosition[0] + (canvas.width / zoomFactor) > mapWidth) {
+      screenPosition[0] = mapWidth - (canvas.width / zoomFactor);
     }
     if (screenPosition[1] < 0) {
       screenPosition[1] = 0;
-    } else if (screenPosition[1] + canvas.height > mapHeight) {
-      screenPosition[1] = mapHeight - canvas.height;
+    } else if (screenPosition[1] + (canvas.height / zoomFactor) > mapHeight) {
+      screenPosition[1] = mapHeight - (canvas.height / zoomFactor);
     }
     this.draw();
   };
   this.zoomScreen = function zoomScreen(z) {
+    const oldWidth = 1000 / zoomFactor;
+    const oldHeight = 500 / zoomFactor;
     if (z < 0) {
-      zoomFactor *= 1.1;
-    } else if (z > 0) {
       zoomFactor /= 1.1;
+    } else if (z > 0) {
+      zoomFactor *= 1.1;
     }
     if (zoomFactor < 0.5) {
       zoomFactor = 0.5;
     } else if (zoomFactor > maxZoom) {
       zoomFactor = maxZoom;
     }
-    const oldWidth = canvas.width;
-    const oldHeight = canvas.height;
-    canvas.width = 1000 * zoomFactor;
-    canvas.height = 500 * zoomFactor;
-
     // Divide by zoom factor to counteract zoom in the moveScreen function.
-    this.moveScreen(((oldWidth - canvas.width) * relativeMousePosition[0]) / zoomFactor,
-      ((oldHeight - canvas.height) * (relativeMousePosition[1])) / zoomFactor);
+    this.moveScreen(((oldWidth - 1000 / zoomFactor) * relativeMousePosition[0]) * zoomFactor,
+      ((oldHeight - 500 / zoomFactor) * (relativeMousePosition[1])) * zoomFactor);
   };
+
   let mouseIsDown = false;
   let isDragging = false;
   let oldX;
   let oldY;
-  $('canvas')
-    .mousedown((event) => {
-      mouseIsDown = true;
-      isDragging = false;
+  this.onMouseDown = function onMouseDown(event) {
+    mouseIsDown = true;
+    isDragging = false;
+    oldX = event.offsetX;
+    oldY = event.offsetY;
+  };
+  this.onMouseUp = function onMouseUp() {
+    mouseIsDown = false;
+  };
+  this.onMouseLeave = function onMouseLeave() {
+    mouseIsDown = false;
+  };
+  this.onMouseMove = function onMouseMove(event) {
+    relativeMousePosition[0] = event.offsetX / canvas.clientWidth;
+    relativeMousePosition[1] = event.offsetY / canvas.clientHeight;
+    if (mouseIsDown) {
+      isDragging = true;
+      this.moveScreen(oldX - event.offsetX, oldY - event.offsetY);
       oldX = event.offsetX;
       oldY = event.offsetY;
-    })
-    .mouseup(() => {
-      mouseIsDown = false;
-    })
-    .mouseleave(() => {
-      mouseIsDown = false;
-    })
-    .mousemove((event) => {
-      relativeMousePosition[0] = event.offsetX / canvas.clientWidth;
-      relativeMousePosition[1] = event.offsetY / canvas.clientHeight;
-      if (mouseIsDown) {
-        isDragging = true;
-        this.moveScreen(oldX - event.offsetX, oldY - event.offsetY);
-        oldX = event.offsetX;
-        oldY = event.offsetY;
+    }
+  };
+  this.onClick = function onClick(event) {
+    if (!isDragging) {
+      const point = {
+        x: 1000 * (event.offsetX / canvas.clientWidth),
+        y: 500 * (event.offsetY / canvas.clientHeight),
+      };
+      if (nodeMenu && nodeMenu.containsPoint(point)) {
+        nodeMenu.onClick(point);
+      } else {
+        const coords = {
+          x: (((event.offsetX / canvas.clientWidth)
+            * canvas.width) / zoomFactor) + screenPosition[0],
+          y: (((event.offsetY / canvas.clientHeight)
+            * canvas.height) / zoomFactor) + screenPosition[1],
+        };
+        const clickedNode = nodes.find((node) => node.containsPoint(coords));
+        if (clickedNode && clickedNode.isVisible) {
+          nodeMenu = new NodeMenu(clickedNode, canvas, startDataBattleCallback);
+          this.draw();
+        }
       }
-    })
-    .click((event) => {
-      if (!isDragging) {
-        this.onClick(event);
-      }
-    })
-    .bind('mousewheel', (event) => {
-      this.zoomScreen(event.originalEvent.wheelDelta / 120);
-    });
-  $(document).keydown((event) => {
+    }
+  };
+  this.onMouseWheel = function onMouseWheel(event) {
+    this.zoomScreen(event.originalEvent.wheelDelta / 120);
+  };
+  this.onKeydown = function onKeydown(event) {
     if (event.keyCode === 71) {
       showingGrid = !showingGrid;
       this.draw();
     }
-  });
+  };
 }

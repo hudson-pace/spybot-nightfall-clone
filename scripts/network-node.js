@@ -12,6 +12,7 @@ export default function NetworkNode(node, image) {
   this.image = image;
   this.name = node.name;
   this.desc = node.desc;
+  this.owner = node.owner;
 
   this.isVisible = node.ownedByUser;
   this.isActive = node.ownedByUser;
