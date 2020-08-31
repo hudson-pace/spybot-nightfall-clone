@@ -5,7 +5,9 @@
 	},
 	{
 		"imgSource": 1,
-		"name": "Bit-Man"
+    "name": "Bit-Man",
+    "moves": 3,
+    "maxSize": 3
 	},
 	{
 		"imgSource": 2,
@@ -18,7 +20,8 @@
 	{
 		"imgSource": 4,
     "name": "Bug",
-    "moves": 5
+    "moves": 5,
+    "maxSize": 1
 	},
 	{
 		"imgSource": 5,
@@ -38,7 +41,9 @@
 	},
 	{
 		"imgSource": 9,
-		"name": "Data Doctor"
+    "name": "Data Doctor",
+    "moves": 4,
+    "maxSize": 5
 	},
 	{
 		"imgSource": 10,

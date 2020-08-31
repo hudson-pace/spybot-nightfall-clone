@@ -1,5 +1,5 @@
 import NetworkNode from './network-node.js'
-import NodeMenu from './node_menu.js'
+import NodeMenu from './node-menu.js'
 
 const nodes = [];
 const connections = [];

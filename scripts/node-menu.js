@@ -1,8 +1,4 @@
-function calculatePaddingToCenterText(container, text, textHeight, context) {
-  const leftPadding = (container.width - context.measureText(text).width) / 2;
-  const topPadding = container.height / 2;
-  return [leftPadding, topPadding];
-}
+import { calculateTextPadding } from './helpers.js';
 
 export default function NodeMenu(node, canvas, startDataBattleCallback) {
   const textHeight = 20;
@@ -37,9 +33,9 @@ export default function NodeMenu(node, canvas, startDataBattleCallback) {
     context.fillText(node.owner, rect.x, rect.y + textHeight);
     context.fillText(node.name, rect.x, rect.y + (textHeight * 2));
 
-    let [leftPad, topPad] = calculatePaddingToCenterText(cancelButton, 'Cancel', textHeight, context);
+    let [leftPad, topPad] = calculateTextPadding(cancelButton, 'Cancel', context);
     context.fillText('Cancel', cancelButton.x + leftPad, cancelButton.y + topPad);
-    [leftPad, topPad] = calculatePaddingToCenterText(startButton, 'Start', textHeight, context);
+    [leftPad, topPad] = calculateTextPadding(startButton, 'Start', context);
     context.fillText('Start', startButton.x + leftPad, startButton.y + topPad);
 
     context.fillStyle = 'rgba(60, 60, 60, 0.95)';

@@ -11,16 +11,28 @@ export const overlayTypes = {
   MOVE_RIGHT: 'move right',
   MOVE_UP: 'move up',
   MOVE_DOWN: 'move down',
+  UPLOAD: 'upload',
 };
 
 export function Tile(x, y, size, gap, leftPad, topPad, image) {
   // These are the coordinates where the tile should actually be drawn.
   this.x = x;
   this.y = y;
+  this.gap = gap;
+  this.size = size;
   const canvasX = leftPad + (x * (size + gap));
   const canvasY = topPad + (y * (size + gap));
   this.overlay = overlayTypes.NONE;
   this.type = tileTypes.NONE;
+
+  this.getCanvasRect = function getCanvasRect() {
+    return {
+      x: canvasX,
+      y: canvasY,
+      width: size,
+      height: size,
+    };
+  };
 
   this.draw = function draw(context) {
     switch (this.type) {
@@ -29,9 +41,6 @@ export function Tile(x, y, size, gap, leftPad, topPad, image) {
         break;
       case tileTypes.BASIC:
         context.fillStyle = 'gray';
-        break;
-      case tileTypes.UPLOAD:
-        context.fillStyle = 'white';
         break;
     }
     context.fillRect(canvasX, canvasY, size, size);
@@ -52,6 +61,9 @@ export function Tile(x, y, size, gap, leftPad, topPad, image) {
         break;
       case overlayTypes.MOVE_DOWN:
         context.drawImage(image, 2 * size, 1 * size, size, size, canvasX, canvasY, size, size);
+        break;
+      case overlayTypes.UPLOAD:
+        context.drawImage(image, 0 * size, 1 * size, size, size, canvasX, canvasY, size, size);
         break;
     }
   };

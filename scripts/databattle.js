@@ -1,5 +1,8 @@
 import { Tile, tileTypes, overlayTypes } from './tile.js';
 import Agent from './agent.js';
+import { calculateTextPadding } from './helpers.js';
+import Inventory from './inventory.js';
+import ProgramMenu from './program-menu.js';
 
 export default function DataBattle(name, url, images, battleLoadedCallback, exitBattleCallback) {
   const canvas = $('canvas')[0];
@@ -9,9 +12,17 @@ export default function DataBattle(name, url, images, battleLoadedCallback, exit
   let width;
   let height;
   let gameIsStarted = false;
+  const inventory = new Inventory();
+  const programMenu = new ProgramMenu(canvas, { ...inventory });
 
   const startButton = {
     x: 200,
+    y: 470,
+    width: 100,
+    height: 30,
+  };
+  const leaveButton = {
+    x: 350,
     y: 470,
     width: 100,
     height: 30,
@@ -27,13 +38,14 @@ export default function DataBattle(name, url, images, battleLoadedCallback, exit
         const tile = new Tile(colIndex, rowIndex, 27, 3, leftPad, topPad, images.tileOverlays);
         switch (square) {
           default:
-            tile.type = tileTypes.NONE;
+            tile.changeType(tileTypes.NONE);
             break;
           case '#':
-            tile.type = tileTypes.BASIC;
+            tile.changeType(tileTypes.BASIC);
             break;
           case '@':
-            tile.type = tileTypes.UPLOAD;
+            tile.changeType(tileTypes.BASIC);
+            tile.changeOverlay(overlayTypes.UPLOAD);
             break;
         }
         map.push(tile);
@@ -41,19 +53,13 @@ export default function DataBattle(name, url, images, battleLoadedCallback, exit
     });
   }
 
-  let agentData;
   $.getJSON(url, (data) => {
     const battle = data.battles.find((b) => b.name === name);
-    console.log(battle);
     initializeMap(battle);
 
     battleLoadedCallback();
 
     this.draw();
-  });
-  $.getJSON('../assets/agents.json', (data) => {
-    agentData = data;
-    console.log('agents loaded');
   });
 
   this.draw = function draw() {
@@ -63,14 +69,21 @@ export default function DataBattle(name, url, images, battleLoadedCallback, exit
       tile.draw(context);
     });
     agents.forEach((agent) => agent.draw(context));
+    context.fillStyle = 'grey';
+    context.fillRect(leaveButton.x, leaveButton.y, leaveButton.width, leaveButton.height);
+    context.fillStyle = 'white';
+    context.font = '20px verdana';
+    context.textBaseline = 'middle';
+    let padding = calculateTextPadding(leaveButton, 'Leave', context);
+    context.fillText('Leave', leaveButton.x + padding[0], leaveButton.y + padding[1]);
     if (!gameIsStarted) {
       context.fillStyle = 'grey';
       context.fillRect(startButton.x, startButton.y, startButton.width, startButton.height);
       context.fillStyle = 'white';
-      context.font = '20px verdana';
-      context.textBaseline = 'middle';
-      context.fillText('start', startButton.x + 20, startButton.y + (startButton.height / 2));
+      padding = calculateTextPadding(startButton, 'Start', context);
+      context.fillText('Start', startButton.x + padding[0], startButton.y + padding[1]);
     }
+    programMenu.draw();
   };
 
   function getTileFromCoords(x, y) {
@@ -88,26 +101,30 @@ export default function DataBattle(name, url, images, battleLoadedCallback, exit
       const tile = explorationQueue.splice(0, 1)[0];
       if (tile[1] < agent.movesRemaining) {
         let nextTile = getTileFromCoords(tile[0].x - 1, tile[0].y);
-        if (nextTile && nextTile.type === tileTypes.BASIC
+        if (nextTile && (nextTile.type === tileTypes.BASIC
+           || (nextTile.type === tileTypes.OCCUPIED && agent.containsTile(nextTile)))
           && !visitedTiles.find((t) => t === nextTile)) {
           explorationQueue.push([nextTile, tile[1] + 1]);
           visitedTiles.push(nextTile);
         }
         nextTile = getTileFromCoords(tile[0].x + 1, tile[0].y);
-        if (nextTile && nextTile.type === tileTypes.BASIC
-          && !visitedTiles.find((t) => t === nextTile)) {
+        if (nextTile && (nextTile.type === tileTypes.BASIC
+          || (nextTile.type === tileTypes.OCCUPIED && agent.containsTile(nextTile)))
+         && !visitedTiles.find((t) => t === nextTile)) {
           explorationQueue.push([nextTile, tile[1] + 1]);
           visitedTiles.push(nextTile);
         }
         nextTile = getTileFromCoords(tile[0].x, tile[0].y - 1);
-        if (nextTile && nextTile.type === tileTypes.BASIC
-          && !visitedTiles.find((t) => t === nextTile)) {
+        if (nextTile && (nextTile.type === tileTypes.BASIC
+          || (nextTile.type === tileTypes.OCCUPIED && agent.containsTile(nextTile)))
+         && !visitedTiles.find((t) => t === nextTile)) {
           explorationQueue.push([nextTile, tile[1] + 1]);
           visitedTiles.push(nextTile);
         }
         nextTile = getTileFromCoords(tile[0].x, tile[0].y + 1);
-        if (nextTile && nextTile.type === tileTypes.BASIC
-          && !visitedTiles.find((t) => t === nextTile)) {
+        if (nextTile && (nextTile.type === tileTypes.BASIC
+          || (nextTile.type === tileTypes.OCCUPIED && agent.containsTile(nextTile)))
+         && !visitedTiles.find((t) => t === nextTile)) {
           explorationQueue.push([nextTile, tile[1] + 1]);
           visitedTiles.push(nextTile);
         }
@@ -134,21 +151,33 @@ export default function DataBattle(name, url, images, battleLoadedCallback, exit
     const x = (event.offsetX / canvas.clientWidth) * canvas.width;
     const y = (event.offsetY / canvas.clientHeight) * canvas.height;
     const tile = map.find((t) => t.containsPoint({ x, y }));
-    if (!gameIsStarted) {
-      if (tile && tile.type === tileTypes.UPLOAD) {
-        if (!agents.find((agent) => agent.head === tile)) {
-          const tempAgentData = agentData.find((data) => data.name === 'Slingshot');
-          if (tempAgentData) {
-            agents.push(new Agent(tempAgentData, tile, images.agents, context));
-            this.draw();
+
+    if (x > leaveButton.x && x < leaveButton.x + leaveButton.width
+      && y > leaveButton.y && y < leaveButton.y + leaveButton.width) {
+      agents.forEach((agent) => {
+        agent.deselect();
+      });
+      exitBattleCallback();
+    } else if (programMenu.containsPoint({ x, y })) {
+      programMenu.onClick({ x, y });
+    } else if (!gameIsStarted) {
+      if (tile && tile.overlay === overlayTypes.UPLOAD) {
+        const agentData = programMenu.getProgramChoice();
+        if (agentData) {
+          const oldAgentIndex = agents.findIndex((agent) => agent.head === tile);
+          agents.push(new Agent(agentData, tile, images.agents, context));
+          this.draw();
+          if (oldAgentIndex !== -1) {
+            programMenu.addProgram(agents[oldAgentIndex].name);
+            agents.splice(oldAgentIndex, 1);
           }
         }
       } else if (x > startButton.x && x < startButton.x + startButton.width
           && y > startButton.y && y < startButton.y + startButton.height) {
         gameIsStarted = true;
         map.forEach((t) => {
-          if (t.type === tileTypes.UPLOAD) {
-            t.changeType(tileTypes.BASIC);
+          if (t.overlay === overlayTypes.UPLOAD) {
+            t.changeOverlay(overlayTypes.NONE);
           }
         });
         this.draw();
@@ -163,7 +192,9 @@ export default function DataBattle(name, url, images, battleLoadedCallback, exit
       } else {
         const selectedAgent = agents.find((a) => a.selected);
         if (selectedAgent && selectedAgent.movesRemaining > 0 && tile
-          && tile.type === tileTypes.BASIC && Math.abs(tile.x - selectedAgent.head.x)
+          && (tile.type === tileTypes.BASIC
+            || (tile.type === tileTypes.OCCUPIED && selectedAgent.containsTile(tile)))
+          && Math.abs(tile.x - selectedAgent.head.x)
           + Math.abs(tile.y - selectedAgent.head.y) === 1) {
           selectedAgent.move(tile);
           highlightValidMoves(selectedAgent);
