@@ -17,7 +17,8 @@
 	},
 	{
 		"imgSource": 4,
-		"name": "Bug"
+    "name": "Bug",
+    "moves": 5
 	},
 	{
 		"imgSource": 5,
@@ -77,7 +78,9 @@
   },
   {
 		"imgSource": 19,
-		"name": "Hack"
+    "name": "Hack",
+    "moves": 2,
+    "maxSize": 4
   },
   {
 		"imgSource": 20,
@@ -153,7 +156,9 @@
   },
   {
 		"imgSource": 38,
-		"name": "Slingshot"
+    "name": "Slingshot",
+    "moves": 2,
+    "maxSize": 2
   },
   {
 		"imgSource": 39,

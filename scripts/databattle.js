@@ -1,4 +1,4 @@
-import { Tile, tileTypes } from './tile.js';
+import { Tile, tileTypes, overlayTypes } from './tile.js';
 import Agent from './agent.js';
 
 export default function DataBattle(name, url, images, battleLoadedCallback, exitBattleCallback) {
@@ -24,7 +24,7 @@ export default function DataBattle(name, url, images, battleLoadedCallback, exit
     const topPad = (canvas.height - (30 * height)) / 2;
     battle.field.forEach((row, rowIndex) => {
       row.split('').forEach((square, colIndex) => {
-        const tile = new Tile(colIndex, rowIndex, 27, 3, leftPad, topPad);
+        const tile = new Tile(colIndex, rowIndex, 27, 3, leftPad, topPad, images.tileOverlays);
         switch (square) {
           default:
             tile.type = tileTypes.NONE;
@@ -44,6 +44,7 @@ export default function DataBattle(name, url, images, battleLoadedCallback, exit
   let agentData;
   $.getJSON(url, (data) => {
     const battle = data.battles.find((b) => b.name === name);
+    console.log(battle);
     initializeMap(battle);
 
     battleLoadedCallback();
@@ -72,14 +73,71 @@ export default function DataBattle(name, url, images, battleLoadedCallback, exit
     }
   };
 
+  function getTileFromCoords(x, y) {
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+      return undefined;
+    }
+    return map[(y * width) + x];
+  }
+
+  function highlightValidMoves(agent) {
+    const visitedTiles = [];
+    const explorationQueue = [];
+    explorationQueue.push([agent.head, 0]);
+    while (explorationQueue.length > 0) {
+      const tile = explorationQueue.splice(0, 1)[0];
+      if (tile[1] < agent.movesRemaining) {
+        let nextTile = getTileFromCoords(tile[0].x - 1, tile[0].y);
+        if (nextTile && nextTile.type === tileTypes.BASIC
+          && !visitedTiles.find((t) => t === nextTile)) {
+          explorationQueue.push([nextTile, tile[1] + 1]);
+          visitedTiles.push(nextTile);
+        }
+        nextTile = getTileFromCoords(tile[0].x + 1, tile[0].y);
+        if (nextTile && nextTile.type === tileTypes.BASIC
+          && !visitedTiles.find((t) => t === nextTile)) {
+          explorationQueue.push([nextTile, tile[1] + 1]);
+          visitedTiles.push(nextTile);
+        }
+        nextTile = getTileFromCoords(tile[0].x, tile[0].y - 1);
+        if (nextTile && nextTile.type === tileTypes.BASIC
+          && !visitedTiles.find((t) => t === nextTile)) {
+          explorationQueue.push([nextTile, tile[1] + 1]);
+          visitedTiles.push(nextTile);
+        }
+        nextTile = getTileFromCoords(tile[0].x, tile[0].y + 1);
+        if (nextTile && nextTile.type === tileTypes.BASIC
+          && !visitedTiles.find((t) => t === nextTile)) {
+          explorationQueue.push([nextTile, tile[1] + 1]);
+          visitedTiles.push(nextTile);
+        }
+      }
+    }
+    map.forEach((t) => {
+      t.changeOverlay(overlayTypes.NONE);
+    });
+    visitedTiles.forEach((t) => {
+      if (t === getTileFromCoords(agent.head.x - 1, agent.head.y)) {
+        t.changeOverlay(overlayTypes.MOVE_LEFT);
+      } else if (t === getTileFromCoords(agent.head.x + 1, agent.head.y)) {
+        t.changeOverlay(overlayTypes.MOVE_RIGHT);
+      } else if (t === getTileFromCoords(agent.head.x, agent.head.y - 1)) {
+        t.changeOverlay(overlayTypes.MOVE_UP);
+      } else if (t === getTileFromCoords(agent.head.x, agent.head.y + 1)) {
+        t.changeOverlay(overlayTypes.MOVE_DOWN);
+      } else {
+        t.changeOverlay(overlayTypes.VALID_MOVE);
+      }
+    });
+  }
   this.onClick = function onClick(event) {
     const x = (event.offsetX / canvas.clientWidth) * canvas.width;
     const y = (event.offsetY / canvas.clientHeight) * canvas.height;
     const tile = map.find((t) => t.containsPoint({ x, y }));
     if (!gameIsStarted) {
       if (tile && tile.type === tileTypes.UPLOAD) {
-        if (!agents.find((agent) => agent.tile === tile)) {
-          const tempAgentData = agentData.find((data) => data.name === 'Bug');
+        if (!agents.find((agent) => agent.head === tile)) {
+          const tempAgentData = agentData.find((data) => data.name === 'Slingshot');
           if (tempAgentData) {
             agents.push(new Agent(tempAgentData, tile, images.agents, context));
             this.draw();
@@ -96,17 +154,19 @@ export default function DataBattle(name, url, images, battleLoadedCallback, exit
         this.draw();
       }
     } else {
-      const agent = agents.find((a) => a.tile === tile);
+      const agent = agents.find((a) => a.head === tile);
       if (agent && !agent.selected) {
         agents.forEach((a) => a.deselect());
         agent.select();
+        highlightValidMoves(agent);
         this.draw();
       } else {
         const selectedAgent = agents.find((a) => a.selected);
-        if (selectedAgent && tile && tile.type === tileTypes.BASIC
-          && Math.abs(tile.x - selectedAgent.tile.x)
-          + Math.abs(tile.y - selectedAgent.tile.y) === 1) {
-          selectedAgent.tile = tile;
+        if (selectedAgent && selectedAgent.movesRemaining > 0 && tile
+          && tile.type === tileTypes.BASIC && Math.abs(tile.x - selectedAgent.head.x)
+          + Math.abs(tile.y - selectedAgent.head.y) === 1) {
+          selectedAgent.move(tile);
+          highlightValidMoves(selectedAgent);
           this.draw();
         }
       }
