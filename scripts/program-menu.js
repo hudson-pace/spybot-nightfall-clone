@@ -1,4 +1,4 @@
-import { calculateTextPadding } from './helpers.js';
+import { calculateTextPadding, splitStringIntoLines } from './helpers.js';
 
 export default class ProgramMenu {
   constructor(canvas, inventory, image) {
@@ -83,6 +83,13 @@ export default class ProgramMenu {
       });
     }
 
+    this.description = {
+      x: this.programInfo.x + 10,
+      y: this.commandList.y + this.commandList.height + 10,
+      width: this.programInfo.width - 20,
+      height: this.rect.height - (this.commandList.y + this.commandList.height + 20),
+    };
+
     this.scrollAmount = 0;
   }
 
@@ -125,7 +132,6 @@ export default class ProgramMenu {
     context.textBaseline = 'middle';
     [leftPad, topPad] = calculateTextPadding(this.listTitle, 'Program Info', context);
     context.fillText('Program Info', this.infoTitle.x + leftPad, this.infoTitle.y + topPad);
-
     if (this.displayProgram) {
       // Draw the container for the program info.
       context.fillStyle = 'rgba(50, 50, 50, 1)';
@@ -156,15 +162,33 @@ export default class ProgramMenu {
       context.fillText('Commands', this.commandLabel.x, this.commandLabel.y + (this.textHeight / 2));
 
       // Draw command names.
-      context.fillStyle = 'white';
       for (let i = 0;
         i < Math.min(this.commandSlots.length, this.displayProgram.commandData.length);
         i += 1) {
         const command = this.displayProgram.commandData[i];
         const commandSlot = this.commandSlots[i];
+        if (this.selectedCommand && this.selectedCommand === command) {
+          context.fillStyle = 'rgba(80, 80, 80, 1)';
+          context.fillRect(commandSlot.x, commandSlot.y, commandSlot.width, commandSlot.height);
+        }
+        context.fillStyle = 'white';
         context.fillText(`${command.name}`, commandSlot.x, commandSlot.y + (commandSlot.height / 2));
-        console.log(command.name);
       }
+
+      context.font = `${this.textHeight / 1.3}px verdana`;
+      // Draw description.
+      let lines;
+      if (this.selectedCommand) {
+        lines = [
+          `Damage: ${this.selectedCommand.damage}`,
+          `Range: ${this.selectedCommand.range}`,
+        ];
+      } else {
+        lines = splitStringIntoLines(this.displayProgram.desc, this.description, context);
+      }
+      lines.forEach((line, index) => {
+        context.fillText(line, this.description.x, this.description.y + (this.textHeight * index));
+      });
     }
   }
 
@@ -175,12 +199,23 @@ export default class ProgramMenu {
 
   onClick(point) {
     for (let i = 0; i < Math.min(this.programSlots.length, this.programs.length); i += 1) {
-      const program = this.programs[i + this.scrollAmount];
       const programSlot = this.programSlots[i];
       if (point.x > programSlot.x && point.x < programSlot.x + programSlot.width
         && point.y > programSlot.y && point.y < programSlot.y + programSlot.height) {
-        this.selectedProgram = program;
+        this.selectedProgram = this.programs[i + this.scrollAmount];
         this.setDisplayProgram(this.selectedProgram.name);
+      }
+    }
+    for (let i = 0;
+      i < Math.min(this.commandSlots.length, this.displayProgram.commandData.length);
+      i += 1) {
+      const commandSlot = this.commandSlots[i];
+      if (point.x > commandSlot.x && point.x < commandSlot.x + commandSlot.width
+      && point.y > commandSlot.y && point.y < commandSlot.y + commandSlot.height) {
+        this.selectedCommand = this.displayProgram.commandData[i];
+        if (this.chooseCommandCallback) {
+          this.chooseCommandCallback(this.selectedCommand);
+        }
       }
     }
   }
@@ -199,12 +234,19 @@ export default class ProgramMenu {
   }
 
   setDisplayProgram(programName) {
+    this.selectedCommand = undefined;
+    this.chooseCommandCallback = undefined;
     const agent = this.agentData.find((data) => data.name === programName);
     agent.commandData = [];
     agent.commands.forEach((commandName) => {
       agent.commandData.push(this.commandData.find((command) => command.name === commandName));
     });
     this.displayProgram = agent;
+  }
+
+  showActiveProgram(program) {
+    this.setDisplayProgram(program.name);
+    this.chooseCommandCallback = program.chooseCommand.bind(program);
   }
 
   scroll(amount) {

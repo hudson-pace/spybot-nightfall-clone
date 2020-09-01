@@ -1,7 +1,9 @@
 import { tileTypes, overlayTypes, Tile } from './tile.js';
 import BattleMap from './battlemap.js';
 
-export default function Agent(agent, startingTile, image, context, map) {
+export default function Agent(agent, startingTile, image, agentDoneImage,
+  context, map, executeCommandCallback) {
+  startingTile.changeType(tileTypes.OCCUPIED);
   this.head = startingTile;
   this.tail = startingTile;
   this.tiles = [{
@@ -17,7 +19,16 @@ export default function Agent(agent, startingTile, image, context, map) {
     size: 27,
   };
   this.turnIsOver = false;
-  [this.selectedAttack] = agent.commandData;
+  this.commands = [];
+
+  $.getJSON('../assets/commands.json', (data) => {
+    this.commandData = data;
+    console.log('commands loaded');
+    agent.commands.forEach((command) => {
+      this.commands.push(data.find((com) => com.name === command));
+      [this.selectedCommand] = this.commands;
+    });
+  });
 
   function createConnector(tile1, tile2, coords) {
     const connector = {};
@@ -73,6 +84,12 @@ export default function Agent(agent, startingTile, image, context, map) {
       context.drawImage(image, imageSource.x, imageSource.y, imageSource.size, imageSource.size,
         coords.x, coords.y, imageSource.size, imageSource.size);
     }
+
+    if (this.turnIsOver) {
+      const coords = this.head.getDrawingCoords();
+      context.drawImage(agentDoneImage, 0, 0, imageSource.size, imageSource.size,
+        coords.x, coords.y, imageSource.size, imageSource.size);
+    }
   };
 
   function toggleSelectedDisplay() {
@@ -85,11 +102,7 @@ export default function Agent(agent, startingTile, image, context, map) {
     this.selected = true;
     selectedDisplay = true;
     flashSelectedDisplay = setInterval(toggleSelectedDisplay.bind(this), 600);
-    if (this.movesRemaining > 0) {
-      this.highlightValidMoves(this.movesRemaining, 'move');
-    } else {
-      this.highlightValidMoves(this.selectedAttack.range, 'attack');
-    }
+    this.showMoveOverlays();
   };
   this.deselect = function deselect() {
     this.selected = false;
@@ -97,7 +110,6 @@ export default function Agent(agent, startingTile, image, context, map) {
     this.draw();
   };
   this.move = function move(newTile) {
-    map.clearTileOverlays();
     const tileIndex = this.tiles.findIndex((tile) => tile.tile === newTile);
     if (tileIndex === -1) {
       newTile.changeType(tileTypes.OCCUPIED);
@@ -118,21 +130,28 @@ export default function Agent(agent, startingTile, image, context, map) {
     }
     this.movesRemaining -= 1;
     this.head = newTile;
-    if (this.movesRemaining === 0) {
-      this.highlightValidMoves(this.selectedAttack.range, 'attack');
-    } else {
-      this.highlightValidMoves(this.movesRemaining, 'move');
-    }
+    this.showMoveOverlays();
   };
 
-  this.attack = function attack(tile) {
+  this.executeCommand = function executeCommand(tile) {
     map.clearTileOverlays();
+    executeCommandCallback(tile, this.selectedCommand);
     this.turnIsOver = true;
   };
   this.containsTile = function containsTile(tile) {
     return !!this.tiles.find((t) => t.tile === tile);
   };
 
+  this.showMoveOverlays = function showMoveOverlays() {
+    map.clearTileOverlays();
+    if (!this.turnIsOver) {
+      if (this.movesRemaining > 0) {
+        this.highlightValidMoves(this.movesRemaining, 'move');
+      } else {
+        this.highlightValidMoves(this.selectedCommand.range, 'attack');
+      }
+    }
+  };
   this.highlightValidMoves = function highlightValidMoves(searchRadius, type) {
     const visitedTiles = [];
     const explorationQueue = [];
@@ -205,8 +224,22 @@ export default function Agent(agent, startingTile, image, context, map) {
           this.move(tile);
         }
       }
-    } else if (BattleMap.tilesAreWithinRange(tile, this.head, this.selectedAttack.range)) {
-      this.attack(tile);
+    } else if (BattleMap.tilesAreWithinRange(tile, this.head, this.selectedCommand.range)) {
+      this.executeCommand(tile);
     }
+  };
+
+  this.chooseCommand = function chooseCommand(newCommand) {
+    const commandIndex = this.commands.findIndex((command) => command.name === newCommand.name);
+    if (commandIndex !== -1) {
+      this.selectedCommand = this.commands[commandIndex];
+      this.movesRemaining = 0;
+      this.showMoveOverlays();
+    }
+  };
+
+  this.hit = function hit() {
+    const tile = this.tiles.splice(this.tiles.length - 1, 1);
+    tile[0].tile.changeType(tileTypes.BASIC);
   };
 }
