@@ -1,83 +1,219 @@
 import { calculateTextPadding } from './helpers.js';
-import Agent from './agent.js';
 
-export default function ProgramMenu(canvas, inventory) {
-  const textHeight = 20;
-  const context = canvas.getContext('2d');
-  let selectedProgram;
-  const rect = {
-    x: 10,
-    y: 10,
-    width: canvas.width * 0.25,
-    height: canvas.height * 0.8,
-  };
-  const title = {
-    x: rect.x,
-    y: rect.y,
-    width: rect.width,
-    height: 40,
-  };
-  const programs = [];
-  inventory.programs.forEach((program, index) => {
-    programs.push({
-      program,
-      x: rect.x + 10,
-      y: rect.y + 60 + (index * textHeight),
-      width: rect.width - 20,
-      height: textHeight,
+export default class ProgramMenu {
+  constructor(canvas, inventory, image) {
+    $.getJSON('../assets/agents.json', (data) => {
+      this.agentData = data;
+      console.log('agents loaded');
     });
-  });
-  let agentData;
-  $.getJSON('../assets/agents.json', (data) => {
-    agentData = data;
-    console.log('agents loaded');
-  });
 
-  this.draw = function draw() {
-    context.clearRect(rect.x, rect.y, rect.width, rect.height);
+    $.getJSON('../assets/commands.json', (data) => {
+      this.commandData = data;
+      console.log('commands loaded');
+    });
+
+    this.image = image;
+
+    this.rect = {
+      x: 10,
+      y: 10,
+      width: canvas.width * 0.2,
+      height: canvas.height - 20,
+    };
+    this.textHeight = 15;
+    this.listTitle = {
+      x: this.rect.x,
+      y: this.rect.y + 10,
+      width: this.rect.width,
+      height: this.textHeight,
+    };
+    this.programs = inventory.programs;
+
+    const programListLength = 8;
+    this.programList = {
+      x: this.rect.x + 10,
+      y: this.listTitle.y + this.listTitle.height + this.textHeight,
+      width: this.rect.width - 20,
+      height: this.textHeight * programListLength,
+    };
+    this.programSlots = [];
+    for (let i = 0; i < programListLength; i += 1) {
+      this.programSlots.push({
+        x: this.rect.x + 10,
+        y: this.programList.y + (this.textHeight * i),
+        width: this.rect.width - 20,
+        height: this.textHeight,
+      });
+    }
+
+    this.infoTitle = {
+      x: this.rect.x,
+      y: this.programList.y + this.programList.height + this.textHeight,
+      width: this.rect.width,
+      height: this.textHeight,
+    };
+
+    this.programInfo = {
+      x: this.rect.x + 10,
+      y: this.infoTitle.y + this.infoTitle.height + this.textHeight,
+      width: this.rect.width - 20,
+      height: this.rect.height - (this.infoTitle.y + this.infoTitle.height + this.textHeight),
+    };
+
+    this.commandLabel = {
+      x: this.rect.x + 10,
+      y: this.programInfo.y + 80,
+      width: this.rect.width - 20,
+      height: this.textHeight,
+    };
+    const commandListLength = 3;
+    this.commandList = {
+      x: this.commandLabel.x,
+      y: this.commandLabel.y + this.commandLabel.height,
+      width: this.commandLabel.width,
+      height: this.textHeight * commandListLength,
+    };
+    this.commandSlots = [];
+    for (let i = 0; i < commandListLength; i += 1) {
+      this.commandSlots.push({
+        x: this.commandList.x,
+        y: this.commandList.y + (i * this.textHeight),
+        width: this.commandList.width,
+        height: this.textHeight,
+      });
+    }
+
+    this.scrollAmount = 0;
+  }
+
+  draw(context) {
+    // Draw the whole menu container.
+    context.clearRect(this.rect.x, this.rect.y, this.rect.width, this.rect.height);
     context.fillStyle = 'rgba(40, 40, 40, 0.95)';
-    context.fillRect(rect.x, rect.y, rect.width, rect.height);
+    context.fillRect(this.rect.x, this.rect.y, this.rect.width, this.rect.height);
+
+    // Draw the 'Program List' title.
     context.fillStyle = 'white';
-    context.font = `${textHeight}px verdana`;
+    context.font = `${this.textHeight}px verdana`;
     context.textBaseline = 'middle';
-    const padding = calculateTextPadding(title, 'Program List', context);
-    context.fillText('Program List', rect.x + padding[0], rect.y + padding[1]);
-    context.font = `${Math.floor(textHeight / 1.3)}px verdana`;
-    programs.forEach((program) => {
-      if (selectedProgram && selectedProgram === program.program) {
-        context.fillStyle = 'rgba(80, 80, 80, 0.95)';
-        context.fillRect(program.x, program.y, program.width, program.height);
+    let [leftPad, topPad] = calculateTextPadding(this.listTitle, 'Program List', context);
+    context.fillText('Program List', this.listTitle.x + leftPad, this.listTitle.y + topPad);
+
+    // Draw the container for the program list.
+    context.fillStyle = 'rgba(50, 50, 50, 1)';
+    context.fillRect(this.programList.x, this.programList.y,
+      this.programList.width, this.programList.height);
+
+    // Draw each program in the program list.
+    context.fillStyle = 'white';
+    context.font = `${Math.floor(this.textHeight / 1.3)}px verdana`;
+    for (let i = 0; i < Math.min(this.programSlots.length, this.programs.length); i += 1) {
+      const program = this.programs[i + this.scrollAmount];
+      const programSlot = this.programSlots[i];
+      if (this.selectedProgram && this.selectedProgram === program) {
+        context.fillStyle = 'rgba(80, 80, 80, 1)';
+        context.fillRect(programSlot.x, programSlot.y,
+          programSlot.width, programSlot.height);
       }
       context.fillStyle = 'white';
-      context.fillText(`${program.program.name} x${program.program.quantity}`, program.x, program.y + textHeight / 2);
-    });
-  };
-  this.containsPoint = function containsPoint(point) {
-    return (point.x > rect.x && point.x < rect.x + rect.width
-      && point.y > rect.y && point.y < rect.y + rect.height);
-  };
-  this.onClick = function onClick(point) {
-    programs.forEach((program) => {
-      if (point.x > program.x && point.x < program.x + program.width
-        && point.y > program.y && point.y < program.y + program.height) {
-        selectedProgram = program.program;
-        this.draw();
+      context.fillText(`${program.name} x${program.quantity}`, programSlot.x, programSlot.y + (programSlot.height / 2));
+    }
+
+    // Draw the 'Program Info' title.
+    context.fillStyle = 'white';
+    context.font = `${this.textHeight}px verdana`;
+    context.textBaseline = 'middle';
+    [leftPad, topPad] = calculateTextPadding(this.listTitle, 'Program Info', context);
+    context.fillText('Program Info', this.infoTitle.x + leftPad, this.infoTitle.y + topPad);
+
+    if (this.displayProgram) {
+      // Draw the container for the program info.
+      context.fillStyle = 'rgba(50, 50, 50, 1)';
+      context.fillRect(this.programInfo.x, this.programInfo.y,
+        this.programInfo.width, this.programInfo.height);
+
+      // Draw the program's image.
+      const imageSource = {
+        x: (this.displayProgram.imgSource % 8) * 27,
+        y: Math.floor(this.displayProgram.imgSource / 8) * 27,
+        size: 27,
+      };
+      context.drawImage(this.image, imageSource.x, imageSource.y,
+        imageSource.size, imageSource.size, this.programInfo.x + 10, this.programInfo.y + 10,
+        imageSource.size * 1.3, imageSource.size * 1.3);
+
+      // Draw the program's moves and max size.'
+      context.fillStyle = 'white';
+      context.font = `${Math.floor(this.textHeight / 1.3)}px verdana`;
+      context.fillText(`Move: ${this.displayProgram.moves}`, this.programInfo.x + imageSource.size * 1.3 + 20, this.programInfo.y + 10 + (this.textHeight / 2));
+      context.fillText(`Max Size: ${this.displayProgram.maxSize}`, this.programInfo.x + imageSource.size * 1.3 + 20, this.programInfo.y + 10 + (this.textHeight * 1.5));
+
+      // Draw the program's name.
+      context.font = `${this.textHeight}px verdana`;
+      context.fillText(`${this.displayProgram.name}`, this.programInfo.x + 10, this.programInfo.y + imageSource.size * 1.3 + 30);
+
+      // Draw label for command list.
+      context.fillText('Commands', this.commandLabel.x, this.commandLabel.y + (this.textHeight / 2));
+
+      // Draw command names.
+      context.fillStyle = 'white';
+      for (let i = 0;
+        i < Math.min(this.commandSlots.length, this.displayProgram.commandData.length);
+        i += 1) {
+        const command = this.displayProgram.commandData[i];
+        const commandSlot = this.commandSlots[i];
+        context.fillText(`${command.name}`, commandSlot.x, commandSlot.y + (commandSlot.height / 2));
+        console.log(command.name);
       }
-    });
-  };
-  this.getProgramChoice = function getProgramChoice() {
+    }
+  }
+
+  containsPoint(point) {
+    return (point.x > this.rect.x && point.x < this.rect.x + this.rect.width
+      && point.y > this.rect.y && point.y < this.rect.y + this.rect.height);
+  }
+
+  onClick(point) {
+    for (let i = 0; i < Math.min(this.programSlots.length, this.programs.length); i += 1) {
+      const program = this.programs[i + this.scrollAmount];
+      const programSlot = this.programSlots[i];
+      if (point.x > programSlot.x && point.x < programSlot.x + programSlot.width
+        && point.y > programSlot.y && point.y < programSlot.y + programSlot.height) {
+        this.selectedProgram = program;
+        this.setDisplayProgram(this.selectedProgram.name);
+      }
+    }
+  }
+
+  getProgramChoice() {
     let agent;
-    if (selectedProgram && selectedProgram.quantity > 0) {
-      agent = agentData.find((data) => data.name === selectedProgram.name);
-      selectedProgram.quantity -= 1;
+    if (this.selectedProgram && this.selectedProgram.quantity > 0) {
+      agent = this.agentData.find((data) => data.name === this.selectedProgram.name);
+      agent.commandData = [];
+      agent.commands.forEach((commandName) => {
+        agent.commandData.push(this.commandData.find((command) => command.name === commandName));
+      });
+      this.selectedProgram.quantity -= 1;
     }
     return agent;
-  };
-  this.addProgram = function addProgram(programName) {
-    const program = programs.find((p) => p.program.name === programName);
-    if (program) {
-      program.program.quantity += 1;
-      this.draw();
+  }
+
+  setDisplayProgram(programName) {
+    const agent = this.agentData.find((data) => data.name === programName);
+    agent.commandData = [];
+    agent.commands.forEach((commandName) => {
+      agent.commandData.push(this.commandData.find((command) => command.name === commandName));
+    });
+    this.displayProgram = agent;
+  }
+
+  scroll(amount) {
+    const programListDisplayHeight = 8;
+    this.scrollAmount += amount;
+    if (this.scrollAmount < 0) {
+      this.scrollAmount = 0;
+    } else if (this.scrollAmount > this.programs.length - programListDisplayHeight) {
+      this.scrollAmount = this.programs.length - programListDisplayHeight;
     }
-  };
+  }
 }

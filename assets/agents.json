@@ -6,8 +6,13 @@
 	{
 		"imgSource": 1,
     "name": "Bit-Man",
+    "desc": "Make sectors of the grid appear or disappear",
     "moves": 3,
-    "maxSize": 3
+    "maxSize": 3,
+    "commands": [
+      "Zero",
+      "One"
+    ]
 	},
 	{
 		"imgSource": 2,
@@ -20,8 +25,12 @@
 	{
 		"imgSource": 4,
     "name": "Bug",
+    "desc": "Fast, cheap, and out of control.",
     "moves": 5,
-    "maxSize": 1
+    "maxSize": 1,
+    "commands": [
+      "Glitch"
+    ]
 	},
 	{
 		"imgSource": 5,
@@ -42,8 +51,12 @@
 	{
 		"imgSource": 9,
     "name": "Data Doctor",
+    "desc": "Helps your programs grow.",
     "moves": 4,
-    "maxSize": 5
+    "maxSize": 5,
+    "commands": [
+      "Grow"
+    ]
 	},
 	{
 		"imgSource": 10,
@@ -63,7 +76,13 @@
   },
   {
 		"imgSource": 14,
-		"name": "Mud Golem"
+    "name": "Mud Golem",
+    "desc": "A slow and steady attack program.",
+    "moves": 1,
+    "maxSize": 5,
+    "commands": [
+      "Thump"
+    ]
   },
   {
 		"imgSource": 15,
@@ -84,12 +103,23 @@
   {
 		"imgSource": 19,
     "name": "Hack",
+    "desc": "A basic attack program.",
     "moves": 2,
-    "maxSize": 4
+    "maxSize": 4,
+    "commands": [
+      "Slice"
+    ]
   },
   {
 		"imgSource": 20,
-		"name": "Hack 2.0"
+    "name": "Hack 2.0",
+    "desc": "Improved hack: More moves and better attacks.",
+    "moves": 3,
+    "maxSize": 4,
+    "commands": [
+      "Slice",
+      "Dice"
+    ]
   },
   {
 		"imgSource": 21,
@@ -113,7 +143,13 @@
   },
   {
 		"imgSource": 26,
-		"name": "Medic"
+    "name": "Medic",
+    "desc": "Grow your programs from a distance.",
+    "moves": 3,
+    "maxSize": 3,
+    "commands": [
+      "Hypo"
+    ]
   },
   {
 		"imgSource": 27,
@@ -133,7 +169,13 @@
   },
   {
 		"imgSource": 31,
-		"name": "Seeker"
+    "name": "Seeker",
+    "desc": "A solid distance attack program",
+    "moves": 3,
+    "maxSize": 3,
+    "commands": [
+      "Peek"
+    ]
   },
   {
 		"imgSource": 32,
@@ -162,8 +204,12 @@
   {
 		"imgSource": 38,
     "name": "Slingshot",
+    "desc": "A basic ranged attack program.",
     "moves": 2,
-    "maxSize": 2
+    "maxSize": 2,
+    "commands": [
+      "Stone"
+    ]
   },
   {
 		"imgSource": 39,
@@ -175,11 +221,23 @@
   },
   {
 		"imgSource": 41,
-		"name": "Tower"
+    "name": "Tower",
+    "desc": "An Immobile long-range program.",
+    "moves": 0,
+    "maxSize": 1,
+    "commands": [
+      "Spot"
+    ]
   },
   {
 		"imgSource": 42,
-		"name": "Turbo"
+    "name": "Turbo",
+    "desc": "Speeds up your programs.",
+    "moves": 3,
+    "maxSize": 3,
+    "commands": [
+      "Boost"
+    ]
   },
   {
 		"imgSource": 43,
@@ -207,6 +265,12 @@
   },
   {
 		"imgSource": 49,
-		"name": "Wolf Spider"
+    "name": "Wolf Spider",
+    "desc": "A speedy and creepy little program.",
+    "moves": 3,
+    "maxSize": 3,
+    "commands": [
+      "Byte"
+    ]
 	}
 ]

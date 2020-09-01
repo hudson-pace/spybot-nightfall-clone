@@ -1,6 +1,7 @@
-import { tileTypes } from './tile.js';
+import { tileTypes, overlayTypes, Tile } from './tile.js';
+import BattleMap from './battlemap.js';
 
-export default function Agent(agent, startingTile, image, context) {
+export default function Agent(agent, startingTile, image, context, map) {
   this.head = startingTile;
   this.tail = startingTile;
   this.tiles = [{
@@ -15,53 +16,51 @@ export default function Agent(agent, startingTile, image, context) {
     y: Math.floor(agent.imgSource / 8) * 27,
     size: 27,
   };
+  this.turnIsOver = false;
+  [this.selectedAttack] = agent.commandData;
+
+  function createConnector(tile1, tile2, coords) {
+    const connector = {};
+    if (tile1.x !== tile2.x) {
+      connector.width = tile1.gap;
+      connector.height = Math.floor(tile1.size / 2);
+      connector.y = coords.y + Math.floor(connector.height / 2);
+      if (tile1.x > tile2.x) {
+        connector.x = coords.x - tile1.gap;
+      } else {
+        connector.x = coords.x + tile1.size;
+      }
+    } else {
+      connector.width = Math.floor(tile1.size / 2);
+      connector.height = tile1.gap;
+      connector.x = coords.x + Math.floor((connector.width / 2));
+      if (tile1.y > tile2.y) {
+        connector.y = coords.y - tile1.gap;
+      } else {
+        connector.y = coords.y + tile1.size;
+      }
+    }
+    return connector;
+  }
 
   let selectedDisplay = true;
   this.draw = function draw() {
     this.tiles.forEach((tile, index) => {
       const coords = tile.tile.getDrawingCoords();
       if (tile.tile === this.head) {
-        if (this.selected) {
-          context.clearRect(coords.x - 2, coords.y - 2, imageSource.size + 4, imageSource.size + 4);
-        }
+        context.clearRect(coords.x - 2, coords.y - 2, imageSource.size + 4, imageSource.size + 4);
         context.drawImage(image, imageSource.x, imageSource.y, imageSource.size, imageSource.size,
           coords.x, coords.y, imageSource.size, imageSource.size);
         const pixelData = context.getImageData(coords.x, coords.y, 1, 1).data;
         context.fillStyle = `rgba(${pixelData.join(',')})`;
       } else if (index > 0) {
-        const canvasRect = tile.tile.getCanvasRect();
-        let connector;
-        if (tile.nextTile.x > tile.tile.x) {
-          connector = {
-            width: tile.tile.gap,
-            height: tile.tile.size / 2,
-            x: canvasRect.x + canvasRect.width,
-            y: canvasRect.y + Math.floor((canvasRect.height - (tile.tile.size / 2)) / 2),
-          };
-        } else if (tile.nextTile.x < tile.tile.x) {
-          connector = {
-            width: tile.tile.gap,
-            height: tile.tile.size / 2,
-            x: canvasRect.x - tile.tile.gap,
-            y: canvasRect.y + Math.floor((canvasRect.height - (tile.tile.size / 2)) / 2),
-          };
-        } else if (tile.nextTile.y > tile.tile.y) {
-          connector = {
-            width: tile.tile.size / 2,
-            height: tile.tile.gap,
-            x: canvasRect.x + Math.floor((canvasRect.width - (tile.tile.size / 2)) / 2),
-            y: canvasRect.y + canvasRect.width,
-          };
-        } else if (tile.nextTile.y < tile.tile.y) {
-          connector = {
-            width: tile.tile.size / 2,
-            height: tile.tile.gap,
-            x: canvasRect.x + Math.floor((canvasRect.width - (tile.tile.size / 2)) / 2),
-            y: canvasRect.y - tile.tile.gap,
-          };
-        }
+        const connector = createConnector(tile.tile, tile.nextTile, coords);
         context.fillRect(coords.x, coords.y, imageSource.size, imageSource.size);
         context.fillRect(connector.x, connector.y, connector.width, connector.height);
+      }
+
+      if (tile.tile.overlay !== overlayTypes.UPLOAD) {
+        tile.tile.drawOverlays(context);
       }
     });
     if (this.selected) {
@@ -86,12 +85,19 @@ export default function Agent(agent, startingTile, image, context) {
     this.selected = true;
     selectedDisplay = true;
     flashSelectedDisplay = setInterval(toggleSelectedDisplay.bind(this), 600);
+    if (this.movesRemaining > 0) {
+      this.highlightValidMoves(this.movesRemaining, 'move');
+    } else {
+      this.highlightValidMoves(this.selectedAttack.range, 'attack');
+    }
   };
   this.deselect = function deselect() {
     this.selected = false;
     clearInterval(flashSelectedDisplay);
+    this.draw();
   };
   this.move = function move(newTile) {
+    map.clearTileOverlays();
     const tileIndex = this.tiles.findIndex((tile) => tile.tile === newTile);
     if (tileIndex === -1) {
       newTile.changeType(tileTypes.OCCUPIED);
@@ -112,8 +118,95 @@ export default function Agent(agent, startingTile, image, context) {
     }
     this.movesRemaining -= 1;
     this.head = newTile;
+    if (this.movesRemaining === 0) {
+      this.highlightValidMoves(this.selectedAttack.range, 'attack');
+    } else {
+      this.highlightValidMoves(this.movesRemaining, 'move');
+    }
+  };
+
+  this.attack = function attack(tile) {
+    map.clearTileOverlays();
+    this.turnIsOver = true;
   };
   this.containsTile = function containsTile(tile) {
     return !!this.tiles.find((t) => t.tile === tile);
+  };
+
+  this.highlightValidMoves = function highlightValidMoves(searchRadius, type) {
+    const visitedTiles = [];
+    const explorationQueue = [];
+    explorationQueue.push([this.head, 0]);
+    while (explorationQueue.length > 0) {
+      const tile = explorationQueue.splice(0, 1)[0];
+      if (tile[1] < searchRadius) {
+        let nextTile = map.getTileAtGridCoords(tile[0].x - 1, tile[0].y);
+        if (nextTile && (nextTile.type === tileTypes.BASIC
+          || (nextTile.type === tileTypes.OCCUPIED && this.containsTile(nextTile))
+          || type === 'attack')
+          && !visitedTiles.find((t) => t === nextTile)) {
+          explorationQueue.push([nextTile, tile[1] + 1]);
+          visitedTiles.push(nextTile);
+        }
+        nextTile = map.getTileAtGridCoords(tile[0].x + 1, tile[0].y);
+        if (nextTile && (nextTile.type === tileTypes.BASIC
+          || (nextTile.type === tileTypes.OCCUPIED && this.containsTile(nextTile))
+          || type === 'attack')
+        && !visitedTiles.find((t) => t === nextTile)) {
+          explorationQueue.push([nextTile, tile[1] + 1]);
+          visitedTiles.push(nextTile);
+        }
+        nextTile = map.getTileAtGridCoords(tile[0].x, tile[0].y - 1);
+        if (nextTile && (nextTile.type === tileTypes.BASIC
+          || (nextTile.type === tileTypes.OCCUPIED && this.containsTile(nextTile))
+          || type === 'attack')
+        && !visitedTiles.find((t) => t === nextTile)) {
+          explorationQueue.push([nextTile, tile[1] + 1]);
+          visitedTiles.push(nextTile);
+        }
+        nextTile = map.getTileAtGridCoords(tile[0].x, tile[0].y + 1);
+        if (nextTile && (nextTile.type === tileTypes.BASIC
+          || (nextTile.type === tileTypes.OCCUPIED && this.containsTile(nextTile))
+          || type === 'attack')
+        && !visitedTiles.find((t) => t === nextTile)) {
+          explorationQueue.push([nextTile, tile[1] + 1]);
+          visitedTiles.push(nextTile);
+        }
+      }
+    }
+    visitedTiles.forEach((t) => {
+      if (type === 'move') {
+        if (t === map.getTileAtGridCoords(this.head.x - 1, this.head.y)) {
+          t.changeOverlay(overlayTypes.MOVE_LEFT);
+        } else if (t === map.getTileAtGridCoords(this.head.x + 1, this.head.y)) {
+          t.changeOverlay(overlayTypes.MOVE_RIGHT);
+        } else if (t === map.getTileAtGridCoords(this.head.x, this.head.y - 1)) {
+          t.changeOverlay(overlayTypes.MOVE_UP);
+        } else if (t === map.getTileAtGridCoords(this.head.x, this.head.y + 1)) {
+          t.changeOverlay(overlayTypes.MOVE_DOWN);
+        } else {
+          t.changeOverlay(overlayTypes.VALID_MOVE);
+        }
+      } else if (type === 'attack') {
+        t.changeOverlay(overlayTypes.ATTACK);
+      }
+    });
+  };
+  this.resetTurn = function resetTurn() {
+    this.turnIsOver = false;
+    this.movesRemaining = agent.moves;
+  };
+
+  this.chooseTile = function chooseTiles(tile) {
+    if (this.movesRemaining > 0) {
+      if (BattleMap.tilesAreWithinRange(tile, this.head, 1)) {
+        if (tile.type === tileTypes.BASIC
+          || (tile.type === tileTypes.OCCUPIED && this.containsTile(tile))) {
+          this.move(tile);
+        }
+      }
+    } else if (BattleMap.tilesAreWithinRange(tile, this.head, this.selectedAttack.range)) {
+      this.attack(tile);
+    }
   };
 }

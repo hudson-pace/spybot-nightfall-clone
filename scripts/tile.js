@@ -12,14 +12,15 @@ export const overlayTypes = {
   MOVE_UP: 'move up',
   MOVE_DOWN: 'move down',
   UPLOAD: 'upload',
+  ATTACK: 'attack',
 };
 
 export function Tile(x, y, size, gap, leftPad, topPad, image) {
-  // These are the coordinates where the tile should actually be drawn.
   this.x = x;
   this.y = y;
   this.gap = gap;
   this.size = size;
+  // These are the coordinates where the tile should actually be drawn.
   const canvasX = leftPad + (x * (size + gap));
   const canvasY = topPad + (y * (size + gap));
   this.overlay = overlayTypes.NONE;
@@ -34,16 +35,7 @@ export function Tile(x, y, size, gap, leftPad, topPad, image) {
     };
   };
 
-  this.draw = function draw(context) {
-    switch (this.type) {
-      default:
-        context.fillStyle = 'black';
-        break;
-      case tileTypes.BASIC:
-        context.fillStyle = 'gray';
-        break;
-    }
-    context.fillRect(canvasX, canvasY, size, size);
+  this.drawOverlays = function drawOverlays(context) {
     switch (this.overlay) {
       default:
         break;
@@ -65,7 +57,22 @@ export function Tile(x, y, size, gap, leftPad, topPad, image) {
       case overlayTypes.UPLOAD:
         context.drawImage(image, 0 * size, 1 * size, size, size, canvasX, canvasY, size, size);
         break;
+      case overlayTypes.ATTACK:
+        context.drawImage(image, 1 * size, 0 * size, size, size, canvasX, canvasY, size, size);
+        break;
     }
+  };
+  this.draw = function draw(context) {
+    switch (this.type) {
+      default:
+        context.fillStyle = 'black';
+        break;
+      case tileTypes.BASIC:
+        context.fillStyle = 'gray';
+        break;
+    }
+    context.fillRect(canvasX, canvasY, size, size);
+    this.drawOverlays(context);
   };
   this.containsPoint = function containsPoint(point) {
     return (point.x > canvasX && point.x < canvasX + size

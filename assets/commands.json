@@ -1,0 +1,106 @@
+[
+  {
+    "name": "Slice",
+    "type": "attack",
+    "range": 1,
+    "damage": 2,
+    "sizeReq": 0,
+    "sacrifice": 0
+  },
+  {
+    "name": "Grow",
+    "type": "heal",
+    "range": 1,
+    "damage": 2,
+    "sizeReq": 0,
+    "sacrifice": 0
+  },
+  {
+    "name": "Glitch",
+    "type": "attack",
+    "range": 1,
+    "damage": 2,
+    "sizeReq": 0,
+    "sacrifice": 0
+  },
+  {
+    "name": "Zero",
+    "type": "terrain",
+    "range": 1,
+    "damage": 1,
+    "sizeReq": 0,
+    "sacrifice": 0
+  },
+  {
+    "name": "One",
+    "type": "terrain",
+    "range": 1,
+    "damage": -1,
+    "sizeReq": 0,
+    "sacrifice": 0
+  },
+  {
+    "name": "Stone",
+    "type": "attack",
+    "range": 3,
+    "damage": 1,
+    "sizeReq": 0,
+    "sacrifice": 0
+  },
+  {
+    "name": "Dice",
+    "type": "attack",
+    "range": 1,
+    "damage": 3,
+    "sizeReq": 3,
+    "sacrifice": 0
+  },
+  {
+    "name": "Thump",
+    "type": "attack",
+    "range": 1,
+    "damage": 3,
+    "sizeReq": 0,
+    "sacrifice": 0
+  },
+  {
+    "name": "Byte",
+    "type": "attack",
+    "range": 1,
+    "damage": 2,
+    "sizeReq": 0,
+    "sacrifice": 0
+  },
+  {
+    "name": "Peek",
+    "type": "attack",
+    "range": 2,
+    "damage": 2,
+    "sizeReq": 0,
+    "sacrifice": 0
+  },
+  {
+    "name": "Spot",
+    "type": "attack",
+    "range": 3,
+    "damage": 3,
+    "sizeReq": 0,
+    "sacrifice": 0
+  },
+  {
+    "name": "Hypo",
+    "type": "heal",
+    "range": 3,
+    "damage": 2,
+    "sizeReq": 0,
+    "sacrifice": 0
+  },
+  {
+    "name": "Boost",
+    "type": "boost_moves",
+    "range": 1,
+    "damage": 1,
+    "sizeReq": 1,
+    "sacrifice": 1
+  }
+]
