@@ -94,7 +94,13 @@
   },
   {
 		"imgSource": 17,
-		"name": "Guard Pup"
+    "name": "Guard Pup",
+    "desc": "A speedy little corporate cur.",
+    "moves": 3,
+    "maxSize": 2,
+    "commands": [
+      "Byte"
+    ]
   },
   {
 		"imgSource": 18,
@@ -191,7 +197,13 @@
   },
   {
 		"imgSource": 35,
-		"name": "Sentinel"
+    "name": "Sentinel",
+    "desc": "A corporate data defender.",
+    "moves": 1,
+    "maxSize": 3,
+    "commands": [
+      "Cut"
+    ]
   },
   {
 		"imgSource": 36,
@@ -253,7 +265,13 @@
   },
   {
 		"imgSource": 46,
-		"name": "Watchman"
+    "name": "Watchman",
+    "desc": "A corporate ranged attack program.",
+    "moves": 1,
+    "maxSize": 2,
+    "commands": [
+      "Phaser"
+    ]
   },
   {
 		"imgSource": 47,

@@ -102,5 +102,21 @@
     "damage": 1,
     "sizeReq": 1,
     "sacrifice": 1
+  },
+  {
+    "name": "Cut",
+    "type": "attack",
+    "range": 1,
+    "damage": 2,
+    "sizeReq": 0,
+    "sacrifice": 0
+  },
+  {
+    "name": "Phaser",
+    "type": "attack",
+    "range": 2,
+    "damage": 2,
+    "sizeReq": 0,
+    "sacrifice": 0
   }
 ]

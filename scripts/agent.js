@@ -135,8 +135,8 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
 
   this.executeCommand = function executeCommand(tile) {
     map.clearTileOverlays();
-    executeCommandCallback(tile, this.selectedCommand);
     this.turnIsOver = true;
+    executeCommandCallback(tile, this.selectedCommand);
   };
   this.containsTile = function containsTile(tile) {
     return !!this.tiles.find((t) => t.tile === tile);
@@ -146,54 +146,76 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
     map.clearTileOverlays();
     if (!this.turnIsOver) {
       if (this.movesRemaining > 0) {
-        this.highlightValidMoves(this.movesRemaining, 'move');
+        this.highlightTiles(this.getValidMoves(this.movesRemaining, 'move'), 'move');
       } else {
-        this.highlightValidMoves(this.selectedCommand.range, 'attack');
+        this.highlightTiles(this.getValidMoves(this.selectedCommand.range, 'attack'), 'attack');
       }
     }
   };
-  this.highlightValidMoves = function highlightValidMoves(searchRadius, type) {
-    const visitedTiles = [];
-    const explorationQueue = [];
-    explorationQueue.push([this.head, 0]);
+  this.isTileValid = function isTileValid(tile, type, visitedTiles) {
+    return tile && (tile.type === tileTypes.BASIC || type === 'attack'
+      || (tile.type === tileTypes.OCCUPIED && this.containsTile(tile)))
+      && !visitedTiles.find((t) => t === tile);
+  };
+  this.getValidAdjacentTiles = function getValidAdjacentTiles(tile, type, visitedTiles) {
+    const validAdjacentTiles = [];
+    let nextTile = map.getTileAtGridCoords(tile.x - 1, tile.y);
+    if (this.isTileValid(nextTile, type, visitedTiles)) {
+      validAdjacentTiles.push(nextTile);
+    }
+    nextTile = map.getTileAtGridCoords(tile.x + 1, tile.y);
+    if (this.isTileValid(nextTile, type, visitedTiles)) {
+      validAdjacentTiles.push(nextTile);
+    }
+    nextTile = map.getTileAtGridCoords(tile.x, tile.y - 1);
+    if (this.isTileValid(nextTile, type, visitedTiles)) {
+      validAdjacentTiles.push(nextTile);
+    }
+    nextTile = map.getTileAtGridCoords(tile.x, tile.y + 1);
+    if (this.isTileValid(nextTile, type, visitedTiles)) {
+      validAdjacentTiles.push(nextTile);
+    }
+    return validAdjacentTiles;
+  };
+  this.getValidMoves = function getValidMoves(searchRadius, type) {
+    const visitedTiles = [this.head];
+    const explorationQueue = [[this.head, 0]];
     while (explorationQueue.length > 0) {
       const tile = explorationQueue.splice(0, 1)[0];
       if (tile[1] < searchRadius) {
-        let nextTile = map.getTileAtGridCoords(tile[0].x - 1, tile[0].y);
-        if (nextTile && (nextTile.type === tileTypes.BASIC
-          || (nextTile.type === tileTypes.OCCUPIED && this.containsTile(nextTile))
-          || type === 'attack')
-          && !visitedTiles.find((t) => t === nextTile)) {
+        this.getValidAdjacentTiles(tile[0], type, visitedTiles).forEach((nextTile) => {
           explorationQueue.push([nextTile, tile[1] + 1]);
           visitedTiles.push(nextTile);
-        }
-        nextTile = map.getTileAtGridCoords(tile[0].x + 1, tile[0].y);
-        if (nextTile && (nextTile.type === tileTypes.BASIC
-          || (nextTile.type === tileTypes.OCCUPIED && this.containsTile(nextTile))
-          || type === 'attack')
-        && !visitedTiles.find((t) => t === nextTile)) {
-          explorationQueue.push([nextTile, tile[1] + 1]);
-          visitedTiles.push(nextTile);
-        }
-        nextTile = map.getTileAtGridCoords(tile[0].x, tile[0].y - 1);
-        if (nextTile && (nextTile.type === tileTypes.BASIC
-          || (nextTile.type === tileTypes.OCCUPIED && this.containsTile(nextTile))
-          || type === 'attack')
-        && !visitedTiles.find((t) => t === nextTile)) {
-          explorationQueue.push([nextTile, tile[1] + 1]);
-          visitedTiles.push(nextTile);
-        }
-        nextTile = map.getTileAtGridCoords(tile[0].x, tile[0].y + 1);
-        if (nextTile && (nextTile.type === tileTypes.BASIC
-          || (nextTile.type === tileTypes.OCCUPIED && this.containsTile(nextTile))
-          || type === 'attack')
-        && !visitedTiles.find((t) => t === nextTile)) {
-          explorationQueue.push([nextTile, tile[1] + 1]);
-          visitedTiles.push(nextTile);
-        }
+        });
       }
     }
-    visitedTiles.forEach((t) => {
+    return visitedTiles;
+  };
+  this.getShortestPath = function getShortestPath(tile1, tile2) {
+    const visitedTiles = [tile1];
+    const explorationQueue = [[tile1]];
+    while (explorationQueue.length > 0) {
+      const path = explorationQueue.splice(0, 1)[0];
+      let found = false;
+      this.getValidAdjacentTiles(path[path.length - 1], 'move', visitedTiles).forEach((nextTile) => {
+        if (BattleMap.tilesAreWithinRange(nextTile, tile2, 1)) {
+          found = true;
+        }
+        explorationQueue.push([...path, nextTile]);
+        visitedTiles.push(nextTile);
+      });
+      if (found) {
+        const shortestPath = explorationQueue.find((p) => BattleMap.tilesAreWithinRange(
+          p[p.length - 1], tile2, 1,
+        ));
+        shortestPath.splice(0, 1);
+        return shortestPath;
+      }
+    }
+    return undefined;
+  };
+  this.highlightTiles = function highlightTiles(tiles, type) {
+    tiles.forEach((t) => {
       if (type === 'move') {
         if (t === map.getTileAtGridCoords(this.head.x - 1, this.head.y)) {
           t.changeOverlay(overlayTypes.MOVE_LEFT);
@@ -211,6 +233,7 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
       }
     });
   };
+
   this.resetTurn = function resetTurn() {
     this.turnIsOver = false;
     this.movesRemaining = agent.moves;
@@ -241,5 +264,100 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
   this.hit = function hit() {
     const tile = this.tiles.splice(this.tiles.length - 1, 1);
     tile[0].tile.changeType(tileTypes.BASIC);
+  };
+
+  this.expandTileRadius = function expandTileRadius(tileList, expansionRadius) {
+    const expandedTileList = [...tileList];
+    tileList.forEach((tile) => {
+      for (let i = -1 * expansionRadius; i <= expansionRadius; i += 1) {
+        for (let j = -1 * expansionRadius; j <= expansionRadius; j += 1) {
+          if (Math.abs(i) + Math.abs(j) <= expansionRadius) {
+            const nextTile = map.getTileAtGridCoords(tile.x + i, tile.y + j);
+            if (nextTile
+              && !expandedTileList.find((t) => t.x === nextTile.x && t.y === nextTile.y)) {
+              expandedTileList.push(nextTile);
+            }
+          }
+        }
+      }
+    });
+    return expandedTileList;
+  };
+
+  this.calculateTurn = function calculateTurn(enemyAgents) {
+    const possibleMoves = this.getValidMoves(this.movesRemaining, 'move');
+    const possibleTilesToAttack = this.expandTileRadius(possibleMoves, this.selectedCommand.range);
+    const enemyTilesWithinRange = possibleTilesToAttack.filter((tile) => {
+      let occupiedByEnemy = false;
+      if (tile.type === tileTypes.OCCUPIED) {
+        enemyAgents.forEach((enemy) => {
+          if (enemy.containsTile(tile)) {
+            occupiedByEnemy = true;
+          }
+        });
+      }
+      return occupiedByEnemy;
+    });
+
+    // Find all enemies which could be attacked this turn.
+    const possibleTargets = [];
+    enemyAgents.forEach((enemy) => {
+      let withinRange = false;
+      enemyTilesWithinRange.forEach((enemyTile) => {
+        if (enemy.containsTile(enemyTile)) {
+          withinRange = true;
+        }
+      });
+      if (withinRange) {
+        possibleTargets.push(enemy);
+      }
+    });
+
+    let path;
+    let targetTile;
+    if (possibleTargets.length > 0) {
+    // First try all enemies who can be defeated this turn.
+      let targets = possibleTargets.filter((enemy) => enemy.tiles.length
+        <= this.selectedCommand.damage);
+      if (targets.length === 0) {
+        // Then try the shortest enemies within range.
+        let shortestLength = Infinity;
+        possibleTargets.forEach((enemy) => {
+          if (enemy.tiles.length < shortestLength) {
+            shortestLength = enemy.tiles.length;
+          }
+        });
+        targets = possibleTargets.filter((enemy) => enemy.tiles.length === shortestLength);
+      }
+      const target = targets[Math.floor(targets.length * Math.random())];
+      // Find shortest path to enemy.
+      target.tiles.forEach((tile) => {
+        const newPath = this.getShortestPath(this.head, tile.tile);
+        if (!path || (newPath && newPath.length < path.length)) {
+          path = newPath;
+          targetTile = tile.tile;
+        }
+      });
+    } else {
+      // Then move towards the nearest enemy
+      enemyAgents.forEach((enemy) => {
+        enemy.tiles.forEach((tile) => {
+          const newPath = this.getShortestPath(this.head, tile.tile);
+          if (!path || (newPath && newPath.length < path.length)) {
+            path = newPath;
+            targetTile = tile.tile;
+          }
+        });
+      });
+    }
+
+    if (path && path.length > this.movesRemaining) {
+      targetTile = path[this.movesRemaining];
+      path = path.slice(0, this.movesRemaining);
+    }
+    return {
+      moves: path,
+      targetTile,
+    };
   };
 }
