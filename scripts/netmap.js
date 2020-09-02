@@ -3,6 +3,7 @@ import NodeMenu from './node-menu.js'
 
 const nodes = [];
 const connections = [];
+let selectedNode;
 
 function compareArrays(arr1, arr2) {
   return arr1.length === arr2.length && arr1.every((element, index) => element === arr2[index]);
@@ -184,7 +185,8 @@ export default function NetMap(url, images, mapLoadedCallback, startDataBattleCa
         };
         const clickedNode = nodes.find((node) => node.containsPoint(coords));
         if (clickedNode && clickedNode.isVisible) {
-          nodeMenu = new NodeMenu(clickedNode, canvas, startDataBattleCallback);
+          selectedNode = clickedNode;
+          nodeMenu = new NodeMenu(selectedNode, canvas, startDataBattleCallback);
           this.draw();
         }
       }
@@ -198,5 +200,15 @@ export default function NetMap(url, images, mapLoadedCallback, startDataBattleCa
       showingGrid = !showingGrid;
       this.draw();
     }
+  };
+  this.returnFromBattle = function returnFromBattle(wonBattle) {
+    if (wonBattle) {
+      ownNode(selectedNode);
+    } else {
+      console.log('You lose. In your face. Haha what a loser.');
+    }
+    setTimeout(() => {
+      this.draw();
+    }, 500);
   };
 }

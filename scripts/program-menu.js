@@ -192,6 +192,13 @@ export default class ProgramMenu {
     }
   }
 
+  addProgram(programName) {
+    const program = this.programs.find((p) => p.name === programName);
+    if (program) {
+      program.quantity += 1;
+    }
+  }
+
   containsPoint(point) {
     return (point.x > this.rect.x && point.x < this.rect.x + this.rect.width
       && point.y > this.rect.y && point.y < this.rect.y + this.rect.height);

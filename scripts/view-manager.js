@@ -54,12 +54,12 @@ export default function ViewManager(url, images) {
   function setCurrentView(newView) {
     currentView = newView;
     updateEventHandlers(currentView);
-    currentView.draw();
   }
 
   let netMap;
-  function switchToNetMap() {
+  function switchToNetMap(wonBattle) {
     setCurrentView(netMap);
+    currentView.returnFromBattle(wonBattle);
   }
   function startDataBattle(name) {
     const dataBattle = new DataBattle(name, `${url}/battles.json`, images, () => {

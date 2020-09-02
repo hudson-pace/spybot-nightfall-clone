@@ -2,7 +2,7 @@ import { tileTypes, overlayTypes, Tile } from './tile.js';
 import BattleMap from './battlemap.js';
 
 export default function Agent(agent, startingTile, image, agentDoneImage,
-  context, map, executeCommandCallback) {
+  context, map) {
   startingTile.changeType(tileTypes.OCCUPIED);
   this.head = startingTile;
   this.tail = startingTile;
@@ -110,33 +110,35 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
     this.draw();
   };
   this.move = function move(newTile) {
-    const tileIndex = this.tiles.findIndex((tile) => tile.tile === newTile);
-    if (tileIndex === -1) {
-      newTile.changeType(tileTypes.OCCUPIED);
-      this.tiles[0].nextTile = newTile;
-      this.tiles.unshift({
-        tile: newTile,
-      });
-      if (this.tiles.length > maxSize) {
-        const oldTile = this.tiles.pop();
-        oldTile.tile.changeType(tileTypes.BASIC);
+    if (this.movesRemaining > 0 && BattleMap.tilesAreWithinRange(newTile, this.head, 1)
+      && this.isTileValid(newTile, 'move', [])) {
+      const tileIndex = this.tiles.findIndex((tile) => tile.tile === newTile);
+      if (tileIndex === -1) {
+        newTile.changeType(tileTypes.OCCUPIED);
+        this.tiles[0].nextTile = newTile;
+        this.tiles.unshift({
+          tile: newTile,
+        });
+        if (this.tiles.length > maxSize) {
+          const oldTile = this.tiles.pop();
+          oldTile.tile.changeType(tileTypes.BASIC);
+        }
+      } else {
+        this.tiles[0].nextTile = newTile;
+        this.tiles.splice(tileIndex, 1);
+        this.tiles.unshift({
+          tile: newTile,
+        });
       }
-    } else {
-      this.tiles[0].nextTile = newTile;
-      this.tiles.splice(tileIndex, 1);
-      this.tiles.unshift({
-        tile: newTile,
-      });
+      this.movesRemaining -= 1;
+      this.head = newTile;
+      this.showMoveOverlays();
     }
-    this.movesRemaining -= 1;
-    this.head = newTile;
-    this.showMoveOverlays();
   };
 
-  this.executeCommand = function executeCommand(tile) {
+  this.executeCommand = function executeCommand() {
     map.clearTileOverlays();
     this.turnIsOver = true;
-    executeCommandCallback(tile, this.selectedCommand);
   };
   this.containsTile = function containsTile(tile) {
     return !!this.tiles.find((t) => t.tile === tile);
@@ -237,19 +239,6 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
   this.resetTurn = function resetTurn() {
     this.turnIsOver = false;
     this.movesRemaining = agent.moves;
-  };
-
-  this.chooseTile = function chooseTiles(tile) {
-    if (this.movesRemaining > 0) {
-      if (BattleMap.tilesAreWithinRange(tile, this.head, 1)) {
-        if (tile.type === tileTypes.BASIC
-          || (tile.type === tileTypes.OCCUPIED && this.containsTile(tile))) {
-          this.move(tile);
-        }
-      }
-    } else if (BattleMap.tilesAreWithinRange(tile, this.head, this.selectedCommand.range)) {
-      this.executeCommand(tile);
-    }
   };
 
   this.chooseCommand = function chooseCommand(newCommand) {

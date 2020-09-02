@@ -4,6 +4,7 @@ import Inventory from './inventory.js';
 import ProgramMenu from './program-menu.js';
 import Button from './button.js';
 import BattleMap from './battlemap.js';
+import { calculateTextPadding } from './helpers.js';
 
 export default function DataBattle(name, url, images, battleLoadedCallback, exitBattleCallback) {
   const canvas = $('canvas')[0];
@@ -17,6 +18,14 @@ export default function DataBattle(name, url, images, battleLoadedCallback, exit
   let running = true;
   let paused = false;
   let playerTurn = true;
+  const popupMessage = {
+    x: (canvas.width - 100) / 2,
+    y: (canvas.height - 50) / 2,
+    width: 200,
+    height: 100,
+  };
+  let showingPopup = false;
+  let enemyTurnCount = 0;
 
   const startButton = new Button(250, 470, 100, 30, 'Start', () => {
     gameIsStarted = true;
@@ -28,7 +37,7 @@ export default function DataBattle(name, url, images, battleLoadedCallback, exit
       agent.deselect();
     });
     running = false;
-    exitBattleCallback();
+    exitBattleCallback(false);
   });
 
   this.tryToLoadEnemyAgents = function tryToLoadEnemyAgents() {
@@ -38,7 +47,7 @@ export default function DataBattle(name, url, images, battleLoadedCallback, exit
         if (agent) {
           enemyAgents.push(new Agent(agent,
             map.getTileAtGridCoords(enemy.coords.x, enemy.coords.y), images.agents,
-            images.agentDone, context, map, this.executeCommand.bind(this)));
+            images.agentDone, context, map));
         }
       });
       this.draw();
@@ -70,38 +79,115 @@ export default function DataBattle(name, url, images, battleLoadedCallback, exit
     }
     leaveButton.draw(context);
     programMenu.draw(context);
+    if (showingPopup) {
+      context.fillStyle = 'rgba(40, 40, 40, 0.95)';
+      context.fillRect(popupMessage.x, popupMessage.y, popupMessage.width, popupMessage.height);
+      context.fillStyle = 'white';
+      context.font = '20px verdana';
+      const [leftPad, topPad] = calculateTextPadding(popupMessage, popupMessage.message, context);
+      context.fillText(popupMessage.message, popupMessage.x + leftPad, popupMessage.y + topPad);
+    }
+  };
+
+  this.nextEnemyTurn = function nextEnemyTurn() {
+    if (enemyTurnCount < enemyAgents.length) {
+      const agent = enemyAgents[enemyTurnCount];
+      const delay = 300;
+
+      let totalDelay = delay;
+      setTimeout(() => {
+        agent.select();
+      }, totalDelay);
+
+      console.log('-----');
+      const turn = agent.calculateTurn(agents);
+      if (turn.moves) {
+        turn.moves.forEach((tile) => {
+          totalDelay += delay;
+          const repetitions = 1;
+          console.log(`Move: ${totalDelay}`);
+          this.pauseAndDoXTimes(agent.move.bind(agent), 0, repetitions, [tile], totalDelay);
+        });
+      }
+
+      totalDelay += delay;
+      console.log(`Attack: ${totalDelay}`);
+      totalDelay += this.executeCommand(turn.targetTile, agent, totalDelay);
+      totalDelay += delay;
+      setTimeout(() => {
+        agent.deselect();
+        if (!this.checkForEndOfGame()) {
+          this.nextEnemyTurn();
+        }
+      }, totalDelay);
+
+      enemyTurnCount += 1;
+    } else {
+      enemyAgents.forEach((agent) => {
+        agent.resetTurn();
+      });
+      this.startPlayerTurn();
+    }
+  };
+
+  this.startEnemyTurn = function startEnemyTurn() {
+    enemyTurnCount = 0;
+    playerTurn = false;
+    paused = true;
+    this.flashMessage('Enemy Turn', 1000);
+    setTimeout(() => {
+      this.nextEnemyTurn();
+    }, 1000);
+  };
+
+  this.startPlayerTurn = function startPlayerTurn() {
+    this.flashMessage('Your Turn', 1000);
+    setTimeout(() => {
+      playerTurn = true;
+      paused = false;
+    }, 1000);
   };
 
   this.checkForEndOfTurn = function checkForEndOfTurn() {
-    if (!agents.find((agent) => !agent.turnIsOver)) {
-      agents.forEach((a) => {
-        if (a.selected) {
-          a.deselect();
+    if (playerTurn && !this.checkForEndOfGame()) {
+      if (!agents.find((agent) => !agent.turnIsOver)) {
+        console.log('TURN IS OVER...');
+        agents.forEach((a) => {
+          if (a.selected) {
+            a.deselect();
+          }
+          a.resetTurn();
+        });
+        if (!paused) {
+          this.startEnemyTurn();
         }
-        a.resetTurn();
-      });
-      const delay = 300;
-      let totalDelay = 0;
-      enemyAgents.forEach((enemy) => {
-        const enemyTurn = enemy.calculateTurn(agents);
-        enemyTurn.moves.forEach((tile) => {
-          totalDelay += delay;
-          const repetitions = 1;
-          this.pauseAndDoXTimes(enemy.chooseTile.bind(enemy), totalDelay, repetitions, [tile]);
-        });
-        totalDelay += delay;
-        const repetitions = 1;
-        this.pauseAndDoXTimes(enemy.chooseTile.bind(enemy),
-          totalDelay, repetitions, [enemyTurn.targetTile]);
-      });
-      totalDelay += delay;
-      setTimeout(() => {
-        enemyAgents.forEach((enemy) => {
-          console.log('reset');
-          enemy.resetTurn();
-        });
-      }, totalDelay);
+      }
     }
+  };
+  this.checkForEndOfGame = function checkForEndOfGame() {
+    console.log('checking for game end.');
+    if (agents.length === 0) {
+      paused = true;
+      this.flashMessage('You Lose', 1000);
+      setTimeout(() => {
+        exitBattleCallback(false);
+      }, 1000);
+      return true;
+    } if (enemyAgents.length === 0) {
+      agents.forEach((agent) => {
+        if (agent.selected) {
+          agent.deselect();
+        }
+      });
+      paused = true;
+      this.flashMessage('You Win', 1000);
+      setTimeout(() => {
+        exitBattleCallback(true);
+      }, 1000);
+      return true;
+    }
+    console.log('not over yet.');
+    return false;
   };
   this.onClick = function onClick(event) {
     if (playerTurn && !paused) {
@@ -120,8 +206,7 @@ export default function DataBattle(name, url, images, battleLoadedCallback, exit
           const agentData = programMenu.getProgramChoice();
           if (agentData) {
             const oldAgentIndex = agents.findIndex((agent) => agent.head === tile);
-            agents.push(new Agent(agentData, tile, images.agents, images.agentDone, context, map,
-              this.executeCommand.bind(this)));
+            agents.push(new Agent(agentData, tile, images.agents, images.agentDone, context, map));
             if (oldAgentIndex !== -1) {
               programMenu.addProgram(agents[oldAgentIndex].name);
               agents.splice(oldAgentIndex, 1);
@@ -139,7 +224,12 @@ export default function DataBattle(name, url, images, battleLoadedCallback, exit
           const selectedAgent = agents.find((a) => a.selected);
 
           if (selectedAgent && tile) {
-            selectedAgent.chooseTile(tile);
+            if (selectedAgent.movesRemaining > 0) {
+              selectedAgent.move(tile);
+            } else if (BattleMap.tilesAreWithinRange(tile, selectedAgent.head,
+              selectedAgent.selectedCommand.range)) {
+              this.executeCommand(tile, selectedAgent, 0);
+            }
           }
         }
       }
@@ -149,64 +239,89 @@ export default function DataBattle(name, url, images, battleLoadedCallback, exit
     }
   };
 
+  this.flashMessage = function flashMessage(text, time) {
+    popupMessage.message = text;
+    showingPopup = true;
+    this.draw();
+    setTimeout(() => {
+      showingPopup = false;
+      this.draw();
+    }, time);
+  };
+
   this.onMouseWheel = function onMouseWheel(event) {
     programMenu.scroll(event.originalEvent.wheelDelta / -120);
     programMenu.draw(context);
   };
-  this.executeCommand = function executeCommand(tile, command) {
-    switch (command.type) {
+  this.attack = function attack(tile, command, totalDelay) {
+    console.log('ATTACKING');
+    let delay = 0;
+    let repetitions = 0;
+    if (tile.type === tileTypes.OCCUPIED) {
+      let agentList;
+      let targetIndex = enemyAgents.findIndex((agent) => agent.containsTile(tile));
+      if (targetIndex !== -1) {
+        agentList = enemyAgents;
+      } else {
+        targetIndex = agents.findIndex((agent) => agent.containsTile(tile));
+        if (targetIndex !== -1) {
+          agentList = agents;
+        }
+      }
+      if (agentList) {
+        const agent = agentList[targetIndex];
+        repetitions = Math.min(command.damage, agent.tiles.length);
+        delay = 200;
+        this.pauseAndDoXTimes(agent.hit.bind(agent), delay, repetitions, undefined, totalDelay);
+        setTimeout(() => {
+          if (agent.tiles.length === 0) {
+            agentList.splice(targetIndex, 1);
+            console.log('DEAD');
+          } else {
+            console.log('NOT DEAD');
+          }
+        }, totalDelay + (delay * (repetitions + 3)));
+      }
+    }
+    setTimeout(() => {
+      this.checkForEndOfTurn();
+    }, totalDelay + (delay * (repetitions + 3)));
+    return delay * (repetitions + 3);
+  };
+  this.executeCommand = function executeCommand(tile, agent, totalDelay) {
+    let delay = 0;
+    console.log('within range');
+    setTimeout(() => {
+      agent.executeCommand();
+      this.draw();
+    }, totalDelay);
+    switch (agent.selectedCommand.type) {
       default:
         console.log('command type not implemented.');
+        this.checkForEndOfTurn();
         break;
       case 'attack':
-        console.log('attacking.');
-        if (tile.type === tileTypes.OCCUPIED) {
-          let agentList;
-          let targetIndex = enemyAgents.findIndex((agent) => agent.containsTile(tile));
-          if (targetIndex !== -1) {
-            agentList = enemyAgents;
-          } else {
-            targetIndex = agents.findIndex((agent) => agent.containsTile(tile));
-            if (targetIndex !== -1) {
-              agentList = agents;
-            }
-          }
-
-          if (agentList) {
-            const agent = agentList[targetIndex];
-            const repetitions = Math.min(command.damage, agent.tiles.length);
-            const delay = 200;
-            this.pauseAndDoXTimes(agent.hit.bind(agent), delay, repetitions);
-            setTimeout(() => {
-              if (agent.tiles.length === 0) {
-                agentList.splice(targetIndex, 1);
-              }
-              this.checkForEndOfTurn();
-            }, delay * repetitions);
-          } else {
-            this.checkForEndOfTurn();
-          }
-        } else {
-          this.checkForEndOfTurn();
-        }
+        delay = this.attack(tile, agent.selectedCommand, totalDelay);
         break;
     }
+    return delay;
   };
-  this.pauseAndDoXTimes = function pauseAndDoXTimes(callback, delay, repetitions, args) {
-    paused = true;
+  this.pauseAndDoXTimes = function pauseAndDoXTimes(callback, intervalDelay,
+    repetitions, args, delay) {
     let counter = 0;
-    const interval = setInterval(() => {
-      if (args) {
-        callback(...args);
-      } else {
-        callback();
-      }
-      this.draw();
-      counter += 1;
-      if (counter === repetitions) {
-        clearInterval(interval);
-        paused = false;
-      }
+    setTimeout(() => {
+      const interval = setInterval(() => {
+        if (args) {
+          callback(...args);
+        } else {
+          callback();
+        }
+        this.draw();
+        counter += 1;
+        if (counter === repetitions) {
+          clearInterval(interval);
+        }
+      }, intervalDelay);
     }, delay);
   };
 }
