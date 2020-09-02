@@ -96,21 +96,23 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
       let totalDelay = delay;
       setTimeout(() => {
         agent.select();
+        this.draw();
       }, totalDelay);
-
-      console.log('-----');
       const turn = agent.calculateTurn(agents);
       if (turn.moves) {
         turn.moves.forEach((tile) => {
           totalDelay += delay;
           const repetitions = 1;
-          console.log(`Move: ${totalDelay}`);
           this.pauseAndDoXTimes(agent.move.bind(agent), 0, repetitions, [tile], totalDelay);
         });
       }
 
       totalDelay += delay;
-      console.log(`Attack: ${totalDelay}`);
+      setTimeout(() => {
+        agent.showAttack(turn.targetTile);
+        this.draw();
+      }, totalDelay);
+      totalDelay += delay;
       totalDelay += this.executeCommand(turn.targetTile, agent, totalDelay);
       totalDelay += delay;
       setTimeout(() => {
@@ -133,24 +135,23 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
     enemyTurnCount = 0;
     playerTurn = false;
     paused = true;
-    this.flashMessage('Enemy Turn', 1000);
+    this.flashMessage('Enemy Turn', 600);
     setTimeout(() => {
       this.nextEnemyTurn();
-    }, 1000);
+    }, 600);
   };
 
   this.startPlayerTurn = function startPlayerTurn() {
-    this.flashMessage('Your Turn', 1000);
+    this.flashMessage('Your Turn', 600);
     setTimeout(() => {
       playerTurn = true;
       paused = false;
-    }, 1000);
+    }, 600);
   };
 
   this.checkForEndOfTurn = function checkForEndOfTurn() {
     if (playerTurn && !this.checkForEndOfGame()) {
       if (!agents.find((agent) => !agent.turnIsOver)) {
-        console.log('TURN IS OVER...');
         agents.forEach((a) => {
           if (a.selected) {
             a.deselect();
@@ -164,7 +165,6 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
     }
   };
   this.checkForEndOfGame = function checkForEndOfGame() {
-    console.log('checking for game end.');
     if (agents.length === 0) {
       paused = true;
       this.flashMessage('You Lose', 1000);
@@ -185,7 +185,6 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
       }, 1000);
       return true;
     }
-    console.log('not over yet.');
     return false;
   };
   this.onClick = function onClick(event) {
@@ -253,7 +252,6 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
     programMenu.draw(context);
   };
   this.attack = function attack(tile, command, totalDelay) {
-    console.log('ATTACKING');
     let delay = 0;
     let repetitions = 0;
     if (tile.type === tileTypes.OCCUPIED) {
@@ -275,21 +273,17 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
         setTimeout(() => {
           if (agent.tiles.length === 0) {
             agentList.splice(targetIndex, 1);
-            console.log('DEAD');
-          } else {
-            console.log('NOT DEAD');
           }
-        }, totalDelay + (delay * (repetitions + 3)));
+        }, totalDelay + (delay * (repetitions + 1)));
       }
     }
     setTimeout(() => {
       this.checkForEndOfTurn();
-    }, totalDelay + (delay * (repetitions + 3)));
-    return delay * (repetitions + 3);
+    }, totalDelay + (delay * (repetitions + 1)));
+    return delay * (repetitions + 1);
   };
   this.executeCommand = function executeCommand(tile, agent, totalDelay) {
     let delay = 0;
-    console.log('within range');
     setTimeout(() => {
       agent.executeCommand();
       this.draw();

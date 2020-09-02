@@ -101,7 +101,7 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
   this.select = function select() {
     this.selected = true;
     selectedDisplay = true;
-    flashSelectedDisplay = setInterval(toggleSelectedDisplay.bind(this), 600);
+    flashSelectedDisplay = setInterval(toggleSelectedDisplay.bind(this), 700);
     this.showMoveOverlays();
   };
   this.deselect = function deselect() {
@@ -154,6 +154,10 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
       }
     }
   };
+  this.showAttack = function showAttack(targetTile) {
+    map.clearTileOverlays();
+    this.highlightTiles([targetTile], 'attack');
+  };
   this.isTileValid = function isTileValid(tile, type, visitedTiles) {
     return tile && (tile.type === tileTypes.BASIC || type === 'attack'
       || (tile.type === tileTypes.OCCUPIED && this.containsTile(tile)))
@@ -198,6 +202,9 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
     const explorationQueue = [[tile1]];
     while (explorationQueue.length > 0) {
       const path = explorationQueue.splice(0, 1)[0];
+      if (BattleMap.tilesAreWithinRange(path[0], tile2, 1)) {
+        return path;
+      }
       let found = false;
       this.getValidAdjacentTiles(path[path.length - 1], 'move', visitedTiles).forEach((nextTile) => {
         if (BattleMap.tilesAreWithinRange(nextTile, tile2, 1)) {
@@ -242,11 +249,13 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
   };
 
   this.chooseCommand = function chooseCommand(newCommand) {
-    const commandIndex = this.commands.findIndex((command) => command.name === newCommand.name);
-    if (commandIndex !== -1) {
-      this.selectedCommand = this.commands[commandIndex];
-      this.movesRemaining = 0;
-      this.showMoveOverlays();
+    if (this.selected) {
+      const commandIndex = this.commands.findIndex((command) => command.name === newCommand.name);
+      if (commandIndex !== -1) {
+        this.selectedCommand = this.commands[commandIndex];
+        this.movesRemaining = 0;
+        this.showMoveOverlays();
+      }
     }
   };
 
@@ -339,9 +348,11 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
         });
       });
     }
-
     if (path && path.length > this.movesRemaining) {
-      targetTile = path[this.movesRemaining];
+      // If target is out of range, just get as close as possible.
+      if (path.length > this.movesRemaining + this.selectedCommand.range - 1) {
+        targetTile = path[this.movesRemaining + this.selectedCommand.range - 1];
+      }
       path = path.slice(0, this.movesRemaining);
     }
     return {
