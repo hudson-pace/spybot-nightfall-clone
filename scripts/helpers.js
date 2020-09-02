@@ -25,3 +25,7 @@ export function splitStringIntoLines(text, container, context) {
   }
   return lines;
 }
+
+export function drawRect(rect, context) {
+  context.fillRect(rect.x, rect.y, rect.width, rect.height);
+}

@@ -2,6 +2,7 @@ import NetMap from './netmap.js';
 import DataBattle from './databattle.js';
 import Inventory from './inventory.js';
 import ProgramMenu from './program-menu.js';
+import StartMenu from './start-menu.js';
 
 function updateEventHandlers(currentView) {
   console.log('resetting event handlers');
@@ -73,8 +74,20 @@ export default function ViewManager(url, images) {
       setCurrentView(dataBattle);
     }, switchToNetMap);
   }
-  netMap = new NetMap(`${url}/netmap.json`, images, inventory, programMenu, () => {
-    console.log('Netmap loaded.');
-    setCurrentView(netMap);
-  }, startDataBattle);
+
+  const startMenu = new StartMenu(canvas, () => {
+    if (!netMap) {
+      netMap = new NetMap(`${url}/netmap.json`, images, inventory, programMenu, () => {
+        console.log('Netmap loaded.');
+        setCurrentView(netMap);
+      }, startDataBattle, () => {
+        setCurrentView(startMenu);
+        startMenu.draw();
+      });
+    } else {
+      setCurrentView(netMap);
+      netMap.draw();
+    }
+  });
+  setCurrentView(startMenu);
 }

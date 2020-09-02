@@ -2,6 +2,7 @@ import NetworkNode from './network-node.js';
 import NodeMenu from './node-menu.js';
 import Inventory from './inventory.js';
 import Shop from './shop.js';
+import { drawRect, calculateTextPadding, rectContainsPoint } from './helpers.js';
 
 const nodes = [];
 const connections = [];
@@ -34,7 +35,7 @@ function ownNode(node) {
 }
 
 export default function NetMap(url, images, inventory, programMenu, mapLoadedCallback,
-  startDataBattleCallback) {
+  startDataBattleCallback, startMenuCallback) {
   let mapWidth;
   let mapHeight;
   let maxZoom;
@@ -46,6 +47,12 @@ export default function NetMap(url, images, inventory, programMenu, mapLoadedCal
   // Gives mouse position as fraction of element width. Used to zoom in on cursor.
   const relativeMousePosition = [0, 0];
   let zoomFactor = 1;
+  this.menuButton = {
+    x: canvas.width - 50,
+    y: 0,
+    width: 50,
+    height: 30,
+  };
 
   $.getJSON(url, (data) => {
     mapWidth = data.width;
@@ -118,6 +125,10 @@ export default function NetMap(url, images, inventory, programMenu, mapLoadedCal
     context.textBaseline = 'middle';
     context.fillStyle = 'white';
     context.fillText(`credits: ${inventory.credits}`, 800, 20);
+    drawRect(this.menuButton, context);
+    context.fillStyle = 'black';
+    const [leftPad, topPad] = calculateTextPadding(this.menuButton, 'Menu', context);
+    context.fillText('Menu', this.menuButton.x + leftPad, this.menuButton.y + topPad);
   };
 
   this.moveScreen = function moveScreen(x, y) {
@@ -193,6 +204,8 @@ export default function NetMap(url, images, inventory, programMenu, mapLoadedCal
       } else if (programMenu.containsPoint(point)) {
         programMenu.onClick(point);
         this.draw();
+      } else if (rectContainsPoint(this.menuButton, point)) {
+        startMenuCallback();
       } else {
         const coords = {
           x: (((event.offsetX / canvas.clientWidth)
