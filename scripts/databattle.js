@@ -6,15 +6,14 @@ import Button from './button.js';
 import BattleMap from './battlemap.js';
 import { calculateTextPadding } from './helpers.js';
 
-export default function DataBattle(name, url, images, battleLoadedCallback, exitBattleCallback) {
+export default function DataBattle(name, url, images, programMenu, battleLoadedCallback,
+  exitBattleCallback) {
   const canvas = $('canvas')[0];
   const context = canvas.getContext('2d');
   let map;
   const agents = [];
   const enemyAgents = [];
   let gameIsStarted = false;
-  const inventory = new Inventory();
-  const programMenu = new ProgramMenu(canvas, { ...inventory }, images.agents);
   let running = true;
   let paused = false;
   let playerTurn = true;
@@ -182,7 +181,7 @@ export default function DataBattle(name, url, images, battleLoadedCallback, exit
       paused = true;
       this.flashMessage('You Win', 1000);
       setTimeout(() => {
-        exitBattleCallback(true);
+        exitBattleCallback(true, this.battleData.reward);
       }, 1000);
       return true;
     }

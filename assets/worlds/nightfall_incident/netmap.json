@@ -4,7 +4,7 @@
   "nodes": [
     {
       "name": "S.M.A.R.T. HQ",
-      "owner": "S.M.A.R.T",
+      "owner": "S.M.A.R.T.",
       "desc": "Center for information about S.M.A.R.T. and its operations.",
       "image": "nodeSmart",
       "ownedByUser": true,
@@ -31,6 +31,13 @@
       },
       "connectedNodes": [
         "S.M.A.R.T. HQ"
+      ],
+      "shop": [
+        {"name": "Hack", "price": 500},
+        {"name": "Bug", "price": 750},
+        {"name": "Slingshot", "price": 750},
+        {"name": "Data Doctor", "price": 500},
+        {"name": "Bit-Man", "price": 250}
       ]
     },
     {

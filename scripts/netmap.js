@@ -1,5 +1,7 @@
-import NetworkNode from './network-node.js'
-import NodeMenu from './node-menu.js'
+import NetworkNode from './network-node.js';
+import NodeMenu from './node-menu.js';
+import Inventory from './inventory.js';
+import Shop from './shop.js';
 
 const nodes = [];
 const connections = [];
@@ -31,7 +33,8 @@ function ownNode(node) {
   addConnectionsFromNode(node);
 }
 
-export default function NetMap(url, images, mapLoadedCallback, startDataBattleCallback) {
+export default function NetMap(url, images, inventory, programMenu, mapLoadedCallback,
+  startDataBattleCallback) {
   let mapWidth;
   let mapHeight;
   let maxZoom;
@@ -107,6 +110,14 @@ export default function NetMap(url, images, mapLoadedCallback, startDataBattleCa
     if (nodeMenu) {
       nodeMenu.draw(context);
     }
+    if (this.shop) {
+      this.shop.draw(context);
+    }
+    programMenu.draw(context);
+    context.font = '16px verdana';
+    context.textBaseline = 'middle';
+    context.fillStyle = 'white';
+    context.fillText(`credits: ${inventory.credits}`, 800, 20);
   };
 
   this.moveScreen = function moveScreen(x, y) {
@@ -176,6 +187,12 @@ export default function NetMap(url, images, mapLoadedCallback, startDataBattleCa
       };
       if (nodeMenu && nodeMenu.containsPoint(point)) {
         nodeMenu.onClick(point);
+      } else if (this.shop && this.shop.containsPoint(point)) {
+        this.shop.onClick(point);
+        this.draw();
+      } else if (programMenu.containsPoint(point)) {
+        programMenu.onClick(point);
+        this.draw();
       } else {
         const coords = {
           x: (((event.offsetX / canvas.clientWidth)
@@ -186,7 +203,13 @@ export default function NetMap(url, images, mapLoadedCallback, startDataBattleCa
         const clickedNode = nodes.find((node) => node.containsPoint(coords));
         if (clickedNode && clickedNode.isVisible) {
           selectedNode = clickedNode;
-          nodeMenu = new NodeMenu(selectedNode, canvas, startDataBattleCallback);
+          nodeMenu = new NodeMenu(selectedNode, canvas, this.startNode.bind(this), () => {
+            nodeMenu = undefined;
+            this.draw();
+          });
+          if (selectedNode.owner === 'Warez') {
+            selectedNode.own();
+          }
           this.draw();
         }
       }
@@ -201,14 +224,28 @@ export default function NetMap(url, images, mapLoadedCallback, startDataBattleCa
       this.draw();
     }
   };
-  this.returnFromBattle = function returnFromBattle(wonBattle) {
+  this.returnFromBattle = function returnFromBattle(wonBattle, reward) {
     if (wonBattle) {
       ownNode(selectedNode);
+      inventory.addCredits(reward);
     } else {
       console.log('You lose. In your face. Haha what a loser.');
     }
     setTimeout(() => {
       this.draw();
     }, 500);
+  };
+  this.startNode = function startNode() {
+    if (selectedNode.owner === 'Warez') {
+      this.startShop(selectedNode.shop);
+    } else if (selectedNode.owner !== 'S.M.A.R.T.') {
+      startDataBattleCallback(selectedNode.name);
+    }
+  };
+  this.startShop = function startShop(shopData) {
+    this.shop = new Shop(shopData, canvas, inventory, programMenu, () => {
+      this.shop = undefined;
+    });
+    this.draw();
   };
 }

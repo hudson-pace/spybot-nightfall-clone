@@ -1,5 +1,5 @@
 export default function Inventory() {
-  this.credits = 0;
+  this.credits = 10000;
   this.programs = [];
   this.programs.push({
     name: 'Hack',
@@ -12,10 +12,6 @@ export default function Inventory() {
   this.programs.push({
     name: 'Slingshot',
     quantity: 1,
-  });
-  this.programs.push({
-    name: 'Bit-Man',
-    quantity: 3,
   });
   this.programs.push({
     name: 'Data Doctor',
@@ -49,5 +45,30 @@ export default function Inventory() {
     name: 'Turbo',
     quantity: 1,
   });
-  this.programs.sort((a, b) => ((a.name > b.name) ? 1 : -1));
+
+  this.addCredits = function addCredits(amount) {
+    this.credits += amount;
+  };
+  this.spendCredits = function spendCredits(amount) {
+    if (this.credits >= amount) {
+      this.credits -= amount;
+      return true;
+    }
+    return false;
+  };
+  this.addProgram = function addProgram(programName) {
+    const program = this.programs.find((p) => p.name === programName);
+    if (program) {
+      program.quantity += 1;
+    } else {
+      this.programs.push({
+        name: programName,
+        quantity: 1,
+      });
+      this.sortPrograms();
+    }
+  };
+  this.sortPrograms = function sortPrograms() {
+    this.programs.sort((a, b) => ((a.name > b.name) ? 1 : -1));
+  };
 }

@@ -1,5 +1,7 @@
 import NetMap from './netmap.js';
 import DataBattle from './databattle.js';
+import Inventory from './inventory.js';
+import ProgramMenu from './program-menu.js';
 
 function updateEventHandlers(currentView) {
   console.log('resetting event handlers');
@@ -50,6 +52,9 @@ function updateEventHandlers(currentView) {
 }
 
 export default function ViewManager(url, images) {
+  const canvas = $('canvas')[0];
+  const inventory = new Inventory();
+  const programMenu = new ProgramMenu(canvas, inventory, images.agents);
   let currentView;
   function setCurrentView(newView) {
     currentView = newView;
@@ -57,17 +62,18 @@ export default function ViewManager(url, images) {
   }
 
   let netMap;
-  function switchToNetMap(wonBattle) {
+  function switchToNetMap(wonBattle, reward) {
+    programMenu.resetInventoryStock();
     setCurrentView(netMap);
-    currentView.returnFromBattle(wonBattle);
+    currentView.returnFromBattle(wonBattle, reward);
   }
   function startDataBattle(name) {
-    const dataBattle = new DataBattle(name, `${url}/battles.json`, images, () => {
+    const dataBattle = new DataBattle(name, `${url}/battles.json`, images, programMenu, () => {
       console.log('Databattle loaded.');
       setCurrentView(dataBattle);
     }, switchToNetMap);
   }
-  netMap = new NetMap(`${url}/netmap.json`, images, () => {
+  netMap = new NetMap(`${url}/netmap.json`, images, inventory, programMenu, () => {
     console.log('Netmap loaded.');
     setCurrentView(netMap);
   }, startDataBattle);

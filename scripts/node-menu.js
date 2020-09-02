@@ -1,6 +1,6 @@
 import { calculateTextPadding } from './helpers.js';
 
-export default function NodeMenu(node, canvas, startDataBattleCallback) {
+export default function NodeMenu(node, canvas, startNodeCallback, closeNodeMenuCallback) {
   const textHeight = 20;
   const rect = {
     x: canvas.width * 0.7,
@@ -47,8 +47,12 @@ export default function NodeMenu(node, canvas, startDataBattleCallback) {
   this.onClick = function onClick(point) {
     if (point.x > startButton.x && point.x < startButton.x + startButton.width
       && point.y > startButton.y && point.y < startButton.y + startButton.height) {
-      console.log(`Starting databattle on node '${node.name}.'`);
-      startDataBattleCallback(node.name);
+      console.log(`Starting node '${node.name}.'`);
+      closeNodeMenuCallback();
+      startNodeCallback();
+    } else if (point.x > cancelButton.x && point.x < cancelButton.x + cancelButton.width
+      && point.y > cancelButton.y && point.y < cancelButton.y + cancelButton.height) {
+      closeNodeMenuCallback();
     }
   };
 }

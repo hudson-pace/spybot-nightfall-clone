@@ -2,6 +2,131 @@
   "battles": [
     {
       "width": 12,
+      "height": 8,
+      "name": "PR Database",
+      "field": [
+        "        ####",
+        "#### #######",
+        "#### ## ####",
+        "#### ##     ",
+        " ## #### ###",
+        " #####@#####",
+        " ####@######",
+        "    #### ###"
+      ],
+      "enemies": [
+        {"name": "Guard Pup", "coords": {"x": 10, "y": 1}},
+        {"name": "Watchman", "coords": {"x": 1, "y": 2}},
+        {"name": "Sentinel", "coords": {"x": 10, "y": 6}}
+      ],
+      "reward": 400
+    },
+    {
+      "width": 12,
+      "height": 10,
+      "name": "Memory Tower #43",
+      "field": [
+        "         ## ",
+        "  #   ######",
+        " ###########",
+        "########### ",
+        "########### ",
+        "########### ",
+        "##@@####### ",
+        " #@@####### ",
+        " ########## ",
+        "    ###     "
+      ],
+      "enemies": [
+        {"name": "Watchman", "coords": {"x": 9, "y": 1}},
+        {"name": "Guard Pup", "coords": {"x": 7, "y": 2}},
+        {"name": "Watchman", "coords": {"x": 10, "y": 2}},
+        {"name": "Sentinel", "coords": {"x": 9, "y": 3}},
+        {"name": "Guard Pup", "coords": {"x": 10, "y": 4}}
+      ],
+      "reward": 400
+    },
+    {
+      "width": 11,
+      "height": 9,
+      "name": "Sydney Project",
+      "field": [
+        "#######     ",
+        "#######   # ",
+        "#######  ###",
+        "#######  ###",
+        "#######  ###",
+        "#######  ###",
+        "#######  ###",
+        "#######   # ",
+        "#######     "
+      ],
+      "enemies": [
+        {"name": "Sentinel", "coords": {"x": 6, "y": 3}},
+        {"name": "Sentinel", "coords": {"x": 9, "y": 4}},
+        {"name": "Sentinel", "coords": {"x": 6, "y": 5}}
+      ],
+      "reward": 400
+    },
+    {
+      "width": 14,
+      "height": 11,
+      "name": "Government Affairs",
+      "field": [
+        " ###      ### ",
+        "##############",
+        "##############",
+        "##############",
+        " ############ ",
+        " ############ ",
+        " ############ ",
+        "##############",
+        "##############",
+        "##############",
+        " ###      ### "
+      ],
+      "enemies": [
+        {"name": "Guard Pup", "coords": {"x": 2, "y": 0}},
+        {"name": "Guard Pup", "coords": {"x": 11, "y": 0}},
+        {"name": "Guard Pup", "coords": {"x": 0, "y": 2}},
+        {"name": "Guard Pup", "coords": {"x": 13, "y": 2}},
+        {"name": "Guard Pup", "coords": {"x": 2, "y": 8}},
+        {"name": "Guard Pup", "coords": {"x": 11, "y": 8}},
+        {"name": "Guard Pup", "coords": {"x": 0, "y": 10}},
+        {"name": "Guard Pup", "coords": {"x": 13, "y": 10}}
+      ],
+      "reward": 400
+    },
+    {
+      "width": 14,
+      "height": 11,
+      "name": "Eastern Distribution Site",
+      "field": [
+        " ###      ### ",
+        "#####    #####",
+        "#####    #####",
+        "#####     ####",
+        "#####  #######",
+        "##############",
+        "#######  #####",
+        "####     #####",
+        "#####    #####",
+        "#####    #####",
+        " ###      ### "
+      ],
+      "enemies": [
+        {"name": "Guard Dog", "coords": {"x": 3, "y": 1}},
+        {"name": "Guard Dog", "coords": {"x": 2, "y": 2}},
+        {"name": "Guard Dog", "coords": {"x:": 0, "y": 3}},
+        {"name": "Guard Dog", "coords": {"x": 1, "y": 4}},
+        {"name": "Guard Dog", "coords": {"x": 2, "y": 5}},
+        {"name": "Guard Dog", "coords": {"x": 1, "y": 7}},
+        {"name": "Guard Dog", "coords": {"x": 3, "y": 9}}
+      ],
+      "reward": 400
+    },
+    {
+      "width": 12,
       "height": 9,
       "name": "Tech Support",
       "field": [
@@ -18,27 +143,8 @@
       "enemies": [
         {"name": "Sentinel", "coords": {"x": 3, "y": 1}},
         {"name": "Sentinel", "coords": {"x": 8, "y": 1}}
-      ]
-    },
-    {
-      "width": 12,
-      "height": 8,
-      "name": "PR Database",
-      "field": [
-        "        ####",
-        "#### #######",
-        "#### ## ####",
-        "#### ##     ",
-        " ## #### ###",
-        " #####@#####",
-        " ####@######",
-        "    #### ###"
       ],
-      "enemies": [
-        {"name": "Watchman", "coords": {"x": 1, "y": 2}},
-        {"name": "Guard Pup", "coords": {"x": 10, "y": 1}},
-        {"name": "Sentinel", "coords": {"x": 10, "y": 6}}
-      ]
+      "reward": 400
     }
   ]
 }

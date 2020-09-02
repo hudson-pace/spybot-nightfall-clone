@@ -27,7 +27,8 @@ export default class ProgramMenu {
       width: this.rect.width,
       height: this.textHeight,
     };
-    this.programs = inventory.programs;
+    this.inventory = inventory;
+    this.resetInventoryStock();
 
     const programListLength = 8;
     this.programList = {
@@ -213,15 +214,17 @@ export default class ProgramMenu {
         this.setDisplayProgram(this.selectedProgram.name);
       }
     }
-    for (let i = 0;
-      i < Math.min(this.commandSlots.length, this.displayProgram.commandData.length);
-      i += 1) {
-      const commandSlot = this.commandSlots[i];
-      if (point.x > commandSlot.x && point.x < commandSlot.x + commandSlot.width
-      && point.y > commandSlot.y && point.y < commandSlot.y + commandSlot.height) {
-        this.selectedCommand = this.displayProgram.commandData[i];
-        if (this.chooseCommandCallback) {
-          this.chooseCommandCallback(this.selectedCommand);
+    if (this.displayProgram) {
+      for (let i = 0;
+        i < Math.min(this.commandSlots.length, this.displayProgram.commandData.length);
+        i += 1) {
+        const commandSlot = this.commandSlots[i];
+        if (point.x > commandSlot.x && point.x < commandSlot.x + commandSlot.width
+        && point.y > commandSlot.y && point.y < commandSlot.y + commandSlot.height) {
+          this.selectedCommand = this.displayProgram.commandData[i];
+          if (this.chooseCommandCallback) {
+            this.chooseCommandCallback(this.selectedCommand);
+          }
         }
       }
     }
@@ -264,5 +267,12 @@ export default class ProgramMenu {
     } else if (this.scrollAmount > this.programs.length - programListDisplayHeight) {
       this.scrollAmount = this.programs.length - programListDisplayHeight;
     }
+  }
+
+  resetInventoryStock() {
+    this.programs = [];
+    this.inventory.programs.forEach((program) => {
+      this.programs.push({ ...program });
+    });
   }
 }
