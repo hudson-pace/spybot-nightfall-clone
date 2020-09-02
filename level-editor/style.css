@@ -1,0 +1,23 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+body {
+  text-align: center;
+}
+table {
+  border: 1px solid black;
+  display: inline-block;
+}
+.tile {
+  width: 50px;
+  height: 50px;
+  border: 1px solid black;
+}
+input {
+  width: 20px;
+  padding: 0 5px;
+}
+.option {
+  border: 1px solid black;
+}
