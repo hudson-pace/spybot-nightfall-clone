@@ -21,7 +21,7 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
   this.turnIsOver = false;
   this.commands = [];
 
-  $.getJSON('../assets/commands.json', (data) => {
+  $.getJSON('./assets/commands.json', (data) => {
     this.commandData = data;
     console.log('commands loaded');
     agent.commands.forEach((command) => {

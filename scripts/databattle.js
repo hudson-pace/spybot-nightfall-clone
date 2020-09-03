@@ -53,7 +53,7 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
     }
   };
 
-  $.getJSON('../assets/agents.json', (data) => {
+  $.getJSON('./assets/agents.json', (data) => {
     this.agentData = data;
     console.log('agents loaded');
     this.tryToLoadEnemyAgents();

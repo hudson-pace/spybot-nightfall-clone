@@ -2,12 +2,12 @@ import { calculateTextPadding, splitStringIntoLines } from './helpers.js';
 
 export default class ProgramMenu {
   constructor(canvas, inventory, image) {
-    $.getJSON('../assets/agents.json', (data) => {
+    $.getJSON('./assets/agents.json', (data) => {
       this.agentData = data;
       console.log('agents loaded');
     });
 
-    $.getJSON('../assets/commands.json', (data) => {
+    $.getJSON('./assets/commands.json', (data) => {
       this.commandData = data;
       console.log('commands loaded');
     });

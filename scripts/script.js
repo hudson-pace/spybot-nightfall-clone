@@ -7,7 +7,7 @@ function preloadImage(name, src, imageLoadedCallback) {
 }
 const images = {};
 function preloadImages(allImagesLoadedCallback) {
-  const sourcePath = '../assets/images';
+  const sourcePath = './assets/images';
   const imageNames = [
     'nodeCAR', 'nodeDD', 'nodeLMM', 'nodePEDC', 'nodePharmhaus', 'nodeSmart', 'nodeUnknown', 'nodeWarez', 'agents', 'tileOverlays', 'agentDone',
   ];
@@ -32,6 +32,6 @@ $(document).ready(() => {
   canvas.width = 1000;
   preloadImages(() => {
     console.log('All images loaded.');
-    ViewManager('../assets/worlds/nightfall_incident', images);
+    ViewManager('./assets/worlds/nightfall_incident', images);
   });
 });
