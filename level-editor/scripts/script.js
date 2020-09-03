@@ -7,6 +7,7 @@ const tileTypes = {
   BASIC: 'basic',
   UPLOAD: 'upload',
   ENEMY: 'enemy',
+  ITEM: 'item',
 };
 
 const app = angular.module('LevelEditor', []);
@@ -19,6 +20,10 @@ app.controller('controller', ($scope, $http) => {
     }, () => {
       console.log('could not load program list.');
     });
+  $scope.itemList = [
+    'credit',
+    'data',
+  ];
   $scope.tiles = [];
   for (let i = 0; i < defaultHeight; i += 1) {
     const newRow = [];
@@ -107,6 +112,24 @@ app.controller('controller', ($scope, $http) => {
           tile.type = $scope.selectedType;
           tile.program = $scope.selectedProgram;
         }
+      } else if ($scope.selectedType === tileTypes.ITEM) {
+        if ($scope.selectedItem) {
+          if ($scope.selectedItem === 'credit') {
+            const amount = parseInt($scope.creditAmount, 10);
+            if (amount > 0) {
+              tile.type = $scope.selectedType;
+              tile.item = {
+                name: $scope.selectedItem,
+                amount,
+              };
+            }
+          } else {
+            tile.type = $scope.selectedType;
+            tile.item = {
+              name: $scope.selectedItem,
+            };
+          }
+        }
       } else {
         tile.type = $scope.selectedType;
       }
@@ -125,6 +148,7 @@ app.controller('controller', ($scope, $http) => {
     battle.reward = parseInt($scope.reward, 10);
     battle.field = [];
     battle.enemies = [];
+    battle.items = [];
     $scope.tiles.forEach((row, y) => {
       let newRow = '';
       row.forEach((tile, x) => {
@@ -151,6 +175,16 @@ app.controller('controller', ($scope, $http) => {
               },
             });
             break;
+          case tileTypes.ITEM:
+            newRow += '#';
+            battle.items.push({
+              name: tile.item.name,
+              amount: tile.item.amount,
+              coords: {
+                x,
+                y,
+              },
+            });
         }
       });
       battle.field.push(newRow);

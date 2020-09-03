@@ -20,13 +20,16 @@ table {
   background-color: white;
 }
 .tile.basic {
-  background-color: grey;
+  background-color: rgba(0, 0, 0, 0.6);
 }
 .tile.upload {
-  background-color: green;
+  background-color: rgba(0, 0, 0, 0.2);
 }
 .tile.enemy {
   background-color: red;
+}
+.tile.item {
+  background-color: green;
 }
 input.resize {
   width: 20px;
