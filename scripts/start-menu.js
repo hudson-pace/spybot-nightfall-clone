@@ -42,7 +42,8 @@ export default class StartMenu {
     if (rectContainsPoint(this.startButton, point)) {
       this.startGameCallback();
     } else if (rectContainsPoint(this.levelEditorButton, point)) {
-      window.open('/level-editor', '_blank');
+      const path = window.location.pathname;
+      window.open(`${path}level-editor`, '_blank');
     }
   }
 }
