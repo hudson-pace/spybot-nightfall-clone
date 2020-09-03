@@ -23,7 +23,7 @@ table {
   background-color: rgba(0, 0, 0, 0.6);
 }
 .tile.upload {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: blue;
 }
 .tile.enemy {
   background-color: red;

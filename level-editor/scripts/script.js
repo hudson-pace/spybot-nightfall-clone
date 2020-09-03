@@ -142,9 +142,9 @@ app.controller('controller', ($scope, $http) => {
   };
   $scope.generateJSON = () => {
     const battle = {};
+    battle.name = $scope.battleName;
     battle.height = $scope.tiles.length;
     battle.width = $scope.tiles[0].length;
-    battle.name = $scope.battleName;
     battle.reward = parseInt($scope.reward, 10);
     battle.field = [];
     battle.enemies = [];
@@ -178,7 +178,7 @@ app.controller('controller', ($scope, $http) => {
           case tileTypes.ITEM:
             newRow += '#';
             battle.items.push({
-              name: tile.item.name,
+              type: tile.item.name,
               amount: tile.item.amount,
               coords: {
                 x,

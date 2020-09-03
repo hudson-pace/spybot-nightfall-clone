@@ -1,150 +1,41 @@
 {
   "battles": [
-    {
-      "width": 12,
-      "height": 8,
-      "name": "PR Database",
-      "field": [
-        "        ####",
-        "#### #######",
-        "#### ## ####",
-        "#### ##     ",
-        " ## #### ###",
-        " #####@#####",
-        " ####@######",
-        "    #### ###"
-      ],
-      "enemies": [
-        {"name": "Guard Pup", "coords": {"x": 10, "y": 1}},
-        {"name": "Watchman", "coords": {"x": 1, "y": 2}},
-        {"name": "Sentinel", "coords": {"x": 10, "y": 6}}
-      ],
-      "reward": 400
-    },
-    {
-      "width": 12,
-      "height": 10,
-      "name": "Memory Tower #43",
-      "field": [
-        "         ## ",
-        "  #   ######",
-        " ###########",
-        "########### ",
-        "########### ",
-        "########### ",
-        "##@@####### ",
-        " #@@####### ",
-        " ########## ",
-        "    ###     "
-      ],
-      "enemies": [
-        {"name": "Watchman", "coords": {"x": 9, "y": 1}},
-        {"name": "Guard Pup", "coords": {"x": 7, "y": 2}},
-        {"name": "Watchman", "coords": {"x": 10, "y": 2}},
-        {"name": "Sentinel", "coords": {"x": 9, "y": 3}},
-        {"name": "Guard Pup", "coords": {"x": 10, "y": 4}}
-      ],
-      "reward": 400
-    },
-    {
-      "width": 11,
-      "height": 9,
-      "name": "Sydney Project",
-      "field": [
-        "#######     ",
-        "#######   # ",
-        "#######  ###",
-        "#######  ###",
-        "#######  ###",
-        "#######  ###",
-        "#######  ###",
-        "#######   # ",
-        "#######     "
-      ],
-      "enemies": [
-        {"name": "Sentinel", "coords": {"x": 6, "y": 3}},
-        {"name": "Sentinel", "coords": {"x": 9, "y": 4}},
-        {"name": "Sentinel", "coords": {"x": 6, "y": 5}}
-      ],
-      "reward": 400
-    },
-    {
-      "width": 14,
-      "height": 11,
-      "name": "Government Affairs",
-      "field": [
-        " ###      ### ",
-        "##############",
-        "##############",
-        "##############",
-        " ############ ",
-        " ############ ",
-        " ############ ",
-        "##############",
-        "##############",
-        "##############",
-        " ###      ### "
-      ],
-      "enemies": [
-        {"name": "Guard Pup", "coords": {"x": 2, "y": 0}},
-        {"name": "Guard Pup", "coords": {"x": 11, "y": 0}},
-        {"name": "Guard Pup", "coords": {"x": 0, "y": 2}},
-        {"name": "Guard Pup", "coords": {"x": 13, "y": 2}},
-        {"name": "Guard Pup", "coords": {"x": 2, "y": 8}},
-        {"name": "Guard Pup", "coords": {"x": 11, "y": 8}},
-        {"name": "Guard Pup", "coords": {"x": 0, "y": 10}},
-        {"name": "Guard Pup", "coords": {"x": 13, "y": 10}}
-      ],
-      "reward": 400
-    },
-    {
-      "width": 14,
-      "height": 11,
-      "name": "Eastern Distribution Site",
-      "field": [
-        " ###      ### ",
-        "#####    #####",
-        "#####    #####",
-        "#####     ####",
-        "#####  #######",
-        "##############",
-        "#######  #####",
-        "####     #####",
-        "#####    #####",
-        "#####    #####",
-        " ###      ### "
-      ],
-      "enemies": [
-        {"name": "Guard Dog", "coords": {"x": 3, "y": 1}},
-        {"name": "Guard Dog", "coords": {"x": 2, "y": 2}},
-        {"name": "Guard Dog", "coords": {"x:": 0, "y": 3}},
-        {"name": "Guard Dog", "coords": {"x": 1, "y": 4}},
-        {"name": "Guard Dog", "coords": {"x": 2, "y": 5}},
-        {"name": "Guard Dog", "coords": {"x": 1, "y": 7}},
-        {"name": "Guard Dog", "coords": {"x": 3, "y": 9}}
-      ],
-      "reward": 400
-    },
-    {
-      "width": 12,
-      "height": 9,
-      "name": "Tech Support",
-      "field": [
-        " ####  #### ",
-        "############",
-        " ########## ",
-        "  ########  ",
-        "   ##  ##   ",
-        "  ########  ",
-        " ########## ",
-        "############",
-        " ###@  @### "
-      ],
-      "enemies": [
-        {"name": "Sentinel", "coords": {"x": 3, "y": 1}},
-        {"name": "Sentinel", "coords": {"x": 8, "y": 1}}
-      ],
-      "reward": 400
-    }
+    {"name":"PR Database","height":8,"width":12,"reward":400,"field":["        ####","#### #######","#### ## ####","#### ##     "," ## #### ###"," #####@#####"," ####@######","    #### ###"],"enemies":[{"name":"Guard Pup","coords":{"x":10,"y":1}},{"name":"Watchman","coords":{"x":1,"y":2}},{"name":"Sentinel","coords":{"x":10,"y":6}}],"items":[{"type":"credit","amount":300,"coords":{"x":9,"y":1}},{"type":"credit","amount":300,"coords":{"x":2,"y":2}},{"type":"credit","amount":300,"coords":{"x":10,"y":5}}]},
+    {"name":"Memory Tower #43","height":10,"width":12,"reward":400,"field":["         ## ","  #   ######"," ###########","########### ","########### ","########### ","##@@####### "," #@@####### "," ########## ","    ###     "],"enemies":[{"name":"Watchman","coords":{"x":9,"y":1}},{"name":"Guard Pup","coords":{"x":7,"y":2}},{"name":"Watchman","coords":{"x":10,"y":2}},{"name":"Sentinel","coords":{"x":9,"y":3}},{"name":"Guard Pup","coords":{"x":10,"y":4}}],"items":[]},
+    {"name":"Sydney Project","height":9,"width":12,"reward":400,"field":["#######     ","#######   # ","#######  ###","##@####  ###","@######  ###","##@####  ###","#######  ###","#######   # ","#######     "],"enemies":[{"name":"Sentinel","coords":{"x":6,"y":3}},{"name":"Sentinel","coords":{"x":9,"y":4}},{"name":"Sentinel","coords":{"x":6,"y":5}}],"items":[{"type":"credit","amount":300,"coords":{"x":10,"y":1}},{"type":"data","coords":{"x":10,"y":4}},{"type":"credit","amount":300,"coords":{"x":10,"y":7}}]},
+    {"name":"Government Affairs","height":11,"width":14,"reward":400,"field":[" ###      ### ","##############","##############","##############"," #####@@##### "," ############ "," #####@@##### ","##############","##############","##############"," ###      ### "],"enemies":[{"name":"Guard Pup","coords":{"x":2,"y":0}},{"name":"Guard Pup","coords":{"x":11,"y":0}},{"name":"Guard Pup","coords":{"x":0,"y":2}},{"name":"Guard Pup","coords":{"x":13,"y":2}},{"name":"Guard Pup","coords":{"x":0,"y":8}},{"name":"Guard Pup","coords":{"x":13,"y":8}},{"name":"Guard Pup","coords":{"x":2,"y":10}},{"name":"Guard Pup","coords":{"x":11,"y":10}}],"items":[{"type":"credit","amount":300,"coords":{"x":2,"y":5}},{"type":"credit","amount":300,"coords":{"x":11,"y":5}}]},
+    {"name":"Eastern Distribution Site","height":11,"width":15,"reward":600,"field":[" ###       ### ","#####     ##@@#","#####     #####","#####      ####","#####   #######","###############","########  #####","####      #####","#####     #####","#####     ##@@#"," ###       ### "],"enemies":[{"name":"Guard Dog","coords":{"x":3,"y":1}},{"name":"Guard Dog","coords":{"x":2,"y":2}},{"name":"Guard Dog","coords":{"x":0,"y":3}},{"name":"Guard Dog","coords":{"x":1,"y":4}},{"name":"Guard Dog","coords":{"x":2,"y":5}},{"name":"Guard Dog","coords":{"x":1,"y":7}},{"name":"Guard Dog","coords":{"x":3,"y":9}}],"items":[{"type":"data","coords":{"x":1,"y":2}},{"type":"credit","amount":400,"coords":{"x":1,"y":5}},{"type":"credit","amount":400,"coords":{"x":1,"y":8}}]},
+    {"name":"Clinical Trial Database","height":11,"width":14,"reward":600,"field":["           ###"," ####   ######"," #  #   #  ###"," #  #   #     "," #  #   #     "," #  ##  ##    "," #   #   # ###"," #   #   # ###","@##  #   # ###","###  ##### ###","##@        ###"],"enemies":[{"name":"Sensor","coords":{"x":1,"y":1}},{"name":"Sensor","coords":{"x":4,"y":1}},{"name":"Sensor","coords":{"x":12,"y":1}},{"name":"Sensor","coords":{"x":5,"y":5}},{"name":"Sensor","coords":{"x":8,"y":5}},{"name":"Warden++","coords":{"x":11,"y":6}}],"items":[{"type":"data","coords":{"x":13,"y":0}},{"type":"credit","amount":400,"coords":{"x":8,"y":2}},{"type":"credit","amount":400,"coords":{"x":1,"y":4}},{"type":"credit","amount":400,"coords":{"x":12,"y":6}},{"type":"credit","amount":400,"coords":{"x":13,"y":6}},{"type":"credit","amount":400,"coords":{"x":12,"y":7}},{"type":"credit","amount":400,"coords":{"x":13,"y":7}},{"type":"credit","amount":400,"coords":{"x":12,"y":8}},{"type":"credit","amount":400,"coords":{"x":13,"y":8}},{"type":"credit","amount":400,"coords":{"x":6,"y":9}},{"type":"credit","amount":400,"coords":{"x":12,"y":9}},{"type":"credit","amount":400,"coords":{"x":13,"y":9}},{"type":"credit","amount":400,"coords":{"x":12,"y":10}},{"type":"credit","amount":400,"coords":{"x":13,"y":10}}]},
+    {"name":"Toy Properties"},
+    {"name":"Off-Shore Transactions","height":11,"width":14,"reward":800,"field":["####@  ##     ","#@#### #### # ","###### #######","@##### #######"," #############","##############","   ##  ###### "," #############"," #############","##############"," ##  ######## "],"enemies":[{"name":"Watchman","coords":{"x":9,"y":2}},{"name":"Sensor","coords":{"x":7,"y":4}},{"name":"Watchman","coords":{"x":9,"y":5}},{"name":"Sensor","coords":{"x":3,"y":7}},{"name":"Watchman","coords":{"x":7,"y":8}},{"name":"Sensor","coords":{"x":11,"y":8}},{"name":"Watchman","coords":{"x":5,"y":9}},{"name":"Sensor","coords":{"x":8,"y":9}}],"items":[{"type":"credit","amount":600,"coords":{"x":12,"y":8}},{"type":"credit","amount":600,"coords":{"x":11,"y":9}},{"type":"credit","amount":600,"coords":{"x":12,"y":9}}]},
+    {"name":"Vaccine Database"},
+    {"name":"HMO Procedure Management","height":11,"width":14,"reward":800,"field":["##############","##############","##############","##############","##############","            ##","            ##","            ##"," @##        ##"," @############"," @############"],"enemies":[{"name":"Sensor","coords":{"x":5,"y":1}},{"name":"Sensor","coords":{"x":6,"y":1}},{"name":"Sensor","coords":{"x":7,"y":1}},{"name":"Sensor","coords":{"x":8,"y":1}},{"name":"Sensor","coords":{"x":9,"y":1}},{"name":"Sonar","coords":{"x":0,"y":2}},{"name":"Sensor","coords":{"x":5,"y":3}},{"name":"Sensor","coords":{"x":6,"y":3}},{"name":"Sensor","coords":{"x":7,"y":3}},{"name":"Sensor","coords":{"x":8,"y":3}},{"name":"Sensor","coords":{"x":9,"y":3}}],"items":[{"type":"data","coords":{"x":1,"y":2}},{"type":"credit","amount":600,"coords":{"x":5,"y":2}},{"type":"credit","amount":600,"coords":{"x":6,"y":2}},{"type":"credit","amount":600,"coords":{"x":7,"y":2}},{"type":"credit","amount":600,"coords":{"x":8,"y":2}},{"type":"credit","amount":600,"coords":{"x":9,"y":2}}]},
+    {"name":"Employee Records","height":11,"width":14,"reward":400,"field":["      #####   ","              ","              ","              ","@#############","##@###########","@#############","              ","              ","              ","   #####      "],"enemies":[{"name":"Guard Pup","coords":{"x":13,"y":4}},{"name":"Watchman","coords":{"x":12,"y":5}},{"name":"Guard Pup","coords":{"x":13,"y":6}}],"items":[{"type":"credit","amount":300,"coords":{"x":6,"y":0}},{"type":"credit","amount":300,"coords":{"x":7,"y":0}},{"type":"credit","amount":300,"coords":{"x":9,"y":0}},{"type":"credit","amount":300,"coords":{"x":10,"y":0}},{"type":"credit","amount":300,"coords":{"x":3,"y":10}},{"type":"credit","amount":300,"coords":{"x":4,"y":10}},{"type":"credit","amount":300,"coords":{"x":6,"y":10}},{"type":"credit","amount":300,"coords":{"x":7,"y":10}}]},
+    {"name":"Tech Support","height":9,"width":12,"reward":400,"field":[" ####  #### ","############"," ########## ","  ########  ","   ##  ##   ","  ########  "," ########## ","############"," ###@  @### "],"enemies":[{"name":"Sentinel","coords":{"x":3,"y":1}},{"name":"Sentinel","coords":{"x":8,"y":1}}],"items":[]},
+    {"name":"Club Center"},
+    {"name":"Inventory Archives"},
+    {"name":"Communications Hub","height":11,"width":14,"reward":600,"field":[" ####      ###","##############","############@#","##############","############# ","############  ","  ############","  ##########@#"," #############"," ####@####@##@","    ####### ##"],"enemies":[{"name":"Watchman X","coords":{"x":1,"y":1}},{"name":"Watchman","coords":{"x":3,"y":1}},{"name":"Guard Dog","coords":{"x":5,"y":2}},{"name":"Watchman","coords":{"x":1,"y":3}},{"name":"Warden","coords":{"x":3,"y":3}},{"name":"Guard Dog","coords":{"x":2,"y":5}}],"items":[{"type":"credit","amount":400,"coords":{"x":1,"y":8}},{"type":"credit","amount":400,"coords":{"x":1,"y":9}}]},
+    {"name":"Print Assets"},
+    {"name":"Banane System","height":11,"width":14,"reward":600,"field":["#######@#####@","######@##@#@##","########@#####","##########@#@#"," ############@","  ##########@#","  ############"," #############","##############","####   #######","###     ######"],"enemies":[{"name":"Guard Pup","coords":{"x":0,"y":1}},{"name":"Guard Pup","coords":{"x":2,"y":1}},{"name":"Sentinel","coords":{"x":1,"y":2}},{"name":"Sentinel","coords":{"x":3,"y":3}},{"name":"Watchman","coords":{"x":2,"y":4}},{"name":"Guard Pup","coords":{"x":3,"y":5}},{"name":"Sentinel","coords":{"x":3,"y":6}},{"name":"Sentinel","coords":{"x":5,"y":6}},{"name":"Watchman","coords":{"x":2,"y":7}},{"name":"Sentinel","coords":{"x":4,"y":7}},{"name":"Guard Pup","coords":{"x":6,"y":7}},{"name":"Sentinel","coords":{"x":9,"y":7}},{"name":"Guard Pup","coords":{"x":0,"y":8}},{"name":"Watchman","coords":{"x":8,"y":8}},{"name":"Sentinel","coords":{"x":10,"y":8}},{"name":"Guard Pup","coords":{"x":2,"y":9}},{"name":"Watchman","coords":{"x":3,"y":9}},{"name":"Guard Pup","coords":{"x":11,"y":9}},{"name":"Guard Pup","coords":{"x":13,"y":9}},{"name":"Guard Pup","coords":{"x":0,"y":10}},{"name":"Guard Pup","coords":{"x":9,"y":10}}],"items":[{"type":"data","coords":{"x":1,"y":9}}]},
+    {"name":"Supply Management"},
+    {"name":"Franchise Office"},
+    {"name":"Fiduciary Node"},
+    {"name":"Re-Insurance Database","height":11,"width":14,"reward":800,"field":["####          ","####   #######","####   #     #","####   #     #","####   ####  #","####   ####  #","####   ####  #","####         #","####         #","####         #","@@@@##########"],"enemies":[{"name":"Attack Dog","coords":{"x":1,"y":0}},{"name":"Attack Dog","coords":{"x":2,"y":0}},{"name":"Guard Dog","coords":{"x":1,"y":1}},{"name":"Guard Dog","coords":{"x":2,"y":1}},{"name":"Radar","coords":{"x":13,"y":1}},{"name":"Guard Dog","coords":{"x":0,"y":2}},{"name":"Guard Dog","coords":{"x":3,"y":2}},{"name":"Radar","coords":{"x":8,"y":5}},{"name":"Radar","coords":{"x":9,"y":5}},{"name":"Radar","coords":{"x":13,"y":10}}],"items":[{"type":"data","coords":{"x":0,"y":0}},{"type":"credit","amount":600,"coords":{"x":7,"y":4}},{"type":"credit","amount":600,"coords":{"x":8,"y":4}},{"type":"credit","amount":600,"coords":{"x":9,"y":4}},{"type":"credit","amount":600,"coords":{"x":10,"y":4}},{"type":"credit","amount":600,"coords":{"x":7,"y":5}},{"type":"credit","amount":600,"coords":{"x":10,"y":5}},{"type":"credit","amount":600,"coords":{"x":7,"y":6}},{"type":"credit","amount":600,"coords":{"x":8,"y":6}},{"type":"credit","amount":600,"coords":{"x":9,"y":6}},{"type":"credit","amount":600,"coords":{"x":10,"y":6}}]},
+    {"name":"Sub-Station Gamma","height":11,"width":14,"reward":800,"field":["   ####    ###","##############","### ##########","@###### ######","####### #@####","####@#   #####","######  ### ##","#####  #### #@","  ### ########","  ##########  ","  #######     "],"enemies":[{"name":"Attack Dog","coords":{"x":5,"y":0}},{"name":"Sentinel 3.0","coords":{"x":11,"y":1}},{"name":"Sentinel 3.0","coords":{"x":13,"y":1}},{"name":"Sentinel 3.0","coords":{"x":13,"y":3}},{"name":"Sentinel 3.0","coords":{"x":2,"y":8}},{"name":"Sentinel 3.0","coords":{"x":3,"y":9}},{"name":"Attack Dog","coords":{"x":7,"y":9}},{"name":"Sentinel 3.0","coords":{"x":5,"y":10}}],"items":[{"type":"credit","amount":600,"coords":{"x":2,"y":2}},{"type":"credit","amount":600,"coords":{"x":9,"y":7}}]},
+    {"name":"S.A. Archives"},
+    {"name":"Market Research"},
+    {"name":"Flavor Evaluation Lab","height":11,"width":13,"reward":800,"field":[" # # ### # # ","#############"," ########### ","#############"," ########### ","#############"," ########### ","#############"," ########### ","######@######"," # # ### # # "],"enemies":[{"name":"Sentinel","coords":{"x":2,"y":2}},{"name":"Sentinel","coords":{"x":10,"y":2}},{"name":"Sentinel","coords":{"x":2,"y":5}},{"name":"Sentinel","coords":{"x":10,"y":5}},{"name":"Sentinel","coords":{"x":2,"y":8}},{"name":"Sentinel","coords":{"x":10,"y":8}}],"items":[{"type":"credit","amount":600,"coords":{"x":0,"y":1}},{"type":"data","coords":{"x":6,"y":1}},{"type":"credit","amount":600,"coords":{"x":12,"y":1}},{"type":"credit","amount":600,"coords":{"x":0,"y":5}},{"type":"credit","amount":600,"coords":{"x":12,"y":5}},{"type":"credit","amount":600,"coords":{"x":0,"y":9}},{"type":"credit","amount":600,"coords":{"x":12,"y":9}}]},
+    {"name":"Lucky Jungle Central"},
+    {"name":"Beverage Subsidiaries","height":11,"width":14,"reward":800,"field":["  #@@@##@@@#  "," ############ ","##############","##############","##############","##############","##############","##############","##############"," ############ ","  ##########  "],"enemies":[{"name":"Sentinel 3.0","coords":{"x":1,"y":9}},{"name":"Watchman SP","coords":{"x":2,"y":9}},{"name":"Watchman SP","coords":{"x":3,"y":9}},{"name":"Sentinel 3.0","coords":{"x":4,"y":9}},{"name":"Sentinel 3.0","coords":{"x":9,"y":9}},{"name":"Watchman SP","coords":{"x":10,"y":9}},{"name":"Watchman SP","coords":{"x":11,"y":9}},{"name":"Sentinel 3.0","coords":{"x":12,"y":9}},{"name":"Attack Dog","coords":{"x":2,"y":10}},{"name":"Attack Dog","coords":{"x":3,"y":10}},{"name":"Attack Dog","coords":{"x":10,"y":10}},{"name":"Attack Dog","coords":{"x":11,"y":10}}],"items":[]},
+    {"name":"Assimilation Timetable"},
+    {"name":"Recipe Database","height":11,"width":13,"reward":1000,"field":["#############","# # # # # # #","#############","# # # # # # #","######@######","# # @ # @ # #","######@######","# # # # # # #","#############","# # # # # # #","#############"],"enemies":[{"name":"Sentinel 3.0","coords":{"x":3,"y":0}},{"name":"Sentinel 3.0","coords":{"x":8,"y":0}},{"name":"Warden++","coords":{"x":0,"y":1}},{"name":"Warden++","coords":{"x":12,"y":1}},{"name":"Sentinel 3.0","coords":{"x":0,"y":5}},{"name":"Sentinel 3.0","coords":{"x":12,"y":5}},{"name":"Warden++","coords":{"x":3,"y":10}},{"name":"Sentinel 3.0","coords":{"x":11,"y":10}}],"items":[{"type":"credit","amount":800,"coords":{"x":2,"y":2}},{"type":"credit","amount":800,"coords":{"x":10,"y":2}},{"type":"credit","amount":800,"coords":{"x":2,"y":8}},{"type":"credit","amount":800,"coords":{"x":10,"y":8}}]},
+    {"name":"Film Properties"},
+    {"name":"R&D Backup","height":11,"width":12,"reward":1000,"field":["############","#    ##    #","# ######## #","# ######## #","# ##@##@## #","############","# ##@##@## #","# ######## #","# ######## #","#    ##    #","############"],"enemies":[{"name":"Mandelbug","coords":{"x":1,"y":0}},{"name":"Mandelbug","coords":{"x":10,"y":0}},{"name":"Mandelbug","coords":{"x":0,"y":1}},{"name":"Mandelbug","coords":{"x":11,"y":1}},{"name":"Mandelbug","coords":{"x":0,"y":9}},{"name":"Mandelbug","coords":{"x":11,"y":9}},{"name":"Mandelbug","coords":{"x":1,"y":10}},{"name":"Mandelbug","coords":{"x":10,"y":10}}],"items":[{"type":"credit","amount":800,"coords":{"x":5,"y":5}},{"type":"credit","amount":800,"coords":{"x":6,"y":5}}]},
+    {"name":"System Core","height":11,"width":14,"reward":1000,"field":["##############","########    ##","    ##########","######    ####","############# ","##    ########","##########  ##","######  ######"," ###########  ","####    ######","#@@######@@###"],"enemies":[{"name":"Sentinel 3.0","coords":{"x":2,"y":0}},{"name":"Watchman SP","coords":{"x":4,"y":0}},{"name":"Watchman SP","coords":{"x":8,"y":0}},{"name":"Sentinel 3.0","coords":{"x":11,"y":0}},{"name":"Watchman SP","coords":{"x":1,"y":1}},{"name":"Sentinel 3.0","coords":{"x":7,"y":1}},{"name":"Watchman SP","coords":{"x":13,"y":1}},{"name":"Watchman SP","coords":{"x":5,"y":2}},{"name":"Watchman SP","coords":{"x":9,"y":2}},{"name":"Watchman SP","coords":{"x":11,"y":2}}],"items":[{"type":"credit","amount":800,"coords":{"x":9,"y":4}},{"type":"credit","amount":800,"coords":{"x":10,"y":4}},{"type":"credit","amount":800,"coords":{"x":1,"y":6}},{"type":"credit","amount":800,"coords":{"x":2,"y":6}}]},
+    {"name":"Unknown Node"},
+    {"name":"Executive Protocol"},
+    {"name":"Treasury Funds","height":11,"width":14,"reward":1000,"field":["# ########## #","  ##########  ","##############","##############","#####@##@#####","######@@######","#####@##@#####","##############","##############","  ##########  ","# ########## #"],"enemies":[{"name":"Guard Pup","coords":{"x":2,"y":0}},{"name":"Guard Pup","coords":{"x":3,"y":0}},{"name":"Sentinel","coords":{"x":5,"y":0}},{"name":"Sentinel","coords":{"x":6,"y":0}},{"name":"Sentinel","coords":{"x":7,"y":0}},{"name":"Sentinel","coords":{"x":8,"y":0}},{"name":"Guard Pup","coords":{"x":10,"y":0}},{"name":"Guard Pup","coords":{"x":11,"y":0}},{"name":"Guard Pup","coords":{"x":0,"y":2}},{"name":"Guard Pup","coords":{"x":13,"y":2}},{"name":"Watchman","coords":{"x":0,"y":4}},{"name":"Watchman","coords":{"x":13,"y":4}},{"name":"Watchman","coords":{"x":0,"y":5}},{"name":"Watchman","coords":{"x":13,"y":5}},{"name":"Watchman","coords":{"x":0,"y":6}},{"name":"Watchman","coords":{"x":13,"y":6}},{"name":"Guard Pup","coords":{"x":0,"y":8}},{"name":"Guard Pup","coords":{"x":13,"y":8}},{"name":"Guard Pup","coords":{"x":2,"y":10}},{"name":"Guard Pup","coords":{"x":3,"y":10}},{"name":"Sentinel","coords":{"x":5,"y":10}},{"name":"Sentinel","coords":{"x":6,"y":10}},{"name":"Sentinel","coords":{"x":7,"y":10}},{"name":"Sentinel","coords":{"x":8,"y":10}},{"name":"Guard Pup","coords":{"x":10,"y":10}},{"name":"Guard Pup","coords":{"x":11,"y":10}}],"items":[{"type":"credit","amount":800,"coords":{"x":0,"y":0}},{"type":"credit","amount":800,"coords":{"x":13,"y":0}},{"type":"credit","amount":800,"coords":{"x":0,"y":10}},{"type":"credit","amount":800,"coords":{"x":13,"y":10}}]},
+    {"name":"Proprietary Research","height":11,"width":14,"reward":1000,"field":["### #####  ###","### #####  ###","### #####  ###","    #####     ","#########     ","##############","     #########","     #####    ","@#@  ##### ###","###  ##### ###","@#@  ##### ###"],"enemies":[{"name":"Radar","coords":{"x":2,"y":0}},{"name":"Attack Dog","coords":{"x":5,"y":0}},{"name":"Radar","coords":{"x":11,"y":0}},{"name":"Radar","coords":{"x":1,"y":1}},{"name":"Radar","coords":{"x":12,"y":1}},{"name":"Radar","coords":{"x":0,"y":2}},{"name":"Radar","coords":{"x":11,"y":2}},{"name":"Radar","coords":{"x":13,"y":2}},{"name":"Sensor","coords":{"x":6,"y":5}},{"name":"Sensor","coords":{"x":7,"y":5}},{"name":"Radar","coords":{"x":13,"y":8}},{"name":"Radar","coords":{"x":12,"y":9}},{"name":"Attack Dog","coords":{"x":8,"y":10}},{"name":"Radar","coords":{"x":11,"y":10}}],"items":[{"type":"data","coords":{"x":13,"y":0}}]},
+    {"name":"Privileged Accounts","height":11,"width":14,"reward":1000,"field":["### ##########","### ##########","#######  #####","############# "," ###  ####### "," #############","##############","@##@#### #####","@####### #####","@#############","#@@@  ########"],"enemies":[{"name":"Warden++","coords":{"x":1,"y":0}},{"name":"Warden++","coords":{"x":2,"y":0}},{"name":"Warden++","coords":{"x":4,"y":0}},{"name":"Warden++","coords":{"x":5,"y":0}},{"name":"Warden++","coords":{"x":11,"y":0}},{"name":"Watchman SP","coords":{"x":1,"y":2}},{"name":"Watchman SP","coords":{"x":5,"y":2}},{"name":"Watchman SP","coords":{"x":6,"y":2}},{"name":"Watchman SP","coords":{"x":10,"y":2}},{"name":"Warden++","coords":{"x":13,"y":2}},{"name":"Watchman SP","coords":{"x":11,"y":3}},{"name":"Warden++","coords":{"x":13,"y":5}},{"name":"Watchman SP","coords":{"x":10,"y":6}},{"name":"Warden++","coords":{"x":13,"y":6}},{"name":"Watchman SP","coords":{"x":10,"y":7}},{"name":"Watchman SP","coords":{"x":11,"y":9}},{"name":"Warden++","coords":{"x":13,"y":9}},{"name":"Warden++","coords":{"x":13,"y":10}}],"items":[{"type":"credit","amount":800,"coords":{"x":7,"y":0}},{"type":"credit","amount":800,"coords":{"x":8,"y":0}},{"type":"credit","amount":800,"coords":{"x":2,"y":4}},{"type":"credit","amount":800,"coords":{"x":7,"y":4}},{"type":"credit","amount":800,"coords":{"x":8,"y":4}},{"type":"credit","amount":800,"coords":{"x":7,"y":5}},{"type":"credit","amount":800,"coords":{"x":8,"y":5}},{"type":"credit","amount":800,"coords":{"x":7,"y":10}},{"type":"credit","amount":800,"coords":{"x":8,"y":10}}]}
   ]
 }
