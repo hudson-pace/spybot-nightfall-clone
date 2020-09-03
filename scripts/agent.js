@@ -71,7 +71,7 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
       }
 
       if (tile.tile.overlay !== overlayTypes.UPLOAD) {
-        tile.tile.drawOverlays(context);
+        tile.tile.drawOverlay(context);
       }
     });
     if (this.selected) {

@@ -33,6 +33,12 @@ export default class BattleMap {
     });
   }
 
+  drawOverlays(context) {
+    this.tiles.forEach((tile) => {
+      tile.drawOverlay(context);
+    });
+  }
+
   clearTileOverlays() {
     this.tiles.forEach((tile) => {
       tile.changeOverlay(overlayTypes.NONE);

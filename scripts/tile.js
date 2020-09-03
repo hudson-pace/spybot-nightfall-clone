@@ -35,7 +35,7 @@ export function Tile(x, y, size, gap, leftPad, topPad, image) {
     };
   };
 
-  this.drawOverlays = function drawOverlays(context) {
+  this.drawOverlay = function drawOverlay(context) {
     switch (this.overlay) {
       default:
         break;
@@ -72,7 +72,6 @@ export function Tile(x, y, size, gap, leftPad, topPad, image) {
         break;
     }
     context.fillRect(canvasX, canvasY, size, size);
-    this.drawOverlays(context);
   };
   this.containsPoint = function containsPoint(point) {
     return (point.x > canvasX && point.x < canvasX + size

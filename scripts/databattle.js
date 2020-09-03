@@ -6,6 +6,11 @@ import Button from './button.js';
 import BattleMap from './battlemap.js';
 import { calculateTextPadding } from './helpers.js';
 
+const itemTypes = {
+  CREDIT: 'credit',
+  DATA: 'data',
+}
+
 export default function DataBattle(name, url, images, programMenu, battleLoadedCallback,
   exitBattleCallback) {
   const canvas = $('canvas')[0];
@@ -13,6 +18,8 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
   let map;
   const agents = [];
   const enemyAgents = [];
+  let items;
+  let bonusCredits = 0;
   let gameIsStarted = false;
   let running = true;
   let paused = false;
@@ -59,9 +66,11 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
     this.tryToLoadEnemyAgents();
   });
   $.getJSON(url, (data) => {
+    console.log('battle loaded');
     const battle = data.battles.find((b) => b.name === name);
     map = new BattleMap(battle, canvas, images);
     this.battleData = battle;
+    items = this.battleData.items;
 
     battleLoadedCallback();
     this.tryToLoadEnemyAgents();
@@ -71,6 +80,10 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
     console.log('Redrawing databattle');
     context.clearRect(0, 0, canvas.width, canvas.height);
     map.draw(context);
+    items.forEach((item) => {
+      this.drawItem(item);
+    });
+    map.drawOverlays(context);
     agents.forEach((agent) => agent.draw(context));
     enemyAgents.forEach((agent) => agent.draw(context));
     if (!gameIsStarted) {
@@ -86,6 +99,18 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
       const [leftPad, topPad] = calculateTextPadding(popupMessage, popupMessage.message, context);
       context.fillText(popupMessage.message, popupMessage.x + leftPad, popupMessage.y + topPad);
     }
+  };
+
+  this.drawItem = function drawItem(item) {
+    let sourceX = 13;
+    if (item.type === itemTypes.CREDIT) {
+      sourceX = 0;
+    } else if (item.type === itemTypes.DATA) {
+      sourceX = 27;
+    }
+    console.log('drawing item');
+    const { x, y } = map.getTileAtGridCoords(item.coords.x, item.coords.y).getDrawingCoords();
+    context.drawImage(images.items, sourceX, 0, 27, 27, x, y, 27, 27);
   };
 
   this.nextEnemyTurn = function nextEnemyTurn() {
@@ -166,27 +191,33 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
   };
   this.checkForEndOfGame = function checkForEndOfGame() {
     if (agents.length === 0) {
-      paused = true;
-      this.flashMessage('You Lose', 1000);
-      setTimeout(() => {
-        exitBattleCallback(false);
-      }, 1000);
+      this.endGame(false);
       return true;
     } if (enemyAgents.length === 0) {
+      this.endGame(true);
+      return true;
+    }
+    return false;
+  };
+  this.endGame = function endGame(playerWon) {
+    paused = true;
+    if (playerWon) {
       agents.forEach((agent) => {
         if (agent.selected) {
           agent.deselect();
         }
       });
-      paused = true;
       this.flashMessage('You Win', 1000);
       setTimeout(() => {
-        exitBattleCallback(true, this.battleData.reward);
+        exitBattleCallback(true, this.battleData.reward, bonusCredits);
       }, 1000);
-      return true;
+    } else {
+      this.flashMessage('You Lose', 1000);
+      setTimeout(() => {
+        exitBattleCallback(false);
+      }, 1000);
     }
-    return false;
-  };
+  }
   this.onClick = function onClick(event) {
     if (playerTurn && !paused) {
       const x = (event.offsetX / canvas.clientWidth) * canvas.width;
@@ -224,6 +255,12 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
           if (selectedAgent && tile) {
             if (selectedAgent.movesRemaining > 0) {
               selectedAgent.move(tile);
+              const newTile = selectedAgent.head;
+              const itemIndex = items.findIndex((item) => item.coords.x === newTile.x
+              && item.coords.y === newTile.y);
+              if (itemIndex !== -1) {
+                this.pickupItem(itemIndex);
+              }
             } else if (BattleMap.tilesAreWithinRange(tile, selectedAgent.head,
               selectedAgent.selectedCommand.range)) {
               this.executeCommand(tile, selectedAgent, 0);
@@ -316,5 +353,15 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
         }
       }, intervalDelay);
     }, delay);
+  };
+  this.pickupItem = function pickupItem(itemIndex) {
+    const item = items[itemIndex];
+    items.splice(itemIndex, 1);
+    if (item.type === itemTypes.DATA) {
+      this.endGame(true);
+    } else if (item.type === itemTypes.CREDIT) {
+      bonusCredits += item.amount;
+      console.log(item.amount);
+    }
   };
 }

@@ -8,8 +8,6 @@ A clone of LEGO's Spybot: The Nightfall Incident, one of my favorite flash game 
 As it stands, this project is approaching a facsimile of the original. Notable missing features include:
 
 - Commands to heal, boost programs, and alter the terrain.
-- Items on the map, e.g. credits and data.
-- Battles whose objective is to obtain data.
 - The ability to save progress.
 
 And, less importantly:

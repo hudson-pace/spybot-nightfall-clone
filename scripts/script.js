@@ -9,7 +9,7 @@ const images = {};
 function preloadImages(allImagesLoadedCallback) {
   const sourcePath = './assets/images';
   const imageNames = [
-    'nodeCAR', 'nodeDD', 'nodeLMM', 'nodePEDC', 'nodePharmhaus', 'nodeSmart', 'nodeUnknown', 'nodeWarez', 'agents', 'tileOverlays', 'agentDone',
+    'nodeCAR', 'nodeDD', 'nodeLMM', 'nodePEDC', 'nodePharmhaus', 'nodeSmart', 'nodeUnknown', 'nodeWarez', 'agents', 'tileOverlays', 'agentDone', 'items',
   ];
   let loadedCount = 0;
 

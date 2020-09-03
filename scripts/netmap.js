@@ -237,10 +237,11 @@ export default function NetMap(url, images, inventory, programMenu, mapLoadedCal
       this.draw();
     }
   };
-  this.returnFromBattle = function returnFromBattle(wonBattle, reward) {
+  this.returnFromBattle = function returnFromBattle(wonBattle, reward, bonusCredits) {
     if (wonBattle) {
+      console.log(`${reward} credits, plus ${bonusCredits} bonus credits`);
       ownNode(selectedNode);
-      inventory.addCredits(reward);
+      inventory.addCredits(reward + bonusCredits);
     } else {
       console.log('You lose. In your face. Haha what a loser.');
     }

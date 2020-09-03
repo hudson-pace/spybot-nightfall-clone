@@ -63,10 +63,10 @@ export default function ViewManager(url, images) {
   }
 
   let netMap;
-  function switchToNetMap(wonBattle, reward) {
+  function switchToNetMap(wonBattle, reward, bonusCredits) {
     programMenu.resetInventoryStock();
     setCurrentView(netMap);
-    currentView.returnFromBattle(wonBattle, reward);
+    currentView.returnFromBattle(wonBattle, reward, bonusCredits);
   }
   function startDataBattle(name) {
     const dataBattle = new DataBattle(name, `${url}/battles.json`, images, programMenu, () => {
