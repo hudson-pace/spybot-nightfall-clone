@@ -5,14 +5,14 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
   context, map) {
   startingTile.changeType(tileTypes.OCCUPIED);
   this.head = startingTile;
-  this.tail = startingTile;
   this.tiles = [{
     tile: startingTile,
   }];
   this.selected = false;
+  this.speed = agent.moves;
   this.movesRemaining = agent.moves;
+  this.maxSize = agent.maxSize;
   this.name = agent.name;
-  const { maxSize } = agent;
   const imageSource = {
     x: (agent.imgSource % 8) * 27,
     y: Math.floor(agent.imgSource / 8) * 27,
@@ -119,7 +119,7 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
         this.tiles.unshift({
           tile: newTile,
         });
-        if (this.tiles.length > maxSize) {
+        if (this.tiles.length > this.maxSize) {
           const oldTile = this.tiles.pop();
           oldTile.tile.changeType(tileTypes.BASIC);
         }
@@ -150,16 +150,19 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
       if (this.movesRemaining > 0) {
         this.highlightTiles(this.getValidMoves(this.movesRemaining, 'move'), 'move');
       } else {
-        this.highlightTiles(this.getValidMoves(this.selectedCommand.range, 'attack'), 'attack');
+        this.highlightTiles(
+          this.getValidMoves(this.selectedCommand.range, this.selectedCommand.type),
+          this.selectedCommand.type,
+        );
       }
     }
   };
   this.showAttack = function showAttack(targetTile) {
     map.clearTileOverlays();
-    this.highlightTiles([targetTile], 'attack');
+    this.highlightTiles([targetTile], this.selectedCommand.type);
   };
   this.isTileValid = function isTileValid(tile, type, visitedTiles) {
-    return tile && (tile.type === tileTypes.BASIC || type === 'attack'
+    return tile && (tile.type === tileTypes.BASIC || type !== 'move'
       || (tile.type === tileTypes.OCCUPIED && this.containsTile(tile)))
       && !visitedTiles.find((t) => t === tile);
   };
@@ -239,13 +242,21 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
         }
       } else if (type === 'attack') {
         t.changeOverlay(overlayTypes.ATTACK);
+      } else if (type === 'boost') {
+        t.changeOverlay(overlayTypes.BOOST);
+      } else if (type === 'terrain') {
+        if (this.selectedCommand.damage < 0) {
+          t.changeOverlay(overlayTypes.TERRAIN_ADD);
+        } else {
+          t.changeOverlay(overlayTypes.TERRAIN_REMOVE);
+        }
       }
     });
   };
 
   this.resetTurn = function resetTurn() {
     this.turnIsOver = false;
-    this.movesRemaining = agent.moves;
+    this.movesRemaining = this.speed;
   };
 
   this.chooseCommand = function chooseCommand(newCommand) {
@@ -262,6 +273,42 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
   this.hit = function hit() {
     const tile = this.tiles.splice(this.tiles.length - 1, 1);
     tile[0].tile.changeType(tileTypes.BASIC);
+  };
+
+  this.boostStat = function boostStat(stat, amount) {
+    switch (stat) {
+      default:
+        break;
+      case 'speed':
+        this.speed += amount;
+        if (this.movesRemaining === this.speed - amount) {
+          this.movesRemaining = this.speed;
+        }
+        break;
+      case 'maxSize':
+        this.maxSize += amount;
+        break;
+    }
+  };
+
+  this.addToTail = function addToTail() {
+    if (this.tiles.length < this.maxSize) {
+      for (let i = this.tiles.length - 1; i >= 0; i -= 1) {
+        const emptyAdjacentTiles = this.getValidAdjacentTiles(this.tiles[i].tile, 'move', [])
+          .filter((tile) => tile.type !== tileTypes.OCCUPIED);
+        if (emptyAdjacentTiles.length > 0) {
+          const randomTile = emptyAdjacentTiles[
+            Math.floor(Math.random() * emptyAdjacentTiles.length)
+          ];
+          randomTile.changeType(tileTypes.OCCUPIED);
+          this.tiles.push({
+            tile: randomTile,
+            nextTile: this.tiles[i].tile,
+          });
+          break;
+        }
+      }
+    }
   };
 
   this.expandTileRadius = function expandTileRadius(tileList, expansionRadius) {

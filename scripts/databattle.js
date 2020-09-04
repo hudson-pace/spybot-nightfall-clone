@@ -217,7 +217,7 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
         exitBattleCallback(false);
       }, 1000);
     }
-  }
+  };
   this.onClick = function onClick(event) {
     if (playerTurn && !paused) {
       const x = (event.offsetX / canvas.clientWidth) * canvas.width;
@@ -242,30 +242,29 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
             }
           }
         }
-      } else {
-        const agent = agents.find((a) => a.head === tile);
-        if (agent && !agent.selected) {
-          agents.forEach((a) => a.deselect());
-          map.clearTileOverlays();
-          programMenu.showActiveProgram(agent);
-          agent.select();
-        } else {
-          const selectedAgent = agents.find((a) => a.selected);
-
-          if (selectedAgent && tile) {
-            if (selectedAgent.movesRemaining > 0) {
-              selectedAgent.move(tile);
-              const newTile = selectedAgent.head;
-              const itemIndex = items.findIndex((item) => item.coords.x === newTile.x
-              && item.coords.y === newTile.y);
-              if (itemIndex !== -1) {
-                this.pickupItem(itemIndex);
-              }
-            } else if (BattleMap.tilesAreWithinRange(tile, selectedAgent.head,
-              selectedAgent.selectedCommand.range)) {
-              this.executeCommand(tile, selectedAgent, 0);
-            }
+      } else if (tile) {
+        const selectedAgent = agents.find((a) => a.selected);
+        const clickedAgent = agents.find((a) => a.head === tile);
+        if (clickedAgent && (!selectedAgent || selectedAgent.movesRemaining > 0
+          || selectedAgent.turnIsOver)) {
+          if (selectedAgent) {
+            selectedAgent.deselect();
           }
+          map.clearTileOverlays();
+          programMenu.showActiveProgram(clickedAgent);
+          clickedAgent.select();
+        } else if (selectedAgent.movesRemaining > 0) {
+          selectedAgent.move(tile);
+          const newTile = selectedAgent.head;
+          const itemIndex = items.findIndex((item) => item.coords.x === newTile.x
+            && item.coords.y === newTile.y);
+          if (itemIndex !== -1) {
+            this.pickupItem(itemIndex);
+          }
+        } else if (!selectedAgent.turnIsOver
+          && BattleMap.tilesAreWithinRange(tile, selectedAgent.head,
+            selectedAgent.selectedCommand.range)) {
+          this.executeCommand(tile, selectedAgent, 0);
         }
       }
       if (running) {
@@ -291,34 +290,89 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
   this.attack = function attack(tile, command, totalDelay) {
     let delay = 0;
     let repetitions = 0;
-    if (tile.type === tileTypes.OCCUPIED) {
-      let agentList;
-      let targetIndex = enemyAgents.findIndex((agent) => agent.containsTile(tile));
-      if (targetIndex !== -1) {
-        agentList = enemyAgents;
-      } else {
-        targetIndex = agents.findIndex((agent) => agent.containsTile(tile));
-        if (targetIndex !== -1) {
-          agentList = agents;
-        }
-      }
-      if (agentList) {
-        const agent = agentList[targetIndex];
-        repetitions = Math.min(command.damage, agent.tiles.length);
-        delay = 200;
-        this.pauseAndDoXTimes(agent.hit.bind(agent), delay, repetitions, undefined, totalDelay);
-        setTimeout(() => {
-          if (agent.tiles.length === 0) {
+    const target = this.findAgentOnTile(tile);
+    if (target) {
+      repetitions = Math.min(command.damage, target.tiles.length);
+      delay = 200;
+      this.pauseAndDoXTimes(target.hit.bind(target), delay, repetitions, undefined, totalDelay);
+      setTimeout(() => {
+        if (target.tiles.length === 0) {
+          let agentList;
+          let targetIndex = enemyAgents.findIndex((agent) => agent === target);
+          if (targetIndex !== -1) {
+            agentList = enemyAgents;
+          } else {
+            targetIndex = agents.findIndex((agent) => agent === target);
+            if (targetIndex !== -1) {
+              agentList = agents;
+            }
+          }
+          if (agentList) {
             agentList.splice(targetIndex, 1);
           }
-        }, totalDelay + (delay * (repetitions + 1)));
-      }
+        }
+      }, totalDelay + (delay * (repetitions + 1)));
     }
+
     setTimeout(() => {
       this.checkForEndOfTurn();
     }, totalDelay + (delay * (repetitions + 1)));
     return delay * (repetitions + 1);
   };
+  this.alterTerrain = function alterTerrain(tile, command, totalDelay) {
+    setTimeout(() => {
+      if (command.damage < 0) {
+        if (tile.type === tileTypes.NONE) {
+          tile.changeType(tileTypes.BASIC);
+        }
+      } else {
+        const itemOnTile = items.find((item) => item.coords.x === tile.x
+          && item.coords.y === tile.y);
+        if (tile.type === tileTypes.BASIC && !itemOnTile) {
+          tile.changeType(tileTypes.NONE);
+        }
+      }
+      this.checkForEndOfTurn();
+      this.draw();
+    }, totalDelay);
+  };
+
+  this.boost = function boost(tile, command, totalDelay) {
+    let repetitions = 0;
+    let delay = 0;
+    const target = this.findAgentOnTile(tile);
+    if (target) {
+      if (command.stat === 'health') {
+        repetitions = Math.min(command.damage, target.maxSize - target.tiles.length);
+        delay = 200;
+        if (repetitions > 0) {
+          this.pauseAndDoXTimes(target.addToTail.bind(target), delay, repetitions, undefined,
+            totalDelay);
+        }
+      } else {
+        target.boostStat(command.stat, command.damage);
+      }
+    }
+
+    setTimeout(() => {
+      this.checkForEndOfTurn();
+      this.draw();
+    }, totalDelay + (delay * (repetitions + 1)));
+    return delay * (repetitions + 1);
+  };
+
+  this.findAgentOnTile = function findAgentOnTile(tile) {
+    let targetAgent;
+    if (tile.type === tileTypes.OCCUPIED) {
+      targetAgent = enemyAgents.find((agent) => agent.containsTile(tile));
+      if (targetAgent) {
+        return targetAgent;
+      }
+      targetAgent = agents.find((agent) => agent.containsTile(tile));
+    }
+    return targetAgent;
+  };
+
   this.executeCommand = function executeCommand(tile, agent, totalDelay) {
     let delay = 0;
     setTimeout(() => {
@@ -333,12 +387,21 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
       case 'attack':
         delay = this.attack(tile, agent.selectedCommand, totalDelay);
         break;
+      case 'terrain':
+        this.alterTerrain(tile, agent.selectedCommand, totalDelay);
+        break;
+      case 'boost':
+        delay = this.boost(tile, agent.selectedCommand, totalDelay);
+        break;
     }
     return delay;
   };
   this.pauseAndDoXTimes = function pauseAndDoXTimes(callback, intervalDelay,
     repetitions, args, delay) {
     let counter = 0;
+    if (repetitions < 1) {
+      return;
+    }
     setTimeout(() => {
       const interval = setInterval(() => {
         if (args) {

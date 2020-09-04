@@ -13,6 +13,9 @@ export const overlayTypes = {
   MOVE_DOWN: 'move down',
   UPLOAD: 'upload',
   ATTACK: 'attack',
+  BOOST: 'boost',
+  TERRAIN_ADD: 'terrainAdd',
+  TERRAIN_REMOVE: 'terrainRemove',
 };
 
 export function Tile(x, y, size, gap, leftPad, topPad, image) {
@@ -43,7 +46,7 @@ export function Tile(x, y, size, gap, leftPad, topPad, image) {
         context.drawImage(image, 1 * size, 1 * size, size, size, canvasX, canvasY, size, size);
         break;
       case overlayTypes.MOVE_LEFT:
-        context.drawImage(image, 0 * size, 2 * size, size, size, canvasX, canvasY, size, size);
+        context.drawImage(image, 0, 2 * size, size, size, canvasX, canvasY, size, size);
         break;
       case overlayTypes.MOVE_RIGHT:
         context.drawImage(image, 2 * size, 2 * size, size, size, canvasX, canvasY, size, size);
@@ -57,8 +60,15 @@ export function Tile(x, y, size, gap, leftPad, topPad, image) {
       case overlayTypes.UPLOAD:
         context.drawImage(image, 0 * size, 1 * size, size, size, canvasX, canvasY, size, size);
         break;
+      case overlayTypes.TERRAIN_REMOVE:
       case overlayTypes.ATTACK:
-        context.drawImage(image, 1 * size, 0 * size, size, size, canvasX, canvasY, size, size);
+        context.drawImage(image, 1 * size, 0, size, size, canvasX, canvasY, size, size);
+        break;
+      case overlayTypes.BOOST:
+        context.drawImage(image, 2 * size, 0, size, size, canvasX, canvasY, size, size);
+        break;
+      case overlayTypes.TERRAIN_ADD:
+        context.drawImage(image, 0, 0, size, size, canvasX, canvasY, size, size);
         break;
     }
   };

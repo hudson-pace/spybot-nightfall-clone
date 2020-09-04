@@ -7,7 +7,6 @@ A clone of LEGO's Spybot: The Nightfall Incident, one of my favorite flash game 
 ### Missing Features From the Original
 As it stands, this project is approaching a facsimile of the original. Notable missing features include:
 
-- Commands to heal, boost programs, and alter the terrain.
 - The ability to save progress.
 - Enemies that start out with tails, instead of single segments only.
 
