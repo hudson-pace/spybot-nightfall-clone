@@ -1,7 +1,13 @@
 [
 	{
 		"imgSource": 0,
-		"name": "Attack Dog"
+    "name": "Attack Dog",
+    "desc": "Ravenous and bloodthirst corporate canine.",
+    "moves": 4,
+    "maxSize": 7,
+    "commands": [
+      "MegaByte"
+    ]
 	},
 	{
 		"imgSource": 1,
@@ -16,11 +22,24 @@
 	},
 	{
 		"imgSource": 2,
-		"name": "Black Widow"
+    "name": "Black Widow",
+    "desc": "Speedier and creepier.",
+    "moves": 4,
+    "maxSize": 3,
+    "commands": [
+      "Byte",
+      "Paralyze"
+    ]
 	},
 	{
 		"imgSource": 3,
-		"name": "Boss"
+    "name": "Boss",
+    "desc": "Prepare to be owned.",
+    "moves": 6,
+    "maxSize": 25,
+    "commands": [
+      "Shutdown"
+    ]
 	},
 	{
 		"imgSource": 4,
@@ -34,19 +53,45 @@
 	},
 	{
 		"imgSource": 5,
-		"name": "Buzz-Bomb"
+    "name": "BuzzBomb",
+    "desc": "Fast and annoying.",
+    "moves": 8,
+    "maxSize": 2,
+    "commands": [
+      "Sting",
+      "Kamikaze"
+    ]
 	},
 	{
 		"imgSource": 6,
-		"name": "Clog"
+    "name": "Clog",
+    "desc": "Slows down hostile programs.",
+    "moves": 2,
+    "maxSize": 4,
+    "commands": [
+      "Lag"
+    ]
 	},
 	{
 		"imgSource": 7,
-		"name": "Clog 2.0"
+    "name": "Clog 2.0",
+    "desc": "Twice as effective as version 1.0.",
+    "moves": 2,
+    "maxSize": 4,
+    "commands": [
+      "Chug"
+    ]
 	},
 	{
 		"imgSource": 8,
-		"name": "Clog 3.0"
+    "name": "Clog 3.0",
+    "desc": "Brings hostile programs to a halt.",
+    "moves": 2,
+    "maxSize": 4,
+    "commands": [
+      "Chug",
+      "Hang"
+    ]
 	},
 	{
 		"imgSource": 9,
@@ -60,19 +105,45 @@
 	},
 	{
 		"imgSource": 10,
-		"name": "Data Doctor Pro"
+    "name": "Data Doctor Pro",
+    "desc": "Twice the expansion power of Data Doctor.",
+    "moves": 5,
+    "maxSize": 8,
+    "commands": [
+      "MegaGrow",
+      "Surgery"
+    ]
   },
   {
 		"imgSource": 11,
-		"name": "Fiddle"
+    "name": "Fiddle",
+    "desc": "Twiddle and tweak the power of your programs.",
+    "moves": 3,
+    "maxSize": 3,
+    "commands": [
+      "Tweak",
+      "Twiddle"
+    ]
   },
   {
 		"imgSource": 12,
-		"name": "Firewall"
+    "name": "Firewall",
+    "desc": "Keeps unwanted programs out of corporate sectors",
+    "moves": 2,
+    "maxSize": 10,
+    "commands": [
+      "Burn"
+    ]
   },
   {
 		"imgSource": 13,
-		"name": "Clay Golem"
+    "name": "Clay Golem",
+    "desc": "Clay is stronger than mud.",
+    "moves": 2,
+    "maxSize": 6,
+    "commands": [
+      "Bash"
+    ]
   },
   {
 		"imgSource": 14,
@@ -86,11 +157,23 @@
   },
   {
 		"imgSource": 15,
-		"name": "Stone Golem"
+    "name": "Stone Golem",
+    "desc": "Nothing can stand in its way.",
+    "moves": 3,
+    "maxSize": 7,
+    "commands": [
+      "Crash"
+    ]
   },
   {
 		"imgSource": 16,
-		"name": "Guard Dog"
+    "name": "Guard Dog",
+    "desc": "Who let this dog out?",
+    "moves": 3,
+    "maxSize": 3,
+    "commands": [
+      "Byte"
+    ]
   },
   {
 		"imgSource": 17,
@@ -104,7 +187,14 @@
   },
   {
 		"imgSource": 18,
-		"name": "Guru"
+    "name": "Guru",
+    "desc": "Multi-purpose software for the l33t3st of the l33t.",
+    "moves": 2,
+    "maxSize": 3,
+    "commands": [
+      "Fire",
+      "Ice"
+    ]
   },
   {
 		"imgSource": 19,
@@ -129,23 +219,54 @@
   },
   {
 		"imgSource": 21,
-		"name": "Hack 3.0"
+    "name": "Hack 3.0",
+    "desc": "The top of the Hack series.",
+    "moves": 4,
+    "maxSize": 4,
+    "commands": [
+      "Slice",
+      "Mutilate"
+    ]
   },
   {
 		"imgSource": 22,
-		"name": "Heisenbug"
+    "name": "HeisenBug",
+    "desc": "They can't kill what they can't catch.",
+    "moves": 5,
+    "maxSize": 1,
+    "commands": [
+      "Quantum Glitch"
+    ]
   },
   {
 		"imgSource": 23,
-		"name": "Laser Satellite"
+    "name": "Laser Satellite",
+    "desc": "Long-range hard-hitting program",
+    "moves": 2,
+    "maxSize": 1,
+    "commands": [
+      "MegaScramble"
+    ]
   },
   {
 		"imgSource": 24,
-		"name": "Logic Bomb"
+    "name": "Logic Bomb",
+    "desc": "Self-destructing attack program.",
+    "moves": 3,
+    "maxSize": 8,
+    "commands": [
+      "Self-Destruct"
+    ]
   },
   {
 		"imgSource": 25,
-		"name": "Mandelbug"
+    "name": "MandelBug",
+    "desc": "It's not a bug, it's a feature.",
+    "moves": 5,
+    "maxSize": 1,
+    "commands": [
+      "Fractal Glitch"
+    ]
   },
   {
 		"imgSource": 26,
@@ -159,19 +280,41 @@
   },
   {
 		"imgSource": 27,
-		"name": "Memory Hog"
+    "name": "Memory Hog",
+    "desc": "Massive memory-filling bloatware.",
+    "moves": 5,
+    "maxSize": 30,
+    "commands": []
   },
   {
 		"imgSource": 28,
-		"name": "Mobile Tower"
+    "name": "Mobile Tower",
+    "desc": "Slow-moving long-range program.",
+    "moves": 1,
+    "maxSize": 1,
+    "commands": [
+      "Spot"
+    ]
   },
   {
 		"imgSource": 29,
-		"name": "Radar"
+    "name": "Radar",
+    "desc": "Deadly program eradicator",
+    "moves": 0,
+    "maxSize": 1,
+    "commands": [
+      "Pong"
+    ]
   },
   {
 		"imgSource": 30,
-		"name": "Satellite"
+    "name": "Satellite",
+    "desc": "Short-range hard-hitting program.",
+    "moves": 1,
+    "maxSize": 1,
+    "commands": [
+      "Scramble"
+    ]
   },
   {
 		"imgSource": 31,
@@ -185,15 +328,34 @@
   },
   {
 		"imgSource": 32,
-		"name": "Seeker 2.0"
+    "name": "Seeker 2.0",
+    "desc": "Bigger and better than seeker.",
+    "moves": 3,
+    "maxSize": 4,
+    "commands": [
+      "Poke"
+    ]
   },
   {
 		"imgSource": 33,
-		"name": "Seeker 3.0"
+    "name": "Seeker 3.0",
+    "desc": "Seeker with extra deletion power.",
+    "moves": 4,
+    "maxSize": 5,
+    "commands": [
+      "Poke",
+      "Seek and Destroy"
+    ]
   },
   {
 		"imgSource": 34,
-		"name": "Sensor"
+    "name": "Sensor",
+    "desc": "Immobile program eradicator",
+    "moves": 0,
+    "maxSize": 1,
+    "commands": [
+      "Blip"
+    ]
   },
   {
 		"imgSource": 35,
@@ -207,11 +369,23 @@
   },
   {
 		"imgSource": 36,
-		"name": "Sentinel 2.0"
+    "name": "Sentinel 2.0",
+    "desc": "Improved corporate data defender",
+    "moves": 2,
+    "maxSize": 4,
+    "commands": [
+      "Cut"
+    ]
   },
   {
 		"imgSource": 37,
-		"name": "Sentinel 3.0"
+    "name": "Sentinel 3.0",
+    "desc": "Sentinel that attacks several programs at once.",
+    "moves": 2,
+    "maxSize": 4,
+    "commands": [
+      "Taser"
+    ]
   },
   {
 		"imgSource": 38,
@@ -225,11 +399,24 @@
   },
   {
 		"imgSource": 39,
-		"name": "Sonar"
+    "name": "Sonar",
+    "desc": "Long-range program eradicator",
+    "moves": 0,
+    "maxSize": 1,
+    "commands": [
+      "Ping"
+    ]
   },
   {
 		"imgSource": 40,
-		"name": "Trantula"
+    "name": "Tarantula",
+    "desc": "Fast, with a venemous bite.",
+    "moves": 5,
+    "maxSize": 3,
+    "commands": [
+      "MegaByte",
+      "Paralyze"
+    ]
   },
   {
 		"imgSource": 41,
@@ -253,15 +440,33 @@
   },
   {
 		"imgSource": 43,
-		"name": "Warden"
+    "name": "Warden",
+    "desc": "Slow and steady corporate attack program.",
+    "moves": 1,
+    "maxSize": 5,
+    "commands": [
+      "Thump"
+    ]
   },
   {
 		"imgSource": 44,
-		"name": "Warden+"
+    "name": "Warden+",
+    "desc": "Get out of its way.",
+    "moves": 2,
+    "maxSize": 8,
+    "commands": [
+      "Bash"
+    ]
   },
   {
 		"imgSource": 45,
-		"name": "Warden++"
+    "name": "Warden++",
+    "desc": "The last word in corporate security.",
+    "moves": 3,
+    "maxSize": 7,
+    "commands": [
+      "Crash"
+    ]
   },
   {
 		"imgSource": 46,
@@ -275,11 +480,23 @@
   },
   {
 		"imgSource": 47,
-		"name": "Watchman SP"
+    "name": "Watchman SP",
+    "desc": "Watching from an even greater distance.",
+    "moves": 1,
+    "maxSize": 4,
+    "commands": [
+      "Photon"
+    ]
   },
   {
 		"imgSource": 48,
-		"name": "Watchman X"
+    "name": "Watchman X",
+    "desc": "Improved version of Watchman.",
+    "moves": 1,
+    "maxSize": 4,
+    "commands": [
+      "Phaser"
+    ]
   },
   {
 		"imgSource": 49,
@@ -290,5 +507,56 @@
     "commands": [
       "Byte"
     ]
-	}
+  },
+  {
+    "imgSource": 50,
+    "name": "Wizard",
+    "desc": "Pay no attention to the man behind the curtain.",
+    "moves": 3,
+    "maxSize": 4,
+    "commands": [
+      "Scorch",
+      "Stretch"
+    ]
+  },
+  {
+    "imgSource": 51,
+    "name": "Ballista",
+    "desc": "Extreme-range attack program.",
+    "moves": 1,
+    "maxSize": 2,
+    "commands": [
+      "Fling"
+    ]
+  },
+  {
+    "imgSource": 52,
+    "name": "Catapult",
+    "desc": "Extreme-range mobile attacker.",
+    "moves": 2,
+    "maxSize": 3,
+    "commands": [
+      "Fling"
+    ]
+  },
+  {
+    "imgSource": 53,
+    "name": "Turbo Deluxe",
+    "desc": "Slow and steady is for losers.",
+    "moves": 4,
+    "maxSize": 4,
+    "commands": [
+      "MegaBoost"
+    ]
+  },
+  {
+    "imgSource": 54,
+    "name": "Sumo",
+    "desc": "A massive and slow-moving powerhouse",
+    "moves": 2,
+    "maxSize": 12,
+    "commands": [
+      "DataSlam"
+    ]
+  }
 ]
