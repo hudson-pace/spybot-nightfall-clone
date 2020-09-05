@@ -1,7 +1,5 @@
-import { Tile, tileTypes, overlayTypes } from './tile.js';
+import { overlayTypes } from './tile.js';
 import Agent from './agent.js';
-import Inventory from './inventory.js';
-import ProgramMenu from './program-menu.js';
 import Button from './button.js';
 import BattleMap from './battlemap.js';
 import { calculateTextPadding } from './helpers.js';
@@ -9,7 +7,7 @@ import { calculateTextPadding } from './helpers.js';
 const itemTypes = {
   CREDIT: 'credit',
   DATA: 'data',
-}
+};
 
 export default function DataBattle(name, url, images, programMenu, battleLoadedCallback,
   exitBattleCallback) {
@@ -184,7 +182,11 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
           a.resetTurn();
         });
         if (!paused) {
-          this.startEnemyTurn();
+          if (enemyAgents.length > 0) {
+            this.startEnemyTurn();
+          } else {
+            this.draw();
+          }
         }
       }
     }
@@ -193,7 +195,7 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
     if (agents.length === 0) {
       this.endGame(false);
       return true;
-    } if (enemyAgents.length === 0) {
+    } if (enemyAgents.length === 0 && !items.find((item) => item.type === itemTypes.DATA)) {
       this.endGame(true);
       return true;
     }
