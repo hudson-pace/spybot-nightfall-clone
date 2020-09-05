@@ -250,7 +250,10 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
         const selectedAgent = agents.find((a) => a.selected);
         const clickedAgent = agents.find((a) => a.head === tile);
         if (clickedAgent && (!selectedAgent || selectedAgent.movesRemaining > 0
-          || selectedAgent.turnIsOver)) {
+          || selectedAgent.turnIsOver || (selectedAgent.movesRemaining === 0
+            && !BattleMap.tilesAreWithinRange(selectedAgent.head, clickedAgent.head,
+              selectedAgent.selectedCommand.range)))) {
+          // Switch to the clicked program unless the selected program is attacking it.
           if (selectedAgent) {
             selectedAgent.deselect();
           }
@@ -265,7 +268,7 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
           if (itemIndex !== -1) {
             this.pickupItem(itemIndex);
           }
-        } else if (!selectedAgent.turnIsOver
+        } else if (selectedAgent && !selectedAgent.turnIsOver
           && BattleMap.tilesAreWithinRange(tile, selectedAgent.head,
             selectedAgent.selectedCommand.range)) {
           this.executeCommand(tile, selectedAgent, 0);
@@ -300,29 +303,34 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
       delay = 200;
       this.pauseAndDoXTimes(target.hit.bind(target), delay, repetitions, undefined, totalDelay);
       setTimeout(() => {
-        if (target.tiles.length === 0) {
-          let agentList;
-          let targetIndex = enemyAgents.findIndex((agent) => agent === target);
-          if (targetIndex !== -1) {
-            agentList = enemyAgents;
-          } else {
-            targetIndex = agents.findIndex((agent) => agent === target);
-            if (targetIndex !== -1) {
-              agentList = agents;
-            }
-          }
-          if (agentList) {
-            agentList.splice(targetIndex, 1);
-          }
-        }
+        this.checkIfAgentIsDeleted(target);
       }, totalDelay + (delay * (repetitions + 1)));
     }
 
-    setTimeout(() => {
-      this.checkForEndOfTurn();
-    }, totalDelay + (delay * (repetitions + 1)));
     return delay * (repetitions + 1);
   };
+
+  this.checkIfAgentIsDeleted = function checkIfAgentIsDeleted(target) {
+    if (target.selected) {
+      target.deselect();
+    }
+    if (target.tiles.length === 0) {
+      let agentList;
+      let targetIndex = enemyAgents.findIndex((agent) => agent === target);
+      if (targetIndex !== -1) {
+        agentList = enemyAgents;
+      } else {
+        targetIndex = agents.findIndex((agent) => agent === target);
+        if (targetIndex !== -1) {
+          agentList = agents;
+        }
+      }
+      if (agentList) {
+        agentList.splice(targetIndex, 1);
+      }
+    }
+  };
+
   this.alterTerrain = function alterTerrain(tile, command, totalDelay) {
     setTimeout(() => {
       if (command.damage < 0) {
@@ -336,8 +344,6 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
           tile.changeType(tileTypes.NONE);
         }
       }
-      this.checkForEndOfTurn();
-      this.draw();
     }, totalDelay);
   };
 
@@ -357,11 +363,6 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
         target.boostStat(command.stat, command.damage);
       }
     }
-
-    setTimeout(() => {
-      this.checkForEndOfTurn();
-      this.draw();
-    }, totalDelay + (delay * (repetitions + 1)));
     return delay * (repetitions + 1);
   };
 
@@ -378,26 +379,44 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
   };
 
   this.executeCommand = function executeCommand(tile, agent, totalDelay) {
+    let sacrificeRepetitions = 0;
+    let sacrificeDelay = 0;
     let delay = 0;
-    setTimeout(() => {
-      agent.executeCommand();
-      this.draw();
-    }, totalDelay);
-    switch (agent.selectedCommand.type) {
-      default:
-        console.log('command type not implemented.');
-        this.checkForEndOfTurn();
-        break;
-      case 'attack':
-        delay = this.attack(tile, agent.selectedCommand, totalDelay);
-        break;
-      case 'terrain':
-        this.alterTerrain(tile, agent.selectedCommand, totalDelay);
-        break;
-      case 'boost':
-        delay = this.boost(tile, agent.selectedCommand, totalDelay);
-        break;
+    let commandDelay = 0;
+    if (!agent.selectedCommand.sizeReq || agent.tiles.length >= agent.selectedCommand.sizeReq) {
+      setTimeout(() => {
+        agent.executeCommand();
+        this.draw();
+      }, totalDelay);
+      switch (agent.selectedCommand.type) {
+        default:
+          console.log('command type not implemented.');
+          this.checkForEndOfTurn();
+          break;
+        case 'attack':
+          delay = this.attack(tile, agent.selectedCommand, totalDelay);
+          break;
+        case 'terrain':
+          this.alterTerrain(tile, agent.selectedCommand, totalDelay);
+          break;
+        case 'boost':
+          delay = this.boost(tile, agent.selectedCommand, totalDelay);
+          break;
+      }
+      if (agent.selectedCommand.sacrifice) {
+        sacrificeRepetitions = Math.min(agent.selectedCommand.sacrifice, agent.tiles.length);
+        sacrificeDelay = 200;
+        this.pauseAndDoXTimes(agent.hit.bind(agent), sacrificeDelay, sacrificeRepetitions,
+          undefined, totalDelay);
+        commandDelay = Math.max(delay, (sacrificeRepetitions + 1) * sacrificeDelay);
+        setTimeout(() => {
+          this.checkIfAgentIsDeleted(agent);
+        }, totalDelay + commandDelay);
+      }
     }
+    setTimeout(() => {
+      this.checkForEndOfTurn();
+    }, totalDelay + commandDelay);
     return delay;
   };
   this.pauseAndDoXTimes = function pauseAndDoXTimes(callback, intervalDelay,
