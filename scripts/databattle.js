@@ -50,9 +50,8 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
       this.battleData.enemies.forEach((enemy) => {
         const agent = this.agentData.find((a) => a.name === enemy.name);
         if (agent) {
-          enemyAgents.push(new Agent(agent,
-            map.getTileAtGridCoords(enemy.coords.x, enemy.coords.y), images.agents,
-            images.agentDone, context, map));
+          enemyAgents.push(new Agent(agent, enemy.coords, images.agents, images.agentDone, context,
+            map));
         }
       });
       this.draw();
@@ -239,7 +238,8 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
           const agentData = programMenu.getProgramChoice();
           if (agentData) {
             const oldAgentIndex = agents.findIndex((agent) => agent.head === tile);
-            agents.push(new Agent(agentData, tile, images.agents, images.agentDone, context, map));
+            agents.push(new Agent(agentData, [{ x: tile.x, y: tile.y }], images.agents,
+              images.agentDone, context, map));
             if (oldAgentIndex !== -1) {
               programMenu.addProgram(agents[oldAgentIndex].name);
               agents.splice(oldAgentIndex, 1);
@@ -414,6 +414,7 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
         }, totalDelay + commandDelay);
       }
     }
+    commandDelay = Math.max(delay, (sacrificeRepetitions + 1) * sacrificeDelay);
     setTimeout(() => {
       this.checkForEndOfTurn();
     }, totalDelay + commandDelay);

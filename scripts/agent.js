@@ -1,13 +1,15 @@
 import { tileTypes, overlayTypes, Tile } from './tile.js';
 import BattleMap from './battlemap.js';
 
-export default function Agent(agent, startingTile, image, agentDoneImage,
+export default function Agent(agent, coordList, image, agentDoneImage,
   context, map) {
+  const startingTile = map.getTileAtGridCoords(coordList[0].x, coordList[0].y);
   startingTile.changeType(tileTypes.OCCUPIED);
   this.head = startingTile;
   this.tiles = [{
     tile: startingTile,
   }];
+
   this.selected = false;
   this.speed = agent.moves;
   this.movesRemaining = agent.moves;
@@ -187,6 +189,40 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
     }
     return validAdjacentTiles;
   };
+
+  this.addToTail = function addToTail(tile) {
+    // If tile is specified, add it to the tail. Otherwise, add a random tile to the tail.
+    if (this.tiles.length < this.maxSize) {
+      console.log('valid');
+      for (let i = this.tiles.length - 1; i >= 0; i -= 1) {
+        const emptyAdjacentTiles = this.getValidAdjacentTiles(this.tiles[i].tile, 'move', [])
+          .filter((t) => t.type !== tileTypes.OCCUPIED);
+        console.log('adding tile');
+        if (emptyAdjacentTiles.find((t) => t === tile)) {
+          tile.changeType(tileTypes.OCCUPIED);
+          this.tiles.push({
+            tile,
+            nextTile: this.tiles[i].tile,
+          });
+        } else if (!tile && emptyAdjacentTiles.length > 0) {
+          const randomTile = emptyAdjacentTiles[
+            Math.floor(Math.random() * emptyAdjacentTiles.length)
+          ];
+          randomTile.changeType(tileTypes.OCCUPIED);
+          this.tiles.push({
+            tile: randomTile,
+            nextTile: this.tiles[i].tile,
+          });
+          break;
+        }
+      }
+    }
+  };
+  coordList.slice(1).forEach((coord) => {
+    const tile = map.getTileAtGridCoords(coord.x, coord.y);
+    this.addToTail(tile);
+  });
+
   this.getValidMoves = function getValidMoves(searchRadius, type) {
     const visitedTiles = [this.head];
     const explorationQueue = [[this.head, 0]];
@@ -298,26 +334,6 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
       case 'maxSize':
         this.maxSize += amount;
         break;
-    }
-  };
-
-  this.addToTail = function addToTail() {
-    if (this.tiles.length < this.maxSize) {
-      for (let i = this.tiles.length - 1; i >= 0; i -= 1) {
-        const emptyAdjacentTiles = this.getValidAdjacentTiles(this.tiles[i].tile, 'move', [])
-          .filter((tile) => tile.type !== tileTypes.OCCUPIED);
-        if (emptyAdjacentTiles.length > 0) {
-          const randomTile = emptyAdjacentTiles[
-            Math.floor(Math.random() * emptyAdjacentTiles.length)
-          ];
-          randomTile.changeType(tileTypes.OCCUPIED);
-          this.tiles.push({
-            tile: randomTile,
-            nextTile: this.tiles[i].tile,
-          });
-          break;
-        }
-      }
     }
   };
 
