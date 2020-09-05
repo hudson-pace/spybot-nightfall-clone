@@ -130,7 +130,7 @@
     "name": "Firewall",
     "desc": "Keeps unwanted programs out of corporate sectors",
     "moves": 2,
-    "maxSize": 10,
+    "maxSize": 20,
     "commands": [
       "Burn"
     ]

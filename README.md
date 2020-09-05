@@ -8,14 +8,8 @@ A clone of LEGO's Spybot: The Nightfall Incident, one of my favorite flash game 
 As it stands, this project is approaching a facsimile of the original. Notable missing features include:
 
 - The ability to save progress.
-- Enemies that start out with tails, instead of single segments only.
-
-And, less importantly:
-
 - Dialogue and story.
 - Zones with security levels.
-
-I don't care much about those last two, but I'll probably implement them for the sake of creating an accurate clone.
 
 ### Level Editor
 
@@ -28,7 +22,6 @@ It also needs some work to make it look less ugly.
 ### Misc
 - I need to sort out my messy UI and improve the artwork.
 - The AI has a lot of room for improvement. As it stands, it's just functional enough to test gameplay.
-- 24 of the original 37 levels have been recreated. The remaining 13 are waiting on one last game mechanic.
 
 ## Setup
 No fancy setup is required. For the latest version, just clone the repo and start a web server in the root directory and you're golden. Alternatively, check it out at https://hudson-pace.github.io/spybot-nightfall-clone.
