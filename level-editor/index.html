@@ -40,14 +40,15 @@
     <table cellspacing="0" cellpadding="0">
       <tr ng-repeat="row in tiles">
         <td ng-repeat="tile in row">
-          <div class="tile" ng-click="clickTile(tile)" ng-mouseenter="mouseenterTile($event, tile)"
+          <div class="tile" ng-mousedown="clickTile(tile)" ng-mouseenter="mouseenterTile($event, tile)"
           ng-class="{
             'none': tile.type === tileTypes.NONE,
             'basic': tile.type === tileTypes.BASIC,
             'upload': tile.type === tileTypes.UPLOAD,
             'enemy': tile.type === tileTypes.ENEMY,
             'item': tile.type === tileTypes.ITEM,
-          }">
+          }"
+          ng-style="tile.style">
             <span ng-if="tile.type === tileTypes.ENEMY">{{ tile.program }}</span>
             <span ng-if="tile.type === tileTypes.ITEM">{{ tile.item.name }}</span>
           </div>

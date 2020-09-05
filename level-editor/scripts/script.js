@@ -34,6 +34,17 @@ app.controller('controller', ($scope, $http) => {
     }
     $scope.tiles.push(newRow);
   }
+
+  $scope.updateTileCoords = () => {
+    $scope.tiles.forEach((row, rowIndex) => {
+      row.forEach((tile, colIndex) => {
+        tile.x = colIndex;
+        tile.y = rowIndex;
+      });
+    });
+  };
+
+  $scope.updateTileCoords();
   $scope.resize = () => {
     if ($scope.resizeParams) {
       const params = {
@@ -103,41 +114,107 @@ app.controller('controller', ($scope, $http) => {
         }
       }
     }
+    $scope.updateTileCoords();
+  };
+
+  const enemies = [];
+  let currentEnemy;
+  let currentEnemyTile;
+
+  $scope.updateTile = (tile, newType, newItem, newProgram, newStyle) => {
+    const enemyIndex = enemies.findIndex((e) => {
+      let containsTile = false;
+      e.tiles.forEach((enemyTile) => {
+        if (enemyTile === tile) {
+          containsTile = true;
+        }
+      });
+      return containsTile;
+    });
+    if (enemyIndex !== -1) {
+      enemies[enemyIndex].tiles.forEach((enemyTile) => {
+        enemyTile.type = tileTypes.NONE;
+        enemyTile.item = undefined;
+        enemyTile.program = undefined;
+        enemyTile.style = undefined;
+      });
+      enemies.splice(enemyIndex, 1);
+    }
+    tile.type = newType;
+    tile.item = newItem;
+    tile.program = newProgram;
+    tile.style = newStyle;
   };
 
   $scope.clickTile = (tile) => {
     if ($scope.selectedType) {
       if ($scope.selectedType === tileTypes.ENEMY) {
         if ($scope.selectedProgram) {
-          tile.type = $scope.selectedType;
-          tile.program = $scope.selectedProgram;
+          const r = Math.floor(Math.random() * 255);
+          const g = Math.floor(Math.random() * 255);
+          const b = Math.floor(Math.random() * 255);
+          currentEnemy = {
+            name: $scope.selectedProgram,
+            tiles: [tile],
+            style: {
+              'border-left': `4px solid rgba(${r}, ${g}, ${b}, 1)`,
+              'border-right': `4px solid rgba(${r}, ${g}, ${b}, 1)`,
+              'border-top': `4px solid rgba(${r}, ${g}, ${b}, 1)`,
+              'border-bottom': `4px solid rgba(${r}, ${g}, ${b}, 1)`,
+            },
+          };
+          currentEnemyTile = tile;
+          $scope.updateTile(tile, $scope.selectedType, undefined, $scope.selectedProgram,
+            { ...currentEnemy.style });
         }
       } else if ($scope.selectedType === tileTypes.ITEM) {
         if ($scope.selectedItem) {
           if ($scope.selectedItem === 'credit') {
             const amount = parseInt($scope.creditAmount, 10);
             if (amount > 0) {
-              tile.type = $scope.selectedType;
-              tile.item = {
+              const item = {
                 name: $scope.selectedItem,
                 amount,
               };
+              $scope.updateTile(tile, $scope.selectedType, item);
             }
           } else {
-            tile.type = $scope.selectedType;
-            tile.item = {
-              name: $scope.selectedItem,
-            };
+            $scope.updateTile(tile, $scope.selectedType, { name: $scope.selectedItem });
           }
         }
       } else {
-        tile.type = $scope.selectedType;
+        $scope.updateTile(tile, $scope.selectedType);
       }
     }
   };
   $scope.mouseenterTile = (event, tile) => {
     if (event.buttons === 1) {
-      $scope.clickTile(tile);
+      if (currentEnemy) {
+        if (!currentEnemy.tiles.find((t) => t === tile)) {
+          $scope.updateTile(tile, $scope.selectedType, undefined, undefined,
+            { ...currentEnemy.style });
+          currentEnemy.tiles.push(tile);
+          if (tile.x > currentEnemyTile.x) {
+            tile.style['border-left'] = 'none';
+            currentEnemyTile.style['border-right'] = 'none';
+          } else if (tile.x < currentEnemyTile.x) {
+            tile.style['border-right'] = 'none';
+            currentEnemyTile.style['border-left'] = 'none';
+          } else if (tile.y > currentEnemyTile.y) {
+            tile.style['border-top'] = 'none';
+            currentEnemyTile.style['border-bottom'] = 'none';
+          } else if (tile.y < currentEnemyTile.y) {
+            tile.style['border-bottom'] = 'none';
+            currentEnemyTile.style['border-top'] = 'none';
+          }
+        }
+        currentEnemyTile = tile;
+      } else {
+        $scope.clickTile(tile);
+      }
+    } else if (currentEnemy) {
+      enemies.push(currentEnemy);
+      currentEnemy = undefined;
     }
   };
   $scope.generateJSON = () => {
@@ -160,20 +237,11 @@ app.controller('controller', ($scope, $http) => {
             newRow += ' ';
             break;
           case tileTypes.BASIC:
+          case tileTypes.ENEMY:
             newRow += '#';
             break;
           case tileTypes.UPLOAD:
             newRow += '@';
-            break;
-          case tileTypes.ENEMY:
-            newRow += '#';
-            battle.enemies.push({
-              name: tile.program,
-              coords: {
-                x,
-                y,
-              },
-            });
             break;
           case tileTypes.ITEM:
             newRow += '#';
@@ -190,6 +258,19 @@ app.controller('controller', ($scope, $http) => {
       battle.field.push(newRow);
     });
 
+    enemies.forEach((enemy) => {
+      const enemyTiles = [];
+      enemy.tiles.forEach((tile) => {
+        enemyTiles.push({
+          x: tile.x,
+          y: tile.y,
+        });
+      });
+      battle.enemies.push({
+        name: enemy.name,
+        coords: enemyTiles,
+      });
+    });
     console.log(JSON.stringify(battle));
   };
 });
