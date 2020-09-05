@@ -3,6 +3,7 @@ import Agent from './agent.js';
 import Button from './button.js';
 import BattleMap from './battlemap.js';
 import { calculateTextPadding } from './helpers.js';
+import { tileTypes } from './tile.js'
 
 const itemTypes = {
   CREDIT: 'credit',
@@ -106,7 +107,6 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
     } else if (item.type === itemTypes.DATA) {
       sourceX = 27;
     }
-    console.log('drawing item');
     const { x, y } = map.getTileAtGridCoords(item.coords.x, item.coords.y).getDrawingCoords();
     context.drawImage(images.items, sourceX, 0, 27, 27, x, y, 27, 27);
   };
@@ -130,13 +130,15 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
         });
       }
 
-      totalDelay += delay;
-      setTimeout(() => {
-        agent.showAttack(turn.targetTile);
-        this.draw();
-      }, totalDelay);
-      totalDelay += delay;
-      totalDelay += this.executeCommand(turn.targetTile, agent, totalDelay);
+      if (turn.targetTile) {
+        totalDelay += delay;
+        setTimeout(() => {
+          agent.showAttack(turn.targetTile);
+          this.draw();
+        }, totalDelay);
+        totalDelay += delay;
+        totalDelay += this.executeCommand(turn.targetTile, agent, totalDelay);
+      }
       totalDelay += delay;
       setTimeout(() => {
         agent.deselect();
@@ -255,7 +257,7 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
           map.clearTileOverlays();
           programMenu.showActiveProgram(clickedAgent);
           clickedAgent.select();
-        } else if (selectedAgent.movesRemaining > 0) {
+        } else if (selectedAgent && selectedAgent.movesRemaining > 0) {
           selectedAgent.move(tile);
           const newTile = selectedAgent.head;
           const itemIndex = items.findIndex((item) => item.coords.x === newTile.x

@@ -107,6 +107,7 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
   this.deselect = function deselect() {
     this.selected = false;
     clearInterval(flashSelectedDisplay);
+    map.clearTileOverlays();
     this.draw();
   };
   this.move = function move(newTile) {
@@ -200,26 +201,35 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
     }
     return visitedTiles;
   };
-  this.getShortestPath = function getShortestPath(tile1, tile2) {
+  this.getShortestPath = function getShortestPath(tile1, tile2, landOnTile) {
+    // If landOnTile is true, find a path from tile1 to tile2. Otherwise, find a path
+    // to a tile which is adjacent to tile2.
     const visitedTiles = [tile1];
     const explorationQueue = [[tile1]];
     while (explorationQueue.length > 0) {
       const path = explorationQueue.splice(0, 1)[0];
-      if (BattleMap.tilesAreWithinRange(path[0], tile2, 1)) {
+      if ((!landOnTile && BattleMap.tilesAreWithinRange(path[0], tile2, 1))
+        || (landOnTile && path[0] === tile2)) {
         return path;
       }
       let found = false;
       this.getValidAdjacentTiles(path[path.length - 1], 'move', visitedTiles).forEach((nextTile) => {
-        if (BattleMap.tilesAreWithinRange(nextTile, tile2, 1)) {
+        if ((!landOnTile && BattleMap.tilesAreWithinRange(nextTile, tile2, 1))
+          || (landOnTile && nextTile === tile2)) {
           found = true;
         }
         explorationQueue.push([...path, nextTile]);
         visitedTiles.push(nextTile);
       });
       if (found) {
-        const shortestPath = explorationQueue.find((p) => BattleMap.tilesAreWithinRange(
-          p[p.length - 1], tile2, 1,
-        ));
+        const shortestPath = explorationQueue.find((p) => {
+          if (!landOnTile && BattleMap.tilesAreWithinRange(p[p.length - 1], tile2, 1)) {
+            return true;
+          } if (landOnTile && p[p.length - 1] === tile2) {
+            return true;
+          }
+          return false;
+        });
         shortestPath.splice(0, 1);
         return shortestPath;
       }
@@ -384,7 +394,7 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
         }
       });
     } else {
-      // Then move towards the nearest enemy
+      // Then move towards the nearest enemy (by path length).
       enemyAgents.forEach((enemy) => {
         enemy.tiles.forEach((tile) => {
           const newPath = this.getShortestPath(this.head, tile.tile);
@@ -395,13 +405,42 @@ export default function Agent(agent, startingTile, image, agentDoneImage,
         });
       });
     }
+
+    if (!path) {
+      // If all else fails, move towards the reachable tile nearest
+      // the nearest enemy (by manhattan distance)
+      let nearestEnemyTile;
+      let shortestDistance = Infinity;
+      enemyAgents.forEach((enemy) => {
+        enemy.tiles.forEach((tile) => {
+          const distance = BattleMap.manhattanDistance(tile.tile, this.head);
+          if (!nearestEnemyTile || distance < shortestDistance) {
+            shortestDistance = distance;
+            nearestEnemyTile = tile.tile;
+          }
+        });
+      });
+      let bestReachableTile;
+      shortestDistance = Infinity;
+      possibleMoves.forEach((tile) => {
+        const distance = BattleMap.manhattanDistance(tile, nearestEnemyTile);
+        if (!bestReachableTile || distance < shortestDistance) {
+          shortestDistance = distance;
+          bestReachableTile = tile;
+        }
+      });
+      path = this.getShortestPath(this.head, bestReachableTile, true);
+      targetTile = undefined;
+    }
+
     if (path && path.length > this.movesRemaining) {
       // If target is out of range, just get as close as possible.
       if (path.length > this.movesRemaining + this.selectedCommand.range - 1) {
-        targetTile = path[this.movesRemaining + this.selectedCommand.range - 1];
+        targetTile = undefined; // path[this.movesRemaining + this.selectedCommand.range - 1];
       }
       path = path.slice(0, this.movesRemaining);
     }
+    console.log(targetTile);
     return {
       moves: path,
       targetTile,

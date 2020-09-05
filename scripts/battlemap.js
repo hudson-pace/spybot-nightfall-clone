@@ -57,7 +57,11 @@ export default class BattleMap {
   }
 
   static tilesAreWithinRange(tile1, tile2, range) {
-    const distance = Math.abs(tile1.x - tile2.x) + Math.abs(tile1.y - tile2.y);
+    const distance = BattleMap.manhattanDistance(tile1, tile2);
     return distance > 0 && distance <= range;
+  }
+
+  static manhattanDistance(tile1, tile2) {
+    return Math.abs(tile1.x - tile2.x) + Math.abs(tile1.y - tile2.y);
   }
 }
