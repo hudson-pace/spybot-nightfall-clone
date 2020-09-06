@@ -1,8 +1,6 @@
 import NetworkNode from './network-node.js';
-import NodeMenu from './node-menu.js';
-import Inventory from './inventory.js';
-import Shop from './shop.js';
 import { drawRect, calculateTextPadding, rectContainsPoint } from './helpers.js';
+import Menu from './menus/menu.js';
 
 const nodes = [];
 const connections = [];
@@ -118,7 +116,7 @@ export default function NetMap(url, images, inventory, programMenu, mapLoadedCal
       nodeMenu.draw(context);
     }
     if (this.shop) {
-      this.shop.draw(context);
+      this.shop.draw();
     }
     programMenu.draw(context);
     context.font = '16px verdana';
@@ -216,10 +214,7 @@ export default function NetMap(url, images, inventory, programMenu, mapLoadedCal
         const clickedNode = nodes.find((node) => node.containsPoint(coords));
         if (clickedNode && clickedNode.isVisible) {
           selectedNode = clickedNode;
-          nodeMenu = new NodeMenu(selectedNode, canvas, this.startNode.bind(this), () => {
-            nodeMenu = undefined;
-            this.draw();
-          });
+          this.openNodeMenu(selectedNode);
           if (selectedNode.owner === 'Warez') {
             selectedNode.own();
           }
@@ -230,6 +225,9 @@ export default function NetMap(url, images, inventory, programMenu, mapLoadedCal
   };
   this.onMouseWheel = function onMouseWheel(event) {
     this.zoomScreen(event.originalEvent.wheelDelta / 120);
+    if (this.shop) {
+      this.shop.onScroll(event.originalEvent.wheelDelta / 120);
+    }
   };
   this.onKeydown = function onKeydown(event) {
     if (event.keyCode === 71) {
@@ -237,6 +235,24 @@ export default function NetMap(url, images, inventory, programMenu, mapLoadedCal
       this.draw();
     }
   };
+
+  this.openNodeMenu = function startNodeMenu(node) {
+    nodeMenu = new Menu(canvas.width * 0.7, canvas.height * 0.2, canvas.width * 0.25, 0, context);
+    nodeMenu.addTextBlock(node.name, 20, true);
+    nodeMenu.addTextBlock(node.owner, 16, true);
+    nodeMenu.addGap(10);
+    nodeMenu.addTextBlock(node.desc, 15, false);
+    nodeMenu.addGap(10);
+    nodeMenu.addButton('Start', 100, true, true, () => {
+      nodeMenu = undefined;
+      this.startNode();
+    });
+    nodeMenu.addButton('Close', 100, true, true, () => {
+      nodeMenu = undefined;
+      this.draw();
+    });
+  };
+
   this.returnFromBattle = function returnFromBattle(wonBattle, reward, bonusCredits) {
     if (wonBattle) {
       console.log(`${reward} credits, plus ${bonusCredits} bonus credits`);
@@ -251,15 +267,34 @@ export default function NetMap(url, images, inventory, programMenu, mapLoadedCal
   };
   this.startNode = function startNode() {
     if (selectedNode.owner === 'Warez') {
-      this.startShop(selectedNode.shop);
+      this.startShop(selectedNode);
     } else if (selectedNode.owner !== 'S.M.A.R.T.') {
       startDataBattleCallback(selectedNode.name);
+    } else {
+      this.draw();
     }
   };
-  this.startShop = function startShop(shopData) {
-    this.shop = new Shop(shopData, canvas, inventory, programMenu, () => {
+  this.startShop = function startShop(node) {
+    let selectedItem;
+    this.shop = new Menu(canvas.width * 0.3, canvas.height * 0.3, canvas.width * 0.4, 0, context);
+    this.shop.addTextBlock(node.name, 20, true);
+    this.shop.addTextBlock(node.owner, 15, true);
+    this.shop.addScrollList(8, 14,
+      node.shop.map((item) => ({ name: item.name, desc: item.price })),
+      (itemName) => {
+        selectedItem = itemName;
+      });
+    this.shop.addButton('Buy', 0, true, true, () => {
+      const itemInfo = node.shop.find((item) => item.name === selectedItem);
+      if (itemInfo && inventory.spendCredits(itemInfo.price)) {
+        inventory.addProgram(itemInfo.name);
+        programMenu.resetInventoryStock();
+      }
+    });
+    this.shop.addButton('Close', 0, true, true, () => {
       this.shop = undefined;
     });
+
     this.draw();
   };
 }
