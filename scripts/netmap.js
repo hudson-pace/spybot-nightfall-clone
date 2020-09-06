@@ -1,6 +1,7 @@
 import NetworkNode from './network-node.js';
 import { drawRect, calculateTextPadding, rectContainsPoint } from './helpers.js';
 import Menu from './menus/menu.js';
+import ProgramMenu from './menus/program-menu.js';
 
 const nodes = [];
 const connections = [];
@@ -52,40 +53,9 @@ export default function NetMap(url, assets, inventory, mapLoadedCallback,
     height: 30,
   };
 
-  let programInfoMenu;
-  const programListMenu = new Menu(0, 0, 200, canvas.height * 0.4, context);
-  programInfoMenu = new Menu(0, canvas.height * 0.4, 200, canvas.height * 0.6, context);
-  programListMenu.addTextBlock('Program List', 18, true);
-  const programList = programListMenu.addScrollList(8, 14,
-    inventory.programs.map((program) => ({ name: program.name, desc: `x${program.quantity}` })), (programName) => {
-      const selectedProgram = assets.agents.find((program) => program.name === programName);
-      programInfoMenu = new Menu(0, canvas.height * 0.4, 200, canvas.height * 0.6, context);
-      programInfoMenu.addTextBlock('Program Info', 18, true);
-      const imgSourceRect = {
-        x: (selectedProgram.imgSource % 8) * 27,
-        y: Math.floor(selectedProgram.imgSource / 8) * 27,
-        width: 27,
-        height: 27,
-      };
-      programInfoMenu.addImage(assets.images.agents, imgSourceRect, true);
-      programInfoMenu.addTextBlock(selectedProgram.name, 16, true);
-      programInfoMenu.addTextBlock('Commands', 14, false);
-      programInfoMenu.addScrollList(3, 14, selectedProgram.commands.map((command) => ({ name: command, desc: '' })),
-        (commandName) => {
-          programInfoMenu.popComponent();
-          const command = assets.commands.find((com) => com.name === commandName);
-          let commandInfo = `name: ${command.name}\n`;
-          commandInfo += `type: ${command.type}\n`;
-          if (commandInfo.stat) {
-            commandInfo += `stat: ${command.stat}\n`;
-          }
-          commandInfo += `range: ${command.range}\n`;
-          commandInfo += `damage: ${command.damage}\n`;
-          programInfoMenu.addTextBlock(commandInfo, 14, false);
-        });
-      programInfoMenu.addTextBlock(selectedProgram.desc, 14, false);
-    });
-
+  const programMenu = new ProgramMenu(assets, canvas, inventory.programs.map(
+    (program) => ({ name: program.name, desc: `x${program.quantity}` }),
+  ));
   $.getJSON(url, (data) => {
     mapWidth = data.width;
     mapHeight = data.height;
@@ -160,11 +130,7 @@ export default function NetMap(url, assets, inventory, mapLoadedCallback,
     context.fillStyle = 'black';
     const [leftPad, topPad] = calculateTextPadding(this.menuButton, 'Menu', context);
     context.fillText('Menu', this.menuButton.x + leftPad, this.menuButton.y + topPad);
-
-    programListMenu.draw();
-    if (programInfoMenu) {
-      programInfoMenu.draw();
-    }
+    programMenu.draw();
   };
 
   this.moveScreen = function moveScreen(x, y) {
@@ -239,12 +205,8 @@ export default function NetMap(url, assets, inventory, mapLoadedCallback,
         this.draw();
       } else if (rectContainsPoint(this.menuButton, point)) {
         startMenuCallback();
-      } else if (programListMenu.containsPoint(point)) {
-        programListMenu.onClick(point);
-        this.draw();
-      } else if (programInfoMenu && programInfoMenu.containsPoint(point)) {
-        programInfoMenu.onClick(point);
-        this.draw();
+      } else if (programMenu.containsPoint(point)) {
+        programMenu.onClick(point);
       } else {
         const coords = {
           x: (((event.offsetX / canvas.clientWidth)
@@ -271,10 +233,8 @@ export default function NetMap(url, assets, inventory, mapLoadedCallback,
     };
     if (this.shop && this.shop.containsPoint(point)) {
       this.shop.onScroll(event.originalEvent.wheelDelta / 120);
-    } else if (programListMenu && programListMenu.containsPoint(point)) {
-      programListMenu.onScroll(event.originalEvent.wheelDelta / 120);
-    } else if (programInfoMenu && programInfoMenu.containsPoint(point)) {
-      programInfoMenu.onScroll(event.originalEvent.wheelDelta / 120);
+    } else if (programMenu.containsPoint(point)) {
+      programMenu.onScroll(point, event.originalEvent.wheelDelta / 120);
     } else {
       this.zoomScreen(event.originalEvent.wheelDelta / 120);
     }
@@ -338,7 +298,7 @@ export default function NetMap(url, assets, inventory, mapLoadedCallback,
       const itemInfo = node.shop.find((item) => item.name === selectedItem);
       if (itemInfo && inventory.spendCredits(itemInfo.price)) {
         inventory.addProgram(itemInfo.name);
-        programList.updateMembers(inventory.programs.map((program) => (
+        programMenu.updateProgramList(inventory.programs.map((program) => (
           { name: program.name, desc: `x${program.quantity}` })));
       }
     });

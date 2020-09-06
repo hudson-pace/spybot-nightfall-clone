@@ -66,7 +66,7 @@ export default function ViewManager(url, assets) {
     currentView.returnFromBattle(wonBattle, reward, bonusCredits);
   }
   function startDataBattle(name) {
-    const dataBattle = new DataBattle(name, `${url}/battles.json`, assets, inventory.getCopyOfProgramList(), () => {
+    const dataBattle = new DataBattle(name, `${url}/battles.json`, assets, inventory, () => {
       console.log('Databattle loaded.');
       setCurrentView(dataBattle);
     }, switchToNetMap);

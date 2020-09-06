@@ -301,9 +301,9 @@ export default function Agent(agent, coordList, assets, context, map) {
     this.movesRemaining = this.speed;
   };
 
-  this.chooseCommand = function chooseCommand(newCommand) {
+  this.chooseCommand = function chooseCommand(newCommandName) {
     if (this.selected) {
-      const commandIndex = this.commands.findIndex((command) => command.name === newCommand.name);
+      const commandIndex = this.commands.findIndex((command) => command.name === newCommandName);
       if (commandIndex !== -1) {
         this.selectedCommand = this.commands[commandIndex];
         this.movesRemaining = 0;

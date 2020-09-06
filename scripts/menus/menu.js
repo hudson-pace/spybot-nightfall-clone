@@ -178,7 +178,11 @@ export default class Menu {
       },
       updateMembers: (newMembers) => {
         newComponent.members = newMembers;
-        selectedMember = newComponent.members.find((member) => member.name === selectedMember.name);
+        if (selectedMember) {
+          selectedMember = newComponent.members.find(
+            (member) => member.name === selectedMember.name,
+          );
+        }
       },
     };
     this.addComponent(newComponent);
