@@ -166,63 +166,64 @@ export default function NetMap(url, assets, inventory, mapLoadedCallback,
       ((oldHeight - 500 / zoomFactor) * (relativeMousePosition[1])) * zoomFactor);
   };
 
-  let mouseIsDown = false;
   let isDragging = false;
   let oldX;
   let oldY;
   this.onMouseDown = function onMouseDown(event) {
-    mouseIsDown = true;
-    isDragging = false;
+    const point = {
+      x: canvas.width * (event.offsetX / canvas.clientWidth),
+      y: canvas.height * (event.offsetY / canvas.clientHeight),
+    };
+    if (!programMenu.containsPoint(point) && (!nodeMenu || !nodeMenu.containsPoint(point))) {
+      isDragging = true;
+    }
     oldX = event.offsetX;
     oldY = event.offsetY;
   };
   this.onMouseUp = function onMouseUp() {
-    mouseIsDown = false;
+    isDragging = false;
   };
   this.onMouseLeave = function onMouseLeave() {
-    mouseIsDown = false;
+    isDragging = false;
   };
   this.onMouseMove = function onMouseMove(event) {
     relativeMousePosition[0] = event.offsetX / canvas.clientWidth;
     relativeMousePosition[1] = event.offsetY / canvas.clientHeight;
-    if (mouseIsDown) {
-      isDragging = true;
+    if (isDragging) {
       this.moveScreen(oldX - event.offsetX, oldY - event.offsetY);
       oldX = event.offsetX;
       oldY = event.offsetY;
     }
   };
   this.onClick = function onClick(event) {
-    if (!isDragging) {
-      const point = {
-        x: 1000 * (event.offsetX / canvas.clientWidth),
-        y: 500 * (event.offsetY / canvas.clientHeight),
+    const point = {
+      x: canvas.width * (event.offsetX / canvas.clientWidth),
+      y: canvas.height * (event.offsetY / canvas.clientHeight),
+    };
+    if (nodeMenu && nodeMenu.containsPoint(point)) {
+      nodeMenu.onClick(point);
+    } else if (this.shop && this.shop.containsPoint(point)) {
+      this.shop.onClick(point);
+      this.draw();
+    } else if (rectContainsPoint(this.menuButton, point)) {
+      startMenuCallback();
+    } else if (programMenu.containsPoint(point)) {
+      programMenu.onClick(point);
+    } else {
+      const coords = {
+        x: (((event.offsetX / canvas.clientWidth)
+          * canvas.width) / zoomFactor) + screenPosition[0],
+        y: (((event.offsetY / canvas.clientHeight)
+          * canvas.height) / zoomFactor) + screenPosition[1],
       };
-      if (nodeMenu && nodeMenu.containsPoint(point)) {
-        nodeMenu.onClick(point);
-      } else if (this.shop && this.shop.containsPoint(point)) {
-        this.shop.onClick(point);
-        this.draw();
-      } else if (rectContainsPoint(this.menuButton, point)) {
-        startMenuCallback();
-      } else if (programMenu.containsPoint(point)) {
-        programMenu.onClick(point);
-      } else {
-        const coords = {
-          x: (((event.offsetX / canvas.clientWidth)
-            * canvas.width) / zoomFactor) + screenPosition[0],
-          y: (((event.offsetY / canvas.clientHeight)
-            * canvas.height) / zoomFactor) + screenPosition[1],
-        };
-        const clickedNode = nodes.find((node) => node.containsPoint(coords));
-        if (clickedNode && clickedNode.isVisible) {
-          selectedNode = clickedNode;
-          this.openNodeMenu(selectedNode);
-          if (selectedNode.owner === 'Warez') {
-            selectedNode.own();
-          }
-          this.draw();
+      const clickedNode = nodes.find((node) => node.containsPoint(coords));
+      if (clickedNode && clickedNode.isVisible) {
+        selectedNode = clickedNode;
+        this.openNodeMenu(selectedNode);
+        if (selectedNode.owner === 'Warez') {
+          selectedNode.own();
         }
+        this.draw();
       }
     }
   };
