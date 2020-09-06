@@ -10,8 +10,8 @@ export default function Agent(agent, coordList, assets, context, map) {
   }];
 
   this.selected = false;
-  this.speed = agent.moves;
-  this.movesRemaining = agent.moves;
+  this.speed = agent.speed;
+  this.movesRemaining = agent.speed;
   this.maxSize = agent.maxSize;
   this.name = agent.name;
   this.desc = agent.desc;

@@ -232,7 +232,12 @@ export default class Menu {
 
   static splitTextIntoLines(width, text, context) {
     if (text.indexOf('\n') !== -1) {
-      return text.split('\n');
+      let lines = [];
+      const segments = text.split('\n');
+      segments.forEach((segment) => {
+        lines = lines.concat(Menu.splitTextIntoLines(width, segment, context));
+      });
+      return lines;
     }
     const words = text.split(' ');
     const lines = [];

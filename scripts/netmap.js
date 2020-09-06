@@ -293,6 +293,7 @@ export default function NetMap(url, assets, inventory, mapLoadedCallback,
       node.shop.map((item) => ({ name: item.name, desc: item.price })),
       (itemName) => {
         selectedItem = itemName;
+        programMenu.showProgramInfoFromName(itemName);
       });
     this.shop.addButton('Buy', 0, true, true, () => {
       const itemInfo = node.shop.find((item) => item.name === selectedItem);

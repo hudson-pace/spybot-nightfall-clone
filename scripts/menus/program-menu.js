@@ -11,22 +11,21 @@ export default class ProgramMenu {
     this.programListMenu.addTextBlock('Program List', 18, true);
     this.programList = this.programListMenu.addScrollList(8, 14,
       programList, (programName) => {
-        const selectedProgram = {
-          ...assets.agents.find((program) => program.name === programName),
-        };
-        selectedProgram.commands = selectedProgram.commands.map(
-          (command) => ({ name: command }),
-        );
-        this.showProgramInfo(selectedProgram);
-
+        this.showProgramInfoFromName(programName);
         if (selectProgramCallback) {
-          selectProgramCallback(selectedProgram.name);
+          selectProgramCallback(programName);
         }
       });
   }
 
   updateProgramList(members) {
     this.programList.updateMembers(members);
+  }
+
+  showProgramInfoFromName(programName) {
+    const program = { ...this.assets.agents.find((prog) => prog.name === programName) };
+    program.commands = program.commands.map((command) => ({ name: command }));
+    this.showProgramInfo(program);
   }
 
   showProgramInfo(program, selectCommandCallback) {
@@ -46,19 +45,32 @@ export default class ProgramMenu {
       (commandName) => {
         this.programInfoMenu.popComponent();
         const command = this.assets.commands.find((com) => com.name === commandName);
-        let commandInfo = `name: ${command.name}\n`;
-        commandInfo += `type: ${command.type}\n`;
-        if (commandInfo.stat) {
-          commandInfo += `stat: ${command.stat}\n`;
+        let commandInfo = `Name: ${command.name}\n`;
+        commandInfo += `Type: ${command.type.charAt(0).toUpperCase() + command.type.slice(1)}\n`;
+        if (command.stat) {
+          commandInfo += `Stat: ${command.stat.charAt(0).toUpperCase() + command.stat.slice(1)}\n`;
         }
-        commandInfo += `range: ${command.range}\n`;
-        commandInfo += `damage: ${command.damage}\n`;
+        commandInfo += `Range: ${command.range}\n`;
+        commandInfo += `Damage: ${command.damage}\n`;
+        if (command.sizeReq) {
+          commandInfo += `Size Requirement: ${command.sizeReq}\n`;
+        } if (command.sacrifice) {
+          commandInfo += `Sacrifice: ${command.sacrifice}\n`;
+        }
+
+        // Slice off the trailing newline.
+        commandInfo = commandInfo.slice(0, commandInfo.length - 1);
+
         this.programInfoMenu.addTextBlock(commandInfo, 14, false);
         if (selectCommandCallback) {
           selectCommandCallback(commandName);
         }
       });
-    this.programInfoMenu.addTextBlock(program.desc, 14, false);
+
+    let programInfo = `${program.desc}\n`;
+    programInfo += `Speed: ${program.speed}\n`;
+    programInfo += `Max Size: ${program.maxSize}\n`;
+    this.programInfoMenu.addTextBlock(programInfo, 14, false);
   }
 
   draw() {
