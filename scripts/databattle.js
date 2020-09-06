@@ -4,13 +4,14 @@ import Button from './button.js';
 import BattleMap from './battlemap.js';
 import { calculateTextPadding } from './helpers.js';
 import { tileTypes } from './tile.js'
+import Menu from './menus/menu.js';
 
 const itemTypes = {
   CREDIT: 'credit',
   DATA: 'data',
 };
 
-export default function DataBattle(name, url, images, programMenu, battleLoadedCallback,
+export default function DataBattle(name, url, assets, programList, battleLoadedCallback,
   exitBattleCallback) {
   const canvas = $('canvas')[0];
   const context = canvas.getContext('2d');
@@ -32,6 +33,18 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
   let showingPopup = false;
   let enemyTurnCount = 0;
 
+  let selectedProgram;
+  let programInfoMenu;
+  const programListMenu = new Menu(0, 0, 200, canvas.height * 0.4, context);
+  programInfoMenu = new Menu(0, canvas.height * 0.4, 200, canvas.height * 0.6, context);
+  programListMenu.addTextBlock('Program List', 18, true);
+  const programScrollList = programListMenu.addScrollList(8, 14,
+    programList.map((program) => ({ name: program.name, desc: `x${program.quantity}` })), (programName) => {
+      const program = assets.agents.find((prog) => prog.name === programName);
+      selectedProgram = program;
+      this.showProgramInfo(program);
+    });
+
   const startButton = new Button(250, 470, 100, 30, 'Start', () => {
     gameIsStarted = true;
     map.clearTileOverlays();
@@ -50,8 +63,7 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
       this.battleData.enemies.forEach((enemy) => {
         const agent = this.agentData.find((a) => a.name === enemy.name);
         if (agent) {
-          enemyAgents.push(new Agent(agent, enemy.coords, images.agents, images.agentDone, context,
-            map));
+          enemyAgents.push(new Agent(agent, enemy.coords, assets, context, map));
         }
       });
       this.draw();
@@ -66,7 +78,7 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
   $.getJSON(url, (data) => {
     console.log('battle loaded');
     const battle = data.battles.find((b) => b.name === name);
-    map = new BattleMap(battle, canvas, images);
+    map = new BattleMap(battle, canvas, assets.images);
     this.battleData = battle;
     items = this.battleData.items;
 
@@ -88,7 +100,8 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
       startButton.draw(context);
     }
     leaveButton.draw(context);
-    programMenu.draw(context);
+    programListMenu.draw();
+    programInfoMenu.draw();
     if (showingPopup) {
       context.fillStyle = 'rgba(40, 40, 40, 0.95)';
       context.fillRect(popupMessage.x, popupMessage.y, popupMessage.width, popupMessage.height);
@@ -107,7 +120,7 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
       sourceX = 27;
     }
     const { x, y } = map.getTileAtGridCoords(item.coords.x, item.coords.y).getDrawingCoords();
-    context.drawImage(images.items, sourceX, 0, 27, 27, x, y, 27, 27);
+    context.drawImage(assets.images.items, sourceX, 0, 27, 27, x, y, 27, 27);
   };
 
   this.nextEnemyTurn = function nextEnemyTurn() {
@@ -227,22 +240,38 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
       const y = (event.offsetY / canvas.clientHeight) * canvas.height;
       const tile = map.getTileAtPoint({ x, y });
 
+      const clickedEnemy = enemyAgents.find((a) => a.head === tile);
+      if (clickedEnemy) {
+        this.showProgramInfo(clickedEnemy);
+      }
+
       if (leaveButton.containsPoint({ x, y })) {
         leaveButton.click();
-      } else if (programMenu.containsPoint({ x, y })) {
-        programMenu.onClick({ x, y });
+      } else if (programListMenu.containsPoint({ x, y })) {
+        programListMenu.onClick({ x, y });
+      } else if (programInfoMenu.containsPoint({ x, y })) {
+        programInfoMenu.onClick({ x, y });
       } else if (!gameIsStarted) {
         if (startButton.containsPoint({ x, y })) {
           startButton.click();
         } else if (tile && tile.overlay === overlayTypes.UPLOAD) {
-          const agentData = programMenu.getProgramChoice();
-          if (agentData) {
-            const oldAgentIndex = agents.findIndex((agent) => agent.head === tile);
-            agents.push(new Agent(agentData, [{ x: tile.x, y: tile.y }], images.agents,
-              images.agentDone, context, map));
-            if (oldAgentIndex !== -1) {
-              programMenu.addProgram(agents[oldAgentIndex].name);
-              agents.splice(oldAgentIndex, 1);
+          if (selectedProgram) {
+            const newProgram = programList.find((prog) => prog.name === selectedProgram.name);
+            if (newProgram && newProgram.quantity > 0) {
+              newProgram.quantity -= 1;
+              const agentData = assets.agents.find((agent) => agent.name === newProgram.name);
+              const oldAgentIndex = agents.findIndex((agent) => agent.head === tile);
+              agents.push(new Agent(agentData, [{ x: tile.x, y: tile.y }], assets, context, map));
+              if (oldAgentIndex !== -1) {
+                const program = programList.find(
+                  (prog) => prog.name === agents[oldAgentIndex].name,
+                );
+                program.quantity += 1;
+                agents.splice(oldAgentIndex, 1);
+              }
+              programScrollList.updateMembers(programList.map((prog) => ({
+                name: prog.name, desc: `x${prog.quantity}`,
+              })));
             }
           }
         }
@@ -258,8 +287,8 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
             selectedAgent.deselect();
           }
           map.clearTileOverlays();
-          programMenu.showActiveProgram(clickedAgent);
           clickedAgent.select();
+          this.showProgramInfo(clickedAgent);
         } else if (selectedAgent && selectedAgent.movesRemaining > 0) {
           selectedAgent.move(tile);
           const newTile = selectedAgent.head;
@@ -291,8 +320,15 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
   };
 
   this.onMouseWheel = function onMouseWheel(event) {
-    programMenu.scroll(event.originalEvent.wheelDelta / -120);
-    programMenu.draw(context);
+    const point = {
+      x: 1000 * (event.offsetX / canvas.clientWidth),
+      y: 500 * (event.offsetY / canvas.clientHeight),
+    };
+    if (programListMenu && programListMenu.containsPoint(point)) {
+      programListMenu.onScroll(event.originalEvent.wheelDelta / 120);
+    } else if (programInfoMenu && programInfoMenu.containsPoint(point)) {
+      programInfoMenu.onScroll(event.originalEvent.wheelDelta / 120);
+    }
   };
   this.attack = function attack(tile, command, totalDelay) {
     let delay = 0;
@@ -450,5 +486,33 @@ export default function DataBattle(name, url, images, programMenu, battleLoadedC
       bonusCredits += item.amount;
       console.log(item.amount);
     }
+  };
+
+  this.showProgramInfo = function showProgramInfo(program) {
+    programInfoMenu = new Menu(0, canvas.height * 0.4, 200, canvas.height * 0.6, context);
+    programInfoMenu.addTextBlock('Program Info', 18, true);
+    const imgSourceRect = {
+      x: (program.imgSource % 8) * 27,
+      y: Math.floor(program.imgSource / 8) * 27,
+      width: 27,
+      height: 27,
+    };
+    programInfoMenu.addImage(assets.images.agents, imgSourceRect, true);
+    programInfoMenu.addTextBlock(program.name, 16, true);
+    programInfoMenu.addTextBlock('Commands', 14, false);
+    programInfoMenu.addScrollList(3, 14, program.commands.map((command) => ({ name: command.name, desc: '' })),
+      (commandName) => {
+        programInfoMenu.popComponent();
+        const command = assets.commands.find((com) => com.name === commandName);
+        let commandInfo = `name: ${command.name}\n`;
+        commandInfo += `type: ${command.type}\n`;
+        if (commandInfo.stat) {
+          commandInfo += `stat: ${command.stat}\n`;
+        }
+        commandInfo += `range: ${command.range}\n`;
+        commandInfo += `damage: ${command.damage}\n`;
+        programInfoMenu.addTextBlock(commandInfo, 14, false);
+      });
+    programInfoMenu.addTextBlock(program.desc, 14, false);
   };
 }

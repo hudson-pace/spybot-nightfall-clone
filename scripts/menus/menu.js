@@ -122,6 +122,7 @@ export default class Menu {
     const width = this.rect.width - (2 * this.padding);
     let selectedMember;
     const newComponent = {
+      members,
       rect: {
         x: this.rect.x + this.padding,
         y: this.rect.y + this.yOffset,
@@ -136,7 +137,7 @@ export default class Menu {
         this.context.font = `${textHeight}px verdana`;
         this.context.textBaseline = 'top';
         for (let i = 0; i < slots; i += 1) {
-          const member = members[i + newComponent.scrollAmount];
+          const member = newComponent.members[i + newComponent.scrollAmount];
           if (member) {
             if (selectedMember && selectedMember === member) {
               this.context.fillStyle = 'rgba(70, 70, 70, 1)';
@@ -145,7 +146,7 @@ export default class Menu {
             }
             this.context.fillStyle = 'white';
             this.context.fillText(
-              `${member.name}    ${member.desc}`,
+              `${member.name} ${member.desc}`,
               newComponent.rect.x,
               newComponent.rect.y + (i * textHeight),
             );
@@ -156,24 +157,53 @@ export default class Menu {
         newComponent.scrollAmount -= amount;
         if (newComponent.scrollAmount < 0) {
           newComponent.scrollAmount = 0;
-        } else if (newComponent.scrollAmount > members.length - slots) {
+        } else if (newComponent.scrollAmount > newComponent.members.length - slots) {
           if (members.length < slots) {
             newComponent.scrollAmount = 0;
           } else {
-            newComponent.scrollAmount = members.length - slots;
+            newComponent.scrollAmount = newComponent.members.length - slots;
           }
         }
         this.draw();
       },
       onClick: (point) => {
         const slotIndex = Math.floor((point.y - newComponent.rect.y) / textHeight);
-        const member = members[slotIndex + newComponent.scrollAmount];
+        const member = newComponent.members[slotIndex + newComponent.scrollAmount];
         if (member) {
           if (!selectedMember || selectedMember !== member) {
             selectedMember = member;
             chooseMemberCallback(selectedMember.name);
           }
         }
+      },
+      updateMembers: (newMembers) => {
+        newComponent.members = newMembers;
+        selectedMember = newComponent.members.find((member) => member.name === selectedMember.name);
+      },
+    };
+    this.addComponent(newComponent);
+    return newComponent;
+  }
+
+  addImage(image, sourceRect, centered) {
+    let { x } = this.rect;
+    if (centered) {
+      x += (this.rect.width - (sourceRect.width) * 1.3) / 2;
+    } else {
+      x += this.padding;
+    }
+    const newComponent = {
+      rect: {
+        x,
+        y: this.rect.y + this.yOffset,
+        width: sourceRect.width * 1.3,
+        height: sourceRect.height * 1.3,
+      },
+      draw: () => {
+        this.context.drawImage(image,
+          sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height,
+          newComponent.rect.x, newComponent.rect.y,
+          sourceRect.width * 1.3, sourceRect.height * 1.3);
       },
     };
     this.addComponent(newComponent);
@@ -187,17 +217,25 @@ export default class Menu {
     }
   }
 
+  popComponent() {
+    const component = this.components.pop();
+    this.yOffset -= (component.rect.height + this.padding);
+  }
+
   static calculateTextPadding(width, text, context) {
     return (width - context.measureText(text).width) / 2;
   }
 
   static splitTextIntoLines(width, text, context) {
+    if (text.indexOf('\n') !== -1) {
+      return text.split('\n');
+    }
     const words = text.split(' ');
     const lines = [];
     while (words.length > 0) {
       let currentLineLength = 0;
       let index = 0;
-      while (index < words.length && currentLineLength < width) {
+      while (index <= words.length && currentLineLength < width) {
         const line = words.slice(0, index);
         currentLineLength = context.measureText(line.join(' ')).width;
         index += 1;

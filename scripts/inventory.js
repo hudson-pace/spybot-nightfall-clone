@@ -72,4 +72,11 @@ export default function Inventory() {
     this.programs.sort((a, b) => ((a.name > b.name) ? 1 : -1));
   };
   this.sortPrograms();
+  this.getCopyOfProgramList = function getCopyOfProgramList() {
+    const programList = [];
+    this.programs.forEach((program) => {
+      programList.push({ ...program });
+    });
+    return programList;
+  };
 }

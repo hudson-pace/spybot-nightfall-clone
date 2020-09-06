@@ -1,8 +1,7 @@
 import { tileTypes, overlayTypes, Tile } from './tile.js';
 import BattleMap from './battlemap.js';
 
-export default function Agent(agent, coordList, image, agentDoneImage,
-  context, map) {
+export default function Agent(agent, coordList, assets, context, map) {
   const startingTile = map.getTileAtGridCoords(coordList[0].x, coordList[0].y);
   startingTile.changeType(tileTypes.OCCUPIED);
   this.head = startingTile;
@@ -15,6 +14,8 @@ export default function Agent(agent, coordList, image, agentDoneImage,
   this.movesRemaining = agent.moves;
   this.maxSize = agent.maxSize;
   this.name = agent.name;
+  this.desc = agent.desc;
+  this.imgSource = agent.imgSource;
   const imageSource = {
     x: (agent.imgSource % 8) * 27,
     y: Math.floor(agent.imgSource / 8) * 27,
@@ -22,14 +23,9 @@ export default function Agent(agent, coordList, image, agentDoneImage,
   };
   this.turnIsOver = false;
   this.commands = [];
-
-  $.getJSON('./assets/commands.json', (data) => {
-    this.commandData = data;
-    console.log('commands loaded');
-    agent.commands.forEach((command) => {
-      this.commands.push(data.find((com) => com.name === command));
-      [this.selectedCommand] = this.commands;
-    });
+  agent.commands.forEach((command) => {
+    this.commands.push(assets.commands.find((com) => com.name === command));
+    [this.selectedCommand] = this.commands;
   });
 
   function createConnector(tile1, tile2, coords) {
@@ -62,8 +58,8 @@ export default function Agent(agent, coordList, image, agentDoneImage,
       const coords = tile.tile.getDrawingCoords();
       if (tile.tile === this.head) {
         context.clearRect(coords.x - 2, coords.y - 2, imageSource.size + 4, imageSource.size + 4);
-        context.drawImage(image, imageSource.x, imageSource.y, imageSource.size, imageSource.size,
-          coords.x, coords.y, imageSource.size, imageSource.size);
+        context.drawImage(assets.images.agents, imageSource.x, imageSource.y, imageSource.size,
+          imageSource.size, coords.x, coords.y, imageSource.size, imageSource.size);
         const pixelData = context.getImageData(coords.x, coords.y, 1, 1).data;
         context.fillStyle = `rgba(${pixelData.join(',')})`;
       } else if (index > 0) {
@@ -83,13 +79,13 @@ export default function Agent(agent, coordList, image, agentDoneImage,
         context.fillRect(coords.x - 2, coords.y - 2,
           imageSource.size + 4, imageSource.size + 4);
       }
-      context.drawImage(image, imageSource.x, imageSource.y, imageSource.size, imageSource.size,
-        coords.x, coords.y, imageSource.size, imageSource.size);
+      context.drawImage(assets.images.agents, imageSource.x, imageSource.y, imageSource.size,
+        imageSource.size, coords.x, coords.y, imageSource.size, imageSource.size);
     }
 
     if (this.turnIsOver) {
       const coords = this.head.getDrawingCoords();
-      context.drawImage(agentDoneImage, 0, 0, imageSource.size, imageSource.size,
+      context.drawImage(assets.images.agentDone, 0, 0, imageSource.size, imageSource.size,
         coords.x, coords.y, imageSource.size, imageSource.size);
     }
   };
