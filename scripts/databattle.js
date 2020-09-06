@@ -274,8 +274,8 @@ export default function DataBattle(name, url, assets, inventory, battleLoadedCal
       } else if (tile) {
         const selectedAgent = agents.find((a) => a.selected);
         const clickedAgent = agents.find((a) => a.head === tile);
-        if (clickedAgent && (!selectedAgent || selectedAgent.movesRemaining > 0
-          || selectedAgent.turnIsOver || (selectedAgent.movesRemaining === 0
+        if (clickedAgent && (!selectedAgent || !selectedAgent.isAttacking
+          || selectedAgent.turnIsOver || (selectedAgent.isAttacking
             && !BattleMap.tilesAreWithinRange(selectedAgent.head, clickedAgent.head,
               selectedAgent.selectedCommand.range)))) {
           // Switch to the clicked program unless the selected program is attacking it.
@@ -286,8 +286,13 @@ export default function DataBattle(name, url, assets, inventory, battleLoadedCal
           clickedAgent.select();
           programMenu.showProgramInfo(clickedAgent, (commandName) => {
             clickedAgent.chooseCommand(commandName);
+          }, () => {
+            clickedAgent.chooseMove();
+          }, () => {
+            clickedAgent.chooseEndTurn();
+            this.checkForEndOfTurn();
           });
-        } else if (selectedAgent && selectedAgent.movesRemaining > 0) {
+        } else if (selectedAgent && !selectedAgent.isAttacking && !selectedAgent.turnIsOver) {
           selectedAgent.move(tile);
           const newTile = selectedAgent.head;
           const itemIndex = items.findIndex((item) => item.coords.x === newTile.x

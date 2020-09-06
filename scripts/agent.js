@@ -16,6 +16,7 @@ export default function Agent(agent, coordList, assets, context, map) {
   this.name = agent.name;
   this.desc = agent.desc;
   this.imgSource = agent.imgSource;
+  this.isAttacking = false;
   const imageSource = {
     x: (agent.imgSource % 8) * 27,
     y: Math.floor(agent.imgSource / 8) * 27,
@@ -130,6 +131,9 @@ export default function Agent(agent, coordList, assets, context, map) {
         });
       }
       this.movesRemaining -= 1;
+      if (this.movesRemaining === 0) {
+        this.isAttacking = true;
+      }
       this.head = newTile;
       this.showMoveOverlays();
     }
@@ -146,7 +150,7 @@ export default function Agent(agent, coordList, assets, context, map) {
   this.showMoveOverlays = function showMoveOverlays() {
     map.clearTileOverlays();
     if (!this.turnIsOver) {
-      if (this.movesRemaining > 0) {
+      if (!this.isAttacking) {
         this.highlightTiles(this.getValidMoves(this.movesRemaining, 'move'), 'move');
       } else {
         this.highlightTiles(
@@ -299,6 +303,7 @@ export default function Agent(agent, coordList, assets, context, map) {
   this.resetTurn = function resetTurn() {
     this.turnIsOver = false;
     this.movesRemaining = this.speed;
+    this.isAttacking = false;
   };
 
   this.chooseCommand = function chooseCommand(newCommandName) {
@@ -306,10 +311,18 @@ export default function Agent(agent, coordList, assets, context, map) {
       const commandIndex = this.commands.findIndex((command) => command.name === newCommandName);
       if (commandIndex !== -1) {
         this.selectedCommand = this.commands[commandIndex];
-        this.movesRemaining = 0;
+        this.isAttacking = true;
         this.showMoveOverlays();
       }
     }
+  };
+  this.chooseMove = function chooseMove() {
+    this.isAttacking = false;
+    this.showMoveOverlays();
+  };
+  this.chooseEndTurn = function chooseEndTurn() {
+    map.clearTileOverlays();
+    this.turnIsOver = true;
   };
 
   this.hit = function hit() {
@@ -448,11 +461,10 @@ export default function Agent(agent, coordList, assets, context, map) {
     if (path && path.length > this.movesRemaining) {
       // If target is out of range, just get as close as possible.
       if (path.length > this.movesRemaining + this.selectedCommand.range - 1) {
-        targetTile = undefined; // path[this.movesRemaining + this.selectedCommand.range - 1];
+        targetTile = undefined;
       }
       path = path.slice(0, this.movesRemaining);
     }
-    console.log(targetTile);
     return {
       moves: path,
       targetTile,

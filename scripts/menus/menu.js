@@ -74,8 +74,7 @@ export default class Menu {
     this.yOffset += gap;
   }
 
-  addButton(text, minWidth, centerText, centered, onButtonPress) {
-    const textHeight = this.baseTextHeight * 0.8;
+  addButton(text, textHeight, minWidth, centerText, centered, onButtonPress) {
     this.context.font = `${textHeight}px verdana`;
     const width = Math.max(this.context.measureText(text).width + (this.padding * 2), minWidth);
     const height = textHeight * 2;

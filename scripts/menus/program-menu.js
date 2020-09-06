@@ -6,8 +6,8 @@ export default class ProgramMenu {
     this.canvas = canvas;
     const context = canvas.getContext('2d');
     this.context = context;
-    this.programListMenu = new Menu(0, 0, 200, canvas.height * 0.4, context);
-    this.programInfoMenu = new Menu(0, canvas.height * 0.4, 200, canvas.height * 0.6, context);
+    this.programListMenu = new Menu(0, 0, 200, canvas.height * 0.3, context);
+    this.programInfoMenu = new Menu(0, canvas.height * 0.3, 200, canvas.height * 0.7, context);
     this.programListMenu.addTextBlock('Program List', 18, true);
     this.programList = this.programListMenu.addScrollList(8, 14,
       programList, (programName) => {
@@ -28,9 +28,9 @@ export default class ProgramMenu {
     this.showProgramInfo(program);
   }
 
-  showProgramInfo(program, selectCommandCallback) {
-    this.programInfoMenu = new Menu(0, this.canvas.height * 0.4, 200,
-      this.canvas.height * 0.6, this.context);
+  showProgramInfo(program, selectCommandCallback, selectMoveCallback, selectEndTurnCallback) {
+    this.programInfoMenu = new Menu(0, this.canvas.height * 0.3, 200,
+      this.canvas.height * 0.7, this.context);
     this.programInfoMenu.addTextBlock('Program Info', 18, true);
     const imgSourceRect = {
       x: (program.imgSource % 8) * 27,
@@ -45,13 +45,30 @@ export default class ProgramMenu {
       (commandName) => {
         this.programInfoMenu.popComponent();
         const command = this.assets.commands.find((com) => com.name === commandName);
-        let commandInfo = `Name: ${command.name}\n`;
-        commandInfo += `Type: ${command.type.charAt(0).toUpperCase() + command.type.slice(1)}\n`;
-        if (command.stat) {
-          commandInfo += `Stat: ${command.stat.charAt(0).toUpperCase() + command.stat.slice(1)}\n`;
+
+        let commandInfo = `Range: ${command.range}\n`;
+        switch (command.type) {
+          default:
+            commandInfo += 'This command is unknown.\n';
+            break;
+          case 'attack':
+            commandInfo += `Deletes ${command.damage} segments from target.\n`;
+            break;
+          case 'boost':
+            if (command.damage > 0) {
+              commandInfo += `Increases ${command.stat} of target by ${command.damage}.\n`;
+            } else {
+              commandInfo += `Decreases ${command.stat} of target by ${command.damage * -1}.\n`;
+            }
+            break;
+          case 'terrain':
+            if (command.damage > 0) {
+              commandInfo += 'Deletes the targeted tile.\n';
+            } else {
+              commandInfo += 'Repairs the targeted tile.\n';
+            }
+            break;
         }
-        commandInfo += `Range: ${command.range}\n`;
-        commandInfo += `Damage: ${command.damage}\n`;
         if (command.sizeReq) {
           commandInfo += `Size Requirement: ${command.sizeReq}\n`;
         } if (command.sacrifice) {
@@ -66,6 +83,12 @@ export default class ProgramMenu {
           selectCommandCallback(commandName);
         }
       });
+
+    if (selectMoveCallback) {
+      this.programInfoMenu.addButton('Move', 12, 100, true, true, () => selectMoveCallback());
+    } if (selectEndTurnCallback) {
+      this.programInfoMenu.addButton('End Turn', 12, 100, true, true, () => selectEndTurnCallback());
+    }
 
     let programInfo = `${program.desc}\n`;
     programInfo += `Speed: ${program.speed}\n`;

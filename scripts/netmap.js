@@ -254,11 +254,11 @@ export default function NetMap(url, assets, inventory, mapLoadedCallback,
     nodeMenu.addGap(10);
     nodeMenu.addTextBlock(node.desc, 15, false);
     nodeMenu.addGap(10);
-    nodeMenu.addButton('Start', 100, true, true, () => {
+    nodeMenu.addButton('Start', 16, 100, true, true, () => {
       nodeMenu = undefined;
       this.startNode();
     });
-    nodeMenu.addButton('Close', 100, true, true, () => {
+    nodeMenu.addButton('Close', 16, 100, true, true, () => {
       nodeMenu = undefined;
       this.draw();
     });
@@ -296,7 +296,7 @@ export default function NetMap(url, assets, inventory, mapLoadedCallback,
         selectedItem = itemName;
         programMenu.showProgramInfoFromName(itemName);
       });
-    this.shop.addButton('Buy', 0, true, true, () => {
+    this.shop.addButton('Buy', 16, 0, true, true, () => {
       const itemInfo = node.shop.find((item) => item.name === selectedItem);
       if (itemInfo && inventory.spendCredits(itemInfo.price)) {
         inventory.addProgram(itemInfo.name);
@@ -304,7 +304,7 @@ export default function NetMap(url, assets, inventory, mapLoadedCallback,
           { name: program.name, desc: `x${program.quantity}` })));
       }
     });
-    this.shop.addButton('Close', 0, true, true, () => {
+    this.shop.addButton('Close', 16, 0, true, true, () => {
       this.shop = undefined;
     });
 
