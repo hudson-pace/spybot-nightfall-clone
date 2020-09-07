@@ -146,6 +146,7 @@ export default function NetMap(url, assets, inventory, startDataBattleCallback, 
         this.draw();
       });
     }
+    this.moveScreen(-10000, -10000);
     this.moveScreen(node.center.x - (canvas.width / 2), node.center.y - (canvas.height / 2));
   };
 
@@ -287,10 +288,14 @@ export default function NetMap(url, assets, inventory, startDataBattleCallback, 
     nodeMenu.addTextBlock(node.desc, 15, false);
     nodeMenu.addGap(10);
     if (node.isActive) {
-      nodeMenu.addButton('Start', 16, 100, true, true, () => {
-        nodeMenu = undefined;
-        this.startNode();
-      });
+      if (this.securityLevel >= node.securityLevel) {
+        nodeMenu.addButton('Start', 16, 100, true, true, () => {
+          nodeMenu = undefined;
+          this.startNode();
+        });
+      } else {
+        nodeMenu.addTextBlock('[Higher security clearance is needed to access this node.]', 16, false);
+      }
     }
     nodeMenu.addButton('Close', 16, 100, true, true, () => {
       nodeMenu = undefined;
