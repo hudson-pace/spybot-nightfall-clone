@@ -14,6 +14,7 @@ export default function NetworkNode(node, image) {
   this.desc = node.desc;
   this.owner = node.owner;
   this.shop = node.shop;
+  this.event = node.event;
 
   this.isVisible = node.ownedByUser;
   this.isActive = node.ownedByUser;
@@ -43,6 +44,9 @@ export default function NetworkNode(node, image) {
   this.containsPoint = function containsPoint(point) {
     return (point.x >= this.rect.x && point.x < this.rect.x + this.rect.width
       && point.y >= this.rect.y && point.y < this.rect.y + this.rect.height);
+  };
+  this.reveal = function reveal() {
+    this.isVisible = true;
   };
   this.activate = function activate() {
     this.isVisible = true;

@@ -74,17 +74,13 @@ export default function ViewManager(url, assets) {
 
   const startMenu = new StartMenu(canvas, () => {
     if (!netMap) {
-      netMap = new NetMap(`${url}/netmap.json`, assets, inventory, () => {
-        console.log('Netmap loaded.');
-        setCurrentView(netMap);
-      }, startDataBattle, () => {
+      netMap = new NetMap(`${url}/netmap.json`, assets, inventory, startDataBattle, () => {
         setCurrentView(startMenu);
         startMenu.draw();
       });
-    } else {
-      setCurrentView(netMap);
-      netMap.draw();
     }
+    setCurrentView(netMap);
+    netMap.draw();
   });
   setCurrentView(startMenu);
 }

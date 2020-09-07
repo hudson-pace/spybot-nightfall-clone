@@ -2,6 +2,7 @@ import NetworkNode from './network-node.js';
 import { drawRect, calculateTextPadding, rectContainsPoint } from './helpers.js';
 import Menu from './menus/menu.js';
 import ProgramMenu from './menus/program-menu.js';
+import DialogueMenu from './menus/dialogue-menu.js';
 
 const nodes = [];
 const connections = [];
@@ -21,23 +22,8 @@ function addConnectionsFromNode(node) {
     }
   });
 }
-function createInitialConnections() {
-  nodes.forEach((node) => {
-    if (node.isOwned) {
-      addConnectionsFromNode(node);
-    }
-  });
-}
-function ownNode(node) {
-  node.own();
-  addConnectionsFromNode(node);
-}
 
-export default function NetMap(url, assets, inventory, mapLoadedCallback,
-  startDataBattleCallback, startMenuCallback) {
-  let mapWidth;
-  let mapHeight;
-  let maxZoom;
+export default function NetMap(url, assets, inventory, startDataBattleCallback, startMenuCallback) {
   let showingGrid = false;
   const canvas = $('canvas')[0];
   const context = canvas.getContext('2d');
@@ -52,43 +38,19 @@ export default function NetMap(url, assets, inventory, mapLoadedCallback,
     width: 50,
     height: 30,
   };
+  this.securityLevel = 1;
 
   const programMenu = new ProgramMenu(assets, canvas, inventory.programs.map(
     (program) => ({ name: program.name, desc: `x${program.quantity}` }),
   ));
-  $.getJSON(url, (data) => {
-    mapWidth = data.width;
-    mapHeight = data.height;
-    maxZoom = Math.min(mapWidth / 1000, mapHeight / 500);
-    data.nodes.forEach((node) => {
-      nodes.push(new NetworkNode(node, assets.images[node.image]));
-    });
-    createInitialConnections();
 
-    const hqNode = nodes.find((node) => node.name === 'S.M.A.R.T. HQ');
-    this.moveScreen(hqNode.center.x - (canvas.width / 2), hqNode.center.y - (canvas.height / 2));
-
-    mapLoadedCallback();
-
-    this.draw();
+  const map = assets.netmap;
+  const mapWidth = map.width;
+  const mapHeight = map.height;
+  const maxZoom = Math.min(mapWidth / 100, mapHeight / 500);
+  map.nodes.forEach((node) => {
+    nodes.push(new NetworkNode(node, assets.images[node.image]));
   });
-
-  this.drawGrid = function drawGrid() {
-    for (let i = -1 * (screenPosition[1] % 100); i < mapHeight; i += 100) {
-      context.beginPath();
-      context.strokeStyle = 'grey';
-      context.moveTo(0, i);
-      context.lineTo(mapWidth, i);
-      context.stroke();
-    }
-    for (let i = -1 * (screenPosition[0] % 100); i < mapWidth; i += 100) {
-      context.beginPath();
-      context.strokeStyle = 'grey';
-      context.moveTo(i, 0);
-      context.lineTo(i, mapHeight);
-      context.stroke();
-    }
-  };
 
   this.draw = function draw() {
     console.log('Redrawing netmap.');
@@ -131,6 +93,9 @@ export default function NetMap(url, assets, inventory, mapLoadedCallback,
     const [leftPad, topPad] = calculateTextPadding(this.menuButton, 'Menu', context);
     context.fillText('Menu', this.menuButton.x + leftPad, this.menuButton.y + topPad);
     programMenu.draw();
+    if (this.dialogueMenu) {
+      this.dialogueMenu.draw();
+    }
   };
 
   this.moveScreen = function moveScreen(x, y) {
@@ -148,6 +113,70 @@ export default function NetMap(url, assets, inventory, mapLoadedCallback,
     }
     this.draw();
   };
+
+  this.ownNode = function ownNode(node) {
+    node.own();
+    addConnectionsFromNode(node);
+    console.log(`Node ${node.name} has been owned.`);
+    if (node.event) {
+      console.log(node.event);
+      this.dialogueMenu = new DialogueMenu(context, node.event.dialogue, () => {
+        switch (node.event.type) {
+          default:
+            break;
+          case 'add program':
+            inventory.addProgram(node.event.programName);
+            programMenu.updateProgramList(inventory.programs.map((program) => (
+              { name: program.name, desc: `x${program.quantity}` })));
+            break;
+          case 'reveal node': {
+            const newNode = nodes.find((n) => n.name === node.event.nodeName);
+            newNode.reveal();
+            // temp fix. TODO: Add function to center the screen on a node.
+            this.moveScreen(-10000, -10000);
+            this.moveScreen(newNode.center.x - (canvas.width / 2),
+              newNode.center.y - (canvas.height / 2));
+            break;
+          }
+          case 'increase security level':
+            this.securityLevel += 1;
+            break;
+        }
+        this.dialogueMenu = undefined;
+        this.draw();
+      });
+    }
+    this.moveScreen(node.center.x - (canvas.width / 2), node.center.y - (canvas.height / 2));
+  };
+
+  this.createInitialConnections = function createInitialConnections() {
+    nodes.forEach((node) => {
+      if (node.isOwned) {
+        console.log(node);
+        this.ownNode(node);
+      }
+    });
+  };
+
+  this.createInitialConnections();
+
+  this.drawGrid = function drawGrid() {
+    for (let i = -1 * (screenPosition[1] % 100); i < mapHeight; i += 100) {
+      context.beginPath();
+      context.strokeStyle = 'grey';
+      context.moveTo(0, i);
+      context.lineTo(mapWidth, i);
+      context.stroke();
+    }
+    for (let i = -1 * (screenPosition[0] % 100); i < mapWidth; i += 100) {
+      context.beginPath();
+      context.strokeStyle = 'grey';
+      context.moveTo(i, 0);
+      context.lineTo(i, mapHeight);
+      context.stroke();
+    }
+  };
+
   this.zoomScreen = function zoomScreen(z) {
     const oldWidth = 1000 / zoomFactor;
     const oldHeight = 500 / zoomFactor;
@@ -174,7 +203,8 @@ export default function NetMap(url, assets, inventory, mapLoadedCallback,
       x: canvas.width * (event.offsetX / canvas.clientWidth),
       y: canvas.height * (event.offsetY / canvas.clientHeight),
     };
-    if (!programMenu.containsPoint(point) && (!nodeMenu || !nodeMenu.containsPoint(point))) {
+    if (!programMenu.containsPoint(point) && (!nodeMenu || !nodeMenu.containsPoint(point))
+      && (!this.dialogueMenu || !this.dialogueMenu.containsPoint(point))) {
       isDragging = true;
     }
     oldX = event.offsetX;
@@ -209,7 +239,9 @@ export default function NetMap(url, assets, inventory, mapLoadedCallback,
       startMenuCallback();
     } else if (programMenu.containsPoint(point)) {
       programMenu.onClick(point);
-    } else {
+    } else if (this.dialogueMenu && this.dialogueMenu.containsPoint(point)) {
+      this.dialogueMenu.onClick(point);
+    } else if (!this.dialogueMenu) {
       const coords = {
         x: (((event.offsetX / canvas.clientWidth)
           * canvas.width) / zoomFactor) + screenPosition[0],
@@ -221,7 +253,7 @@ export default function NetMap(url, assets, inventory, mapLoadedCallback,
         selectedNode = clickedNode;
         this.openNodeMenu(selectedNode);
         if (selectedNode.owner === 'Warez') {
-          selectedNode.own();
+          this.ownNode(selectedNode);
         }
         this.draw();
       }
@@ -254,10 +286,12 @@ export default function NetMap(url, assets, inventory, mapLoadedCallback,
     nodeMenu.addGap(10);
     nodeMenu.addTextBlock(node.desc, 15, false);
     nodeMenu.addGap(10);
-    nodeMenu.addButton('Start', 16, 100, true, true, () => {
-      nodeMenu = undefined;
-      this.startNode();
-    });
+    if (node.isActive) {
+      nodeMenu.addButton('Start', 16, 100, true, true, () => {
+        nodeMenu = undefined;
+        this.startNode();
+      });
+    }
     nodeMenu.addButton('Close', 16, 100, true, true, () => {
       nodeMenu = undefined;
       this.draw();
@@ -267,7 +301,7 @@ export default function NetMap(url, assets, inventory, mapLoadedCallback,
   this.returnFromBattle = function returnFromBattle(wonBattle, reward, bonusCredits) {
     if (wonBattle) {
       console.log(`${reward} credits, plus ${bonusCredits} bonus credits`);
-      ownNode(selectedNode);
+      this.ownNode(selectedNode);
       inventory.addCredits(reward + bonusCredits);
     } else {
       console.log('You lose. In your face. Haha what a loser.');
