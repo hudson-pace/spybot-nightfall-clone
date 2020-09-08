@@ -2,9 +2,12 @@
   padding: 0;
   margin: 0;
 }
+html {
+  height: 100%;
+}
 body {
   text-align: center;
-  padding-top: 16px;
+  height: 100%;
 }
 table {
   border: 1px solid black;
@@ -17,6 +20,9 @@ table {
   border: 1px solid black;
   overflow: hidden;
   box-sizing: border-box;
+}
+.tile:hover {
+  background-color: red;
 }
 .tile.none {
   background-color: white;
@@ -40,4 +46,21 @@ input.resize {
 .option {
   border: 1px solid black;
   padding: 8px 0;
+}
+
+#app-container {
+  height: 100%;
+}
+#view-container {
+  height: 80%;
+}
+#netmap-container {
+  width: 90%;
+  height: 90%;
+  display: inline-block;
+  overflow: scroll;
+  border: 1px solid black;
+}
+#netmap {
+  transform: rotate(45deg);
 }

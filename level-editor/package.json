@@ -1,0 +1,15 @@
+{
+  "name": "level-editor",
+  "version": "1.0.0",
+  "description": "A level editor for use in my spybot clone.",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "Hudson Pace",
+  "license": "ISC",
+  "dependencies": {
+    "angular": "^1.8.0",
+    "angular-route": "^1.8.0"
+  }
+}
