@@ -21,9 +21,6 @@ table {
   overflow: hidden;
   box-sizing: border-box;
 }
-.tile:hover {
-  background-color: red;
-}
 .tile.none {
   background-color: white;
 }
@@ -38,6 +35,53 @@ table {
 }
 .tile.item {
   background-color: green;
+}
+.tile.node {
+  background-color: blue;
+}
+.tile.selected {
+  border: 3px solid pink;
+}
+.connection-horizontal {
+  background-color: black;
+  height: 100%;
+  width: 5px;
+  display: inline-block;
+}
+.connection-vertical {
+  background-color: black;
+  height: 100%;
+  width: 5px;
+  display: inline-block;
+  transform: rotate(90deg);
+}
+.connection-top-corner {
+  background-color: black;
+  height: 100%;
+  width: 5px;
+  display: inline-block;
+  transform: rotate(45deg) translateX(-18px);
+}
+.connection-bottom-corner {
+  background-color: black;
+  height: 100%;
+  width: 5px;
+  display: inline-block;
+  transform: rotate(45deg) translateX(18px);
+}
+.connection-right-corner {
+  background-color: black;
+  height: 100%;
+  width: 5px;
+  display: inline-block;
+  transform: rotate(-45deg) translateX(18px);
+}
+.connection-left-corner {
+  background-color: black;
+  height: 100%;
+  width: 5px;
+  display: inline-block;
+  transform: rotate(-45deg) translateX(-18px);
 }
 input.resize {
   width: 20px;
@@ -55,8 +99,8 @@ input.resize {
   height: 80%;
 }
 #netmap-container {
-  width: 90%;
-  height: 90%;
+  width: 95%;
+  height: 100%;
   display: inline-block;
   overflow: scroll;
   border: 1px solid black;

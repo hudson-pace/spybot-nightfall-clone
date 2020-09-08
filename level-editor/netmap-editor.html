@@ -8,12 +8,45 @@
     <p>(Use negative numbers to shrink)</p>
     <button ng-click="resize()">Change Size</button>
   </div>
+  <div class="option" ng-show="mode === modes.ADD">
+    Add Node:
+    <select ng-model="newNode.owner">
+      <option ng-repeat="owner in ownerList">{{ owner }}</option>
+    </select>
+    <input type="text" ng-model="newNode.name"></input>
+    <button ng-click="addNode()">Add Node</button>
+  </div>
+  <div class="option" ng-show="mode === modes.EDIT">
+    <select ng-model="selectedNode.owner">
+      <option ng-repeat="owner in ownerList">{{ owner }}</option>
+    </select>
+    <input type="text" ng-model="selectedNode.name"></input>
+    <button ng-click="removeNode()">Remove Node</button>
+    <button ng-click="addConnection()">Add Connection</button>
+  </div>
+  <div class="option" ng-show="mode === modes.ADDING_CONNECTION">
+    <button ng-click="cancelConnection()">Cancel</button>
+  </div>
 </div>
 <div id="netmap-container">
   <table cellspacing="0" cellpadding="0" id="netmap" ng-style="tableMargin">
     <tr ng-repeat="row in tiles">
       <td ng-repeat="tile in row">
-        <div class="tile" ng-mousedown="clickTile(tile)">
+        <div class="tile" ng-mousedown="clickTile(tile)"
+        ng-class="{
+          'none': tile.type === tileTypes.NONE,
+          'node': tile.type === tileTypes.NODE,
+          'selected': tile.selected,
+        }">
+          <div ng-class="{
+            'connection-horizontal': tile.type === tileTypes.CONNECTION_HORIZONTAL,
+            'connection-vertical': tile.type === tileTypes.CONNECTION_VERTICAL,
+            'connection-top-corner': tile.type === tileTypes.CONNECTION_TOP_CORNER,
+            'connection-bottom-corner': tile.type === tileTypes.CONNECTION_BOTTOM_CORNER,
+            'connection-left-corner': tile.type === tileTypes.CONNECTION_LEFT_CORNER,
+            'connection-right-corner': tile.type === tileTypes.CONNECTION_RIGHT_CORNER,
+          }">
+          </div>
         </div>
       </td>
     </tr>

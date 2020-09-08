@@ -7,8 +7,8 @@ function generateTiles(width, height, defaultType) {
         coords: {
           x: j,
           y: i,
-          type: defaultType,
         },
+        type: defaultType,
       });
     }
     tiles.push(newRow);
@@ -290,7 +290,30 @@ const app = angular.module('MapEditor', ['ngRoute'])
   .controller('NetmapEditorController', function($scope) {
     $scope.tileTypes = {
       NONE: 'none',
+      NODE: 'node',
+      CONNECTION_HORIZONTAL: 'connection-horizontal',
+      CONNECTION_VERTICAL: 'connection-vertical',
+      CONNECTION_TOP_CORNER: 'connection-top-corner',
+      CONNECTION_LEFT_CORNER: 'connection-left-corner',
+      CONNECTION_RIGHT_CORNER: 'connection-right-corner',
+      CONNECTION_BOTTOM_CORNER: 'connection-bottom-corner',
     };
+    $scope.modes = {
+      ADD: 'add',
+      EDIT: 'edit',
+      ADDING_CONNECTION: 'adding connection',
+      NONE: 'none',
+    }
+    $scope.ownerList = [
+      'Cellular Automata Research',
+      'Doctor Donut',
+      'Lucky Monkey Media',
+      'Parker Ellington Davis Consulting',
+      'Pharmhaus',
+      'S.M.A.R.T.',
+      'Unknown',
+      'Warez'
+    ]
     const defaultWidth = 10;
     const defaultHeight = 10;
     const maxSize = 99;
@@ -308,8 +331,143 @@ const app = angular.module('MapEditor', ['ngRoute'])
       'margin-left': `${(Math.max($scope.tiles[0].length, $scope.tiles.length) / 2) * 50}px`,
     }
 
+    $scope.nodes = [];
+    $scope.connections = [];
     $scope.clickTile = (tile) => {
-      console.log(`(${((tile.x - tile.y + $scope.tiles.length) - 1) / 2}, ${(tile.x + tile.y) / 2})`);
+      if ($scope.mode === $scope.modes.ADDING_CONNECTION) {
+        const previousTile = $scope.currentConnection[$scope.currentConnection.length - 1];
+        if (tile === previousTile && tile.type !== $scope.tileTypes.NODE) {
+          tile.type = $scope.tileTypes.NONE;
+          $scope.currentConnection.pop();
+        } if ((tile.type === $scope.tileTypes.NONE || tile.type === $scope.tileTypes.NODE) && Math.abs(tile.x - previousTile.x) + Math.abs(tile.y - previousTile.y) === 1) {
+            if (tile !== $scope.selectedNode.tile) {
+              $scope.currentConnection.push(tile);
+              $scope.updateConnectionOrientations($scope.currentConnection);
+            if (tile.type === $scope.tileTypes.NODE) {
+              $scope.finishCurrentConnection();
+            }
+          }
+        }
+      } else {
+        if ($scope.selectedTile) {
+          $scope.selectedTile.selected = false;
+        }
+        $scope.selectedTile = tile;
+        tile.selected = true;
+        if (tile.type === $scope.tileTypes.NODE) {
+          $scope.mode = $scope.modes.EDIT;
+          $scope.selectedNode = $scope.nodes.find((node) => node.tile === tile);
+        } else if (tile.type === $scope.tileTypes.NONE) {
+          $scope.mode = $scope.modes.ADD;
+          $scope.newNode = {
+            tile
+          }
+        } else {
+          $scope.mode = $scope.modes.NONE;
+        }
+      }
+    }
+
+    $scope.addNode = () => {
+      $scope.newNode.tile.type = $scope.tileTypes.NODE;
+      $scope.nodes.push({
+        name: $scope.newNode.name,
+        owner: $scope.newNode.owner,
+        tile: $scope.newNode.tile,
+      });
+      const tile = $scope.newNode.tile;
+      $scope.newNode = undefined;
+      $scope.clickTile(tile);
+    }
+    $scope.removeNode = () => {
+      const tile = $scope.selectedNode.tile;
+      tile.type = $scope.tileTypes.NONE;
+      const index = $scope.nodes.findIndex((node) => node === $scope.selectedNode);
+      $scope.nodes.splice(index, 1);
+      $scope.selectedNode = undefined;
+      $scope.clickTile(tile);
+    }
+    $scope.addConnection = () => {
+      $scope.mode = $scope.modes.ADDING_CONNECTION;
+      $scope.currentConnection = [$scope.selectedNode.tile];
+    }
+    $scope.cancelConnection = () => {
+      $scope.mode = $scope.modes.EDIT;
+      $scope.currentConnection.forEach((tile) => {
+        if (tile.type !== $scope.tileTypes.NODE) {
+          tile.type = $scope.tileTypes.NONE;
+        }
+      });
+      $scope.clickTile($scope.selectedNode.tile);
+    }
+
+    $scope.mouseEnterTile = (tile) => {
+
+    }
+
+    $scope.finishCurrentConnection = () => {
+      const tile = $scope.currentConnection[0];
+      $scope.connections.push($scope.currentConnection);
+      $scope.currentConnection = undefined;
+      $scope.mode = $scope.modes.EDIT;
+      $scope.clickTile(tile);
+    }
+
+    $scope.updateConnectionOrientations = (connection) => {
+      let newTileType;
+      if (connection.length > 2) {
+        if (connection[connection.length - 3].y > connection[connection.length - 2].y) {
+          if (connection[connection.length - 2].x > connection[connection.length - 1].x) {
+            connection[connection.length - 2].type = $scope.tileTypes.CONNECTION_LEFT_CORNER;
+            newTileType = $scope.tileTypes.CONNECTION_VERTICAL;
+          } else if (connection[connection.length - 2].x < connection[connection.length - 1].x) {
+            connection[connection.length - 2].type = $scope.tileTypes.CONNECTION_BOTTOM_CORNER;
+            newTileType = $scope.tileTypes.CONNECTION_VERTICAL;
+          } else {
+            newTileType = $scope.tileTypes.CONNECTION_HORIZONTAL;
+          }
+        } else if (connection[connection.length - 3].y < connection[connection.length - 2].y) {
+          if (connection[connection.length - 2].x > connection[connection.length - 1].x) {
+            connection[connection.length - 2].type = $scope.tileTypes.CONNECTION_TOP_CORNER;
+            newTileType = $scope.tileTypes.CONNECTION_VERTICAL;
+          } else if (connection[connection.length - 2].x < connection[connection.length - 1].x) {
+            connection[connection.length - 2].type = $scope.tileTypes.CONNECTION_RIGHT_CORNER;
+            newTileType = $scope.tileTypes.CONNECTION_VERTICAL;
+          } else {
+            newTileType = $scope.tileTypes.CONNECTION_HORIZONTAL;
+          }
+        } else if (connection[connection.length - 3].x > connection[connection.length - 2].x) {
+          if (connection[connection.length - 2].y > connection[connection.length - 1].y) {
+            connection[connection.length - 2].type = $scope.tileTypes.CONNECTION_RIGHT_CORNER;
+            newTileType = $scope.tileTypes.CONNECTION_HORIZONTAL;
+          } else if (connection[connection.length - 2].y < connection[connection.length - 1].y) {
+            connection[connection.length - 2].type = $scope.tileTypes.CONNECTION_BOTTOM_CORNER;
+            newTileType = $scope.tileTypes.CONNECTION_HORIZONTAL;
+          } else {
+            newTileType = $scope.tileTypes.CONNECTION_VERTICAL;
+          }
+        } else if (connection[connection.length - 3].x < connection[connection.length - 2].x) {
+          if (connection[connection.length - 2].y > connection[connection.length - 1].y) {
+            connection[connection.length - 2].type = $scope.tileTypes.CONNECTION_TOP_CORNER;
+            newTileType = $scope.tileTypes.CONNECTION_HORIZONTAL;
+          } else if (connection[connection.length - 2].y < connection[connection.length - 1].y) {
+            connection[connection.length - 2].type = $scope.tileTypes.CONNECTION_LEFT_CORNER;
+            newTileType = $scope.tileTypes.CONNECTION_HORIZONTAL;
+          } else {
+            newTileType = $scope.tileTypes.CONNECTION_VERTICAL;
+          }
+        }
+      } else {
+        if (connection[0].y !== connection[1].y) {
+          newTileType = $scope.tileTypes.CONNECTION_HORIZONTAL;
+        } else {
+          newTileType = $scope.tileTypes.CONNECTION_VERTICAL;
+        }
+      }
+
+      if (connection[connection.length - 1].type !== $scope.tileTypes.NODE) {
+        connection[connection.length - 1].type = newTileType;
+      }
     }
   })
   .config(function($routeProvider) {
