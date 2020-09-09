@@ -9,7 +9,6 @@
   "author": "Hudson Pace",
   "license": "ISC",
   "dependencies": {
-    "angular": "^1.8.0",
-    "angular-route": "^1.8.0"
+    "angular": "^1.8.0"
   }
 }

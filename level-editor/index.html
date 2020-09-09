@@ -5,14 +5,19 @@
   <base href="/level-editor/">
   <link href="style.css" rel="stylesheet" type="text/css">
   <script src="node_modules/angular/angular.js"></script>
-  <script src="node_modules/angular-route/angular-route.js"></script>
-  <script type="module" src="scripts/script.js"></script>
+  <script src="app.js"></script>
+  <script src="components/databattle-editor/databattle-editor.component.js"></script>
+  <script src="components/netmap-editor//netmap-editor.component.js"></script>
+  <script src="services/grid.service.js"></script>
 </head>
 <body>
-  <div ng-app="MapEditor" ng-controller="MainController" id="app-container">
-    <a href="#!/databattle-editor">Databattle Editor</a>
-    <a href="#!/netmap-editor">Netmap Editor</a>
-    <div ng-view id="view-container"></div>
+  <div ng-app="mapEditorApp" ng-controller="homeController" id="app-container">
+    <div ng-show="mode === 'start'">
+      <button ng-click="startDatabattleEditor()">Databattle</button>
+      <button ng-click="startNetmapEditor()">Netmap</button>
+    </div>
+    <databattle-editor ng-show="mode === 'databattle'"></databattle-editor>
+    <netmap-editor ng-show="mode === 'netmap'"></netmap-editor>
   </div>
 </body>
 </html>
