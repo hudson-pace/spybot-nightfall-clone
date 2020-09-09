@@ -20,6 +20,7 @@ table {
   border: 1px solid black;
   overflow: hidden;
   box-sizing: border-box;
+  text-align: center;
 }
 .tile.none {
   background-color: white;
@@ -91,6 +92,10 @@ input.resize {
   border: 1px solid black;
   padding: 8px 0;
 }
+.netmap-option {
+  border: 2px solid black;
+  padding: 8px;
+}
 
 #app-container {
   height: 100%;
@@ -99,11 +104,20 @@ input.resize {
   height: 80%;
 }
 #netmap-container {
-  width: 95%;
   height: 100%;
-  display: inline-block;
+  display: flex;
+}
+#netmap-options {
+  box-sizing: border-box;
+  border: 2px solid pink;
+  flex: 0 0 300px;
+  text-align: left;
+}
+#netmap-grid-container {
   overflow: scroll;
   border: 1px solid black;
+  flex: 0 0 80%;
+  text-align: left;
 }
 #netmap {
   transform: rotate(45deg);

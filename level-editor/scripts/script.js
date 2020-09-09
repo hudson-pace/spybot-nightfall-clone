@@ -226,22 +226,6 @@ const app = angular.module('MapEditor', ['ngRoute'])
         if (currentEnemy) {
           if (!currentEnemy.tiles.find((t) => t === tile)) {
             $scope.addToEnemy(currentEnemy, tile, currentEnemyTile);
-            /* $scope.updateTile(tile, $scope.selectedType, undefined, undefined,
-              { ...currentEnemy.style });
-            currentEnemy.tiles.push(tile);
-            if (tile.x > currentEnemyTile.x) {
-              tile.style['border-left'] = 'none';
-              currentEnemyTile.style['border-right'] = 'none';
-            } else if (tile.x < currentEnemyTile.x) {
-              tile.style['border-right'] = 'none';
-              currentEnemyTile.style['border-left'] = 'none';
-            } else if (tile.y > currentEnemyTile.y) {
-              tile.style['border-top'] = 'none';
-              currentEnemyTile.style['border-bottom'] = 'none';
-            } else if (tile.y < currentEnemyTile.y) {
-              tile.style['border-bottom'] = 'none';
-              currentEnemyTile.style['border-top'] = 'none';
-            } */
           }
           currentEnemyTile = tile;
         } else {
@@ -396,17 +380,16 @@ const app = angular.module('MapEditor', ['ngRoute'])
     $scope.resize = () => {
       resizeTileGrid($scope.tiles, $scope.resizeParams, maxSize, $scope.tileTypes.NONE);
       $scope.tableMargin = {
-        'margin-top': `${(Math.max($scope.tiles[0].length, $scope.tiles.length) / 2) * 50}px`,
-        'margin-left': `${(Math.max($scope.tiles[0].length, $scope.tiles.length) / 2) * 50}px`,
+        'margin-top': `${ ((((Math.sqrt(2) * $scope.tiles.length) + (Math.sqrt(2) * $scope.tiles[0].length)) / 2) - ($scope.tiles.length)) * 25 }px`,
+        'margin-left': `${ ((((Math.sqrt(2) * $scope.tiles.length) + (Math.sqrt(2) * $scope.tiles[0].length)) / 2) - ($scope.tiles[0].length)) * 25 }px`,
       }
     }
     $scope.tableMargin = {
-      'margin-top': `${(Math.max($scope.tiles[0].length, $scope.tiles.length) / 2) * 50}px`,
-      'margin-left': `${(Math.max($scope.tiles[0].length, $scope.tiles.length) / 2) * 50}px`,
+      'margin-top': `${ ((((Math.sqrt(2) * $scope.tiles.length) + (Math.sqrt(2) * $scope.tiles[0].length)) / 2) - ($scope.tiles.length)) * 25 }px`,
+      'margin-left': `${ ((((Math.sqrt(2) * $scope.tiles.length) + (Math.sqrt(2) * $scope.tiles[0].length)) / 2) - ($scope.tiles[0].length)) * 25 }px`,
     }
 
     $scope.nodes = [];
-    $scope.connections = [];
     $scope.clickTile = (tile) => {
       if ($scope.mode === $scope.modes.ADDING_CONNECTION) {
         const previousTile = $scope.currentConnection[$scope.currentConnection.length - 1];
@@ -447,7 +430,12 @@ const app = angular.module('MapEditor', ['ngRoute'])
       $scope.nodes.push({
         name: $scope.newNode.name,
         owner: $scope.newNode.owner,
+        desc: $scope.newNode.desc,
+        startsOutOwned: $scope.newNode.startsOutOwned,
+        securityLevel: parseInt($scope.newNode.securityLevel, 10),
+        battle: $scope.newNode.battle,
         tile: $scope.newNode.tile,
+        connections: [],
       });
       const tile = $scope.newNode.tile;
       $scope.newNode = undefined;
@@ -481,7 +469,16 @@ const app = angular.module('MapEditor', ['ngRoute'])
 
     $scope.finishCurrentConnection = () => {
       const tile = $scope.currentConnection[0];
-      $scope.connections.push($scope.currentConnection);
+      const node1 = $scope.nodes.find((node) => node.tile === tile);
+      const node2 = $scope.nodes.find((node) => node.tile === $scope.currentConnection[$scope.currentConnection.length - 1]);
+      node1.connections.push({
+        destination: node2,
+        path: $scope.currentConnection
+      });
+      node2.connections.push({
+        destination: node1,
+        path: [...$scope.currentConnection].reverse(),
+      });
       $scope.currentConnection = undefined;
       $scope.mode = $scope.modes.EDIT;
       $scope.clickTile(tile);
@@ -543,6 +540,151 @@ const app = angular.module('MapEditor', ['ngRoute'])
         connection[connection.length - 1].type = newTileType;
       }
     }
+
+    $scope.generateJson = () => {
+      const netmap = {};
+      
+      netmap.size = ($scope.tiles.length + $scope.tiles[0].length) / 2;
+      console.log($scope.nodes);
+
+      netmap.nodes = [];
+      $scope.nodes.forEach((node) => {
+        const x = ((node.tile.x - node.tile.y + $scope.tiles.length) - 1) / 2;
+        const y = (node.tile.x + node.tile.y) / 2;
+        const newNode = {
+          name: node.name,
+          owner: node.owner,
+          desc: node.desc,
+          image: `node-${node.owner}`,
+          ownedByUser: node.ownedByUser,
+          securityLevel: node.securityLevel,
+          coords: {
+            x,
+            y,
+          },
+          connections: [],
+        };
+        node.connections.forEach((connection) => {
+          const segments = [];
+          console.log(connection.path);
+          connection.path.forEach((tile) => {
+            const tileX = ((tile.x - tile.y + $scope.tiles.length) - 1) / 2;
+            const tileY = (tile.x + tile.y) / 2;
+            console.log(`${tileX}, ${tileY}`);
+            if (tile.type === $scope.tileTypes.CONNECTION_VERTICAL) {
+              segments.push({
+                point1: {
+                  x: tileX + 0.25,
+                  y: tileY + 0.25,
+                },
+                point2: {
+                  x: tileX + 0.75,
+                  y: tileY + 0.75,
+                },
+              });
+            } else if (tile.type === $scope.tileTypes.CONNECTION_HORIZONTAL) {
+              segments.push({
+                point1: {
+                  x: tileX + 0.25,
+                  y: tileY + 0.75,
+                },
+                point2: {
+                  x: tileX + 0.75,
+                  y: tileY + 0.25,
+                },
+              });
+            } else if (tile.type === $scope.tileTypes.CONNECTION_BOTTOM_CORNER) {
+              segments.push({
+                point1: {
+                  x: tileX + 0.25,
+                  y: tileY + 0.75,
+                },
+                point2: {
+                  x: tileX + 0.75,
+                  y: tileY + 0.75,
+                },
+              });
+            } else if (tile.type === $scope.tileTypes.CONNECTION_TOP_CORNER) {
+              segments.push({
+                point1: {
+                  x: tileX + 0.25,
+                  y: tileY + 0.25,
+                },
+                point2: {
+                  x: tileX + 0.75,
+                  y: tileY + 0.25,
+                },
+              });
+            } else if (tile.type === $scope.tileTypes.CONNECTION_LEFT_CORNER) {
+              segments.push({
+                point1: {
+                  x: tileX + 0.25,
+                  y: tileY + 0.25,
+                },
+                point2: {
+                  x: tileX + 0.25,
+                  y: tileY + 0.75,
+                },
+              });
+            } else if (tile.type === $scope.tileTypes.CONNECTION_RIGHT_CORNER) {
+              segments.push({
+                point1: {
+                  x: tileX + 0.75,
+                  y: tileY + 0.25,
+                },
+                point2: {
+                  x: tileX + 0.75,
+                  y: tileY + 0.75,
+                },
+              });
+            }
+          });
+
+          const points = [];
+          points.push({
+            x: x + 0.5,
+            y: y + 0.5,
+          });
+          segments.forEach((segment, index) => {
+            const previousPoint = points[points.length - 1]
+            if (Math.abs(segment.point1.x - previousPoint.x) + Math.abs(segment.point1.y - previousPoint.y)
+              < Math.abs(segment.point2.x - previousPoint.x) + Math.abs(segment.point2.y - previousPoint.y)) {
+              points.push(segment.point1);
+              if (index === segments.length - 1) {
+                points.push(segment.point2);
+              }
+            } else {
+              points.push(segment.point2);
+              if (index === segments.length - 1) {
+                points.push(segment.point1);
+              }
+            }
+          });
+          const lastTile = connection.path[connection.path.length - 1];
+          points.push({
+            x: (((lastTile.x - lastTile.y + $scope.tiles.length) - 1) / 2) + 0.5,
+            y: ((lastTile.x + lastTile.y) / 2) + 0.5,
+          });
+
+          // The connection lines are purely aesthetic, so the only relevant points are those at which the direction changes.
+          const relevantPoints = [points[0]];
+          let previousPoint = points[0];
+          let previousSlope = (points[0].x - points[1].x) / (points[0].y - points[1].y);
+          points.slice(1).forEach((point) => {
+            const slope = (previousPoint.x - point.x) / (previousPoint.y - point.y);
+            if (slope !== previousSlope) {
+              relevantPoints.push(previousPoint);
+            }
+            previousPoint = point;
+            previousSlope = slope;
+          });
+          relevantPoints.push(points[points.length - 1]);
+          newNode.connections.push(relevantPoints);
+        });
+        netmap.nodes.push(newNode);
+      });
+      console.log(JSON.stringify(netmap));
+    };
   })
   .config(function($routeProvider) {
     $routeProvider
@@ -553,5 +695,5 @@ const app = angular.module('MapEditor', ['ngRoute'])
       .when('/netmap-editor', {
         templateUrl: 'netmap-editor.html',
         controller: 'NetmapEditorController',
-      });
+      }); 
   });
