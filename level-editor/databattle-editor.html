@@ -25,7 +25,8 @@
     <input type="text" ng-model="creditAmount" ng-show="selectedType === tileTypes.ITEM && selectedItem === 'credit'"></input>
   </div>
   <div class="option">
-    <button ng-click="generateJSON()">Generate JSON</button> (Logged to console)
+    <button ng-click="generateJSON()">Generate JSON</button> (Logged to console) <br>
+    <input ng-model="inputJson" type="text"><button ng-click="openBattleFromJson()">Generate Battle from JSON</button>
   </div>
 </div>
 <table cellspacing="0" cellpadding="0">

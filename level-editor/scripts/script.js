@@ -159,26 +159,47 @@ const app = angular.module('MapEditor', ['ngRoute'])
       tile.style = newStyle;
     };
 
+    $scope.startEnemy = (name, tile) => {
+      const r = Math.floor(Math.random() * 255);
+      const g = Math.floor(Math.random() * 255);
+      const b = Math.floor(Math.random() * 255);
+      const enemy = {
+        name,
+        tiles: [tile],
+        style: {
+          'border-left': `4px solid rgba(${r}, ${g}, ${b}, 1)`,
+          'border-right': `4px solid rgba(${r}, ${g}, ${b}, 1)`,
+          'border-top': `4px solid rgba(${r}, ${g}, ${b}, 1)`,
+          'border-bottom': `4px solid rgba(${r}, ${g}, ${b}, 1)`,
+        }
+      }
+      $scope.updateTile(tile, $scope.tileTypes.ENEMY, undefined, name, { ...enemy.style });
+      return enemy;
+    }
+    $scope.addToEnemy = (enemy, tile, previousTile) => {
+      $scope.updateTile(tile, $scope.tileTypes.ENEMY, undefined, undefined,
+        { ...enemy.style });
+      enemy.tiles.push(tile);
+      if (tile.x > previousTile.x) {
+        tile.style['border-left'] = 'none';
+        previousTile.style['border-right'] = 'none';
+      } else if (tile.x < previousTile.x) {
+        tile.style['border-right'] = 'none';
+        previousTile.style['border-left'] = 'none';
+      } else if (tile.y > previousTile.y) {
+        tile.style['border-top'] = 'none';
+        previousTile.style['border-bottom'] = 'none';
+      } else if (tile.y < previousTile.y) {
+        tile.style['border-bottom'] = 'none';
+        previousTile.style['border-top'] = 'none';
+      }
+    }
     $scope.clickTile = (tile) => {
       if ($scope.selectedType) {
         if ($scope.selectedType === $scope.tileTypes.ENEMY) {
           if ($scope.selectedProgram) {
-            const r = Math.floor(Math.random() * 255);
-            const g = Math.floor(Math.random() * 255);
-            const b = Math.floor(Math.random() * 255);
-            currentEnemy = {
-              name: $scope.selectedProgram,
-              tiles: [tile],
-              style: {
-                'border-left': `4px solid rgba(${r}, ${g}, ${b}, 1)`,
-                'border-right': `4px solid rgba(${r}, ${g}, ${b}, 1)`,
-                'border-top': `4px solid rgba(${r}, ${g}, ${b}, 1)`,
-                'border-bottom': `4px solid rgba(${r}, ${g}, ${b}, 1)`,
-              },
-            };
+            currentEnemy = $scope.startEnemy($scope.selectedProgram, tile);
             currentEnemyTile = tile;
-            $scope.updateTile(tile, $scope.selectedType, undefined, $scope.selectedProgram,
-              { ...currentEnemy.style });
           }
         } else if ($scope.selectedType === $scope.tileTypes.ITEM) {
           if ($scope.selectedItem) {
@@ -204,7 +225,8 @@ const app = angular.module('MapEditor', ['ngRoute'])
       if (event.buttons === 1) {
         if (currentEnemy) {
           if (!currentEnemy.tiles.find((t) => t === tile)) {
-            $scope.updateTile(tile, $scope.selectedType, undefined, undefined,
+            $scope.addToEnemy(currentEnemy, tile, currentEnemyTile);
+            /* $scope.updateTile(tile, $scope.selectedType, undefined, undefined,
               { ...currentEnemy.style });
             currentEnemy.tiles.push(tile);
             if (tile.x > currentEnemyTile.x) {
@@ -219,7 +241,7 @@ const app = angular.module('MapEditor', ['ngRoute'])
             } else if (tile.y < currentEnemyTile.y) {
               tile.style['border-bottom'] = 'none';
               currentEnemyTile.style['border-top'] = 'none';
-            }
+            } */
           }
           currentEnemyTile = tile;
         } else {
@@ -286,6 +308,58 @@ const app = angular.module('MapEditor', ['ngRoute'])
       });
       console.log(JSON.stringify(battle));
     };
+
+    $scope.openBattleFromJson = () => {
+      const battleJson = JSON.parse($scope.inputJson);
+      $scope.battleName = battleJson.name;
+      $scope.tiles = [];
+      $scope.reward = battleJson.reward;
+      battleJson.field.forEach((row, y) => {
+        let newRow = [];
+        row.split('').forEach((tile, x) => {
+          if (tile === '@') {
+            newRow.push({
+              x,
+              y,
+              type: $scope.tileTypes.UPLOAD,
+            });
+          } else if (tile === '#') {
+            newRow.push({
+              x,
+              y,
+              type: $scope.tileTypes.BASIC,
+            });
+          } else {
+            newRow.push({
+              x,
+              y,
+              type: $scope.tileTypes.NONE,
+            });
+          }
+        });
+        $scope.tiles.push(newRow);
+      });
+      battleJson.enemies.forEach((enemy) => {
+        let previousTile = $scope.tiles[enemy.coords[0].y][enemy.coords[0].x]
+        const newEnemy = $scope.startEnemy(enemy.name, previousTile);
+        enemy.coords.splice(1).forEach((c) => {
+          const tile = $scope.tiles[c.y][c.x]
+          $scope.addToEnemy(newEnemy, tile, previousTile)
+          previousTile = tile;
+        });
+        enemies.push(newEnemy);
+      });
+      battleJson.items.forEach((item) => {
+        const tile = $scope.tiles[item.coords.y][item.coords.x];
+        tile.type = $scope.tileTypes.ITEM;
+        tile.item = {
+          name: item.type,
+          amount: item.amount,
+        }
+      });
+
+      console.log('done');
+    }
   })
   .controller('NetmapEditorController', function($scope) {
     $scope.tileTypes = {
