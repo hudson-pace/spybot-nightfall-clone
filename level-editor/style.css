@@ -122,3 +122,32 @@ input.resize {
 #netmap {
   transform: rotate(45deg);
 }
+
+.table-options {
+  display: flex;
+  justify-content: center;
+}
+
+.grid-container {
+  display: inline-block;
+}
+
+.vertical-arrow {
+  flex: 0 0 20px;
+}
+.horizontal-arrow {
+  height: 20px;
+}
+
+.expand {
+  background-color: rgba(0, 255, 0, 0.1);
+}
+.expand:hover {
+  background-color: rgba(0, 255, 0, 0.5);
+}
+.collapse {
+  background-color: rgba(255, 0, 0, 0.1);
+}
+.collapse:hover {
+  background-color: rgba(255, 0, 0, 0.5);
+}

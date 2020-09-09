@@ -1,16 +1,7 @@
 <div>
   <div class="option">
-    <p>Title: <input type="text" ng-model="battleName"></p>
-    <p>Reward: <input type="text" ng-model="reward"></p>
-  </div>
-  <div class="option">
-    <p>{{ tiles[0].length }}x{{ tiles.length }}</p>
-    Add To Left<input class="resize" type="text" maxLength="3" ng-model="resizeParams.left"></input>
-    Add To Right<input class="resize" type="text" maxLength="3" ng-model="resizeParams.right"></input>
-    Add To Top<input class="resize" type="text" maxLength="3" ng-model="resizeParams.top"></input>
-    Add To Bottom<input class="resize" type="text" maxLength="3" ng-model="resizeParams.bottom"></input>
-    <p>(Use negative numbers to shrink)</p>
-    <button ng-click="resize()">Change Size</button>
+    <p>Title: <input type="text" ng-model="databattle.name"></p>
+    <p>Reward: <input type="text" ng-model="databattle.reward"></p>
   </div>
   <div class="option">
     <select ng-model="selectedType">
@@ -29,21 +20,37 @@
     <input ng-model="inputJson" type="text"><button ng-click="openBattleFromJson()">Generate Battle from JSON</button>
   </div>
 </div>
-<table cellspacing="0" cellpadding="0">
-  <tr ng-repeat="row in tiles">
-    <td ng-repeat="tile in row">
-      <div class="tile" ng-mousedown="clickTile(tile)" ng-mouseenter="mouseenterTile($event, tile)"
-      ng-class="{
-        'none': tile.type === tileTypes.NONE,
-        'basic': tile.type === tileTypes.BASIC,
-        'upload': tile.type === tileTypes.UPLOAD,
-        'enemy': tile.type === tileTypes.ENEMY,
-        'item': tile.type === tileTypes.ITEM,
-      }"
-      ng-style="tile.style">
-        <span ng-if="tile.type === tileTypes.ENEMY">{{ tile.program }}</span>
-        <span ng-if="tile.type === tileTypes.ITEM">{{ tile.item.name }}</span>
-      </div>
-    </td>
-  </tr>
-</table>
+<div class="grid-container">
+  <div>
+    <div class="horizontal-arrow expand" ng-click="databattle.resize({ top: 1 })"></div>
+    <div class="horizontal-arrow collapse" ng-click="databattle.resize({ top: -1 })"></div>
+  </div>
+  <div class="table-options">
+    <div class="vertical-arrow expand" ng-click="databattle.resize({ left: 1 })"></div>
+    <div class="vertical-arrow collapse" ng-click="databattle.resize({ left: -1 })"></div>
+    <table cellspacing="0" cellpadding="0">
+      <tr ng-repeat="row in databattle.tiles">
+        <td ng-repeat="tile in row">
+          <div class="tile" ng-mousedown="clickTile(tile)" ng-mouseenter="mouseenterTile($event, tile)"
+          ng-class="{
+            'none': tile.type === tileTypes.NONE,
+            'basic': tile.type === tileTypes.BASIC,
+            'upload': tile.type === tileTypes.UPLOAD,
+            'enemy': tile.type === tileTypes.ENEMY,
+            'item': tile.type === tileTypes.ITEM,
+          }"
+          ng-style="tile.style">
+            <span ng-if="tile.type === tileTypes.ENEMY">{{ tile.program }}</span>
+            <span ng-if="tile.type === tileTypes.ITEM">{{ tile.item.name }}</span>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <div class="vertical-arrow collapse" ng-click="databattle.resize({ right: -1 })"></div>
+    <div class="vertical-arrow expand" ng-click="databattle.resize({ right: 1 })"></div>
+  </div>
+  <div>
+    <div class="horizontal-arrow collapse" ng-click="databattle.resize({ bottom: -1 })"></div>
+    <div class="horizontal-arrow expand" ng-click="databattle.resize({ bottom: 1 })"></div>
+  </div>
+</div>
