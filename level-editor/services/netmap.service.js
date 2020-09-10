@@ -1,6 +1,6 @@
 angular
   .module('mapEditorApp')
-  .factory('netmapService', ['gridService', function(gridService) {
+  .factory('netmapService', ['gridService', 'databattleService', function(gridService, databattleService) {
     const service = {};
     service.tileTypes = {
       NONE: 'none',
@@ -12,34 +12,46 @@ angular
       CONNECTION_RIGHT_CORNER: 'connection-right-corner',
       CONNECTION_BOTTOM_CORNER: 'connection-bottom-corner',
     }
-    let initialized = false;
-    const map = {};
 
-    service.hasBeenInitialized = () => {
-      return initialized;
+    const netmapWatcher = {};
+
+    service.getNetmapWatcher = () => {
+      return netmapWatcher;
+    }
+    service.setOpenNetmap = (netmap) => {
+      netmapWatcher.netmap = netmap;
+    };
+    service.closeNetmap = () => {
+      netmapWatcher.netmap = undefined;
+    };
+
+    service.openDatabattle = (node) => {
+      console.log('hey ho let go');
+      databattleService.setOpenDatabattle(node.battle);
     }
 
     service.createNewNetmap = (initialWidth, initialHeight, maxSize) => {
-      map.resize = (resizeParams) => {
-        gridService.resizeGrid(map.tiles, resizeParams, maxSize, service.tileTypes.NONE);
-        map.tableMargin = {
-          'margin-top': `${ ((((Math.sqrt(2) * map.tiles.length) + (Math.sqrt(2) * map.tiles[0].length)) / 2) - (map.tiles.length)) * 25 }px`,
-          'margin-left': `${ ((((Math.sqrt(2) * map.tiles.length) + (Math.sqrt(2) * map.tiles[0].length)) / 2) - (map.tiles[0].length)) * 25 }px`,
+      const netmap = {};
+      netmap.resize = (resizeParams) => {
+        gridService.resizeGrid(netmap.tiles, resizeParams, maxSize, service.tileTypes.NONE);
+        netmap.tableMargin = {
+          'margin-top': `${ ((((Math.sqrt(2) * netmap.tiles.length) + (Math.sqrt(2) * netmap.tiles[0].length)) / 2) - (netmap.tiles.length)) * 25 }px`,
+          'margin-left': `${ ((((Math.sqrt(2) * netmap.tiles.length) + (Math.sqrt(2) * netmap.tiles[0].length)) / 2) - (netmap.tiles[0].length)) * 25 }px`,
         }
       }
-      map.tiles = gridService.createGrid(initialWidth, initialHeight, service.tileTypes.NONE);
-      map.resize({});
-      map.nodes = [];
+      netmap.tiles = gridService.createGrid(initialWidth, initialHeight, service.tileTypes.NONE);
+      netmap.resize({});
+      netmap.nodes = [];
 
-      map.addNode = (node) => {
-        map.nodes.push({
+      netmap.addNode = (node) => {
+        netmap.nodes.push({
           name: node.name,
           owner: node.owner,
           desc: node.desc,
           startsOutOwned: node.startsOutOwned,
           securityLevel: parseInt(node.securityLevel, 10),
           imageName: node.imageName,
-          battle: node.battle,
+          battle: databattleService.createNewDatabattle(10, 10, 99),
           tile: node.tile,
           connections: [],
         });
@@ -47,26 +59,26 @@ angular
         const tile = node.tile;
         tile.type = service.tileTypes.NODE;
       }
-      map.removeNode = (node) => {
+      netmap.removeNode = (node) => {
         const tile = node.tile;
         tile.type = service.tileTypes.NONE;
-        const index = map.nodes.findIndex((n) => n === node);
-        map.nodes.splice(index, 1);
+        const index = netmap.nodes.findIndex((n) => n === node);
+        netmap.nodes.splice(index, 1);
         node = undefined;
       }
 
-      map.addConnection = (connection) => {
+      netmap.addConnection = (connection) => {
         const tile = connection[0];
-        const node = map.nodes.find((node) => node.tile === tile);
+        const node = netmap.nodes.find((node) => node.tile === tile);
         node.connections.push(connection);
       }
-      map.removeConnection = (connection) => {
+      netmap.removeConnection = (connection) => {
         const tiles = [connection[0]];
         if (connection[connection.length - 1].type === service.tileTypes.NODE) {
           tiles.push(connection[connection.length - 1]);
         }
         tiles.forEach((tile) => {
-          const node = map.nodes.find((node) => node.tile === tile);
+          const node = netmap.nodes.find((node) => node.tile === tile);
 
           // Either find the connection, or the connection equal to the reverse of the array.
           const connectionIndex = node.connections.findIndex((c) => {
@@ -86,19 +98,19 @@ angular
         });
       }
       
-      map.addToConnection = (connection, tile) => {
+      netmap.addToConnection = (connection, tile) => {
         connection.push(tile);
         if (tile.type === service.tileTypes.NODE) {
-          const node = map.nodes.find((n) => n.tile === tile);
+          const node = netmap.nodes.find((n) => n.tile === tile);
           node.connections.push([ ...connection ].reverse());
         }
-        map.updateConnectionOrientations(connection);
+        netmap.updateConnectionOrientations(connection);
       }
-      map.popFromConnection = (connection) => {
+      netmap.popFromConnection = (connection) => {
         connection.pop();
       }
 
-      map.updateConnectionOrientations = (connection) => {
+      netmap.updateConnectionOrientations = (connection) => {
         let newTileType;
         if (connection.length > 2) {
           if (connection[connection.length - 3].y > connection[connection.length - 2].y) {
@@ -157,9 +169,9 @@ angular
 
       
 
-      return map;
+      return netmap;
     }
-    service.generateJson = () => {
+    service.generateJson = (map) => {
 
       const netmap = {};
       
@@ -173,7 +185,7 @@ angular
           owner: node.owner,
           desc: node.desc,
           image: node.imageName,
-          battle: node.battle,
+          battle: JSON.parse(databattleService.getJsonFromDatabattle(node.battle)),
           ownedByUser: node.ownedByUser,
           securityLevel: node.securityLevel,
           coords: {

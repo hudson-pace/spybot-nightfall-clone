@@ -14,12 +14,12 @@
 </head>
 <body>
   <div ng-app="mapEditorApp" ng-controller="homeController" id="app-container">
-    <div ng-show="mode === 'start'">
+    <div ng-if="!databattleWatcher.databattle && !netmapWatcher.netmap">
       <button ng-click="startDatabattleEditor()">Databattle</button>
       <button ng-click="startNetmapEditor()">Netmap</button>
     </div>
-    <databattle-editor ng-show="mode === 'databattle'"></databattle-editor>
-    <netmap-editor ng-show="mode === 'netmap'"></netmap-editor>
+    <netmap-editor ng-if="!databattleWatcher.databattle && netmapWatcher.netmap"></netmap-editor>
+    <databattle-editor ng-if="databattleWatcher.databattle"></databattle-editor>
   </div>
 </body>
 </html>

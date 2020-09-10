@@ -1,12 +1,13 @@
 angular
   .module('mapEditorApp', [])
-  .controller('homeController', function($scope) {
-    $scope.mode = 'start';
+  .controller('homeController', ['$scope', 'databattleService', 'netmapService', function($scope, databattleService, netmapService) {
+    $scope.databattleWatcher = databattleService.getDatabattleWatcher();
+    $scope.netmapWatcher = netmapService.getNetmapWatcher();
     $scope.startDatabattleEditor = () => {
-      $scope.mode = 'databattle';
-    };
+      databattleService.setOpenDatabattle(databattleService.createNewDatabattle(10, 10, 99));
+    }
     $scope.startNetmapEditor = () => {
-      $scope.mode = 'netmap';
-    };
-  });
+      netmapService.setOpenNetmap(netmapService.createNewNetmap(10, 10, 99));
+    }
+  }]);
   

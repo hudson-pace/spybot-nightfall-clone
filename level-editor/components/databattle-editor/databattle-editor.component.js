@@ -2,7 +2,7 @@ angular
   .module('mapEditorApp')
   .component('databattleEditor', {
     templateUrl: 'components/databattle-editor/databattle-editor.html',
-    controller: function DatabattleEditorController($scope, $http, databattleService) {
+    controller: function DatabattleEditorController($scope, $http, databattleService, netmapService) {
       $scope.tileTypes = databattleService.tileTypes;
   
       $http.get('../assets/agents.json')
@@ -16,7 +16,14 @@ angular
         'data',
       ];
 
-      $scope.databattle = databattleService.createNewDatabattle(10, 10, 99);
+      $scope.netmapWatcher = netmapService.getNetmapWatcher();
+
+      const databattleWatcher = databattleService.getDatabattleWatcher();
+      if (databattleWatcher.databattle) {
+        $scope.databattle = databattleWatcher.databattle;
+      } else {
+        $scope.databattle = databattleService.createNewDatabattle(10, 10, 99);
+      }
   
 
       let currentEnemy;
@@ -75,6 +82,10 @@ angular
       }
       $scope.loadDatabattle = (battleJson) => {
         $scope.databattle = databattleService.createDatabattleFromJson(battleJson);
+      }
+
+      $scope.returnToNetmap = () => {
+        databattleService.closeDatabattle();
       }
     },
   });

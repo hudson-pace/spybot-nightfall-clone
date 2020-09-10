@@ -15,9 +15,12 @@
     </select>
     <input type="text" ng-model="creditAmount" ng-show="selectedType === tileTypes.ITEM && selectedItem === 'credit'"></input>
   </div>
-  <div class="option">
+  <div class="option" ng-if="!netmapWatcher.netmap">
     <button ng-click="generateJSON()">Generate JSON</button> (Logged to console) <br>
     <input ng-model="inputJson" type="text"><button ng-click="loadDatabattle(inputJson)">Generate Battle from JSON</button>
+  </div>
+  <div class="option" ng-if="netmapWatcher.netmap">
+    <button ng-click="returnToNetmap()">Return to Netmap</button>
   </div>
 </div>
 <div class="grid-container">

@@ -9,6 +9,17 @@ angular
       ENEMY: 'enemy',
       ITEM: 'item',
     };
+    const databattleWatcher = {};
+
+    service.getDatabattleWatcher = () => {
+      return databattleWatcher;
+    }
+    service.setOpenDatabattle = (databattle) => {
+      databattleWatcher.databattle = databattle
+    };
+    service.closeDatabattle = () => {
+      databattleWatcher.databattle = undefined;
+    };
 
     service.createNewDatabattle = (startingWidth, startingHeight, maxSize) => {
       const databattle = {};

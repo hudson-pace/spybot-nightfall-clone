@@ -2,7 +2,7 @@ angular
   .module('mapEditorApp')
   .component('netmapEditor', {
     templateUrl: 'components/netmap-editor/netmap-editor.html',
-    controller: function($scope, gridService, netmapService) {
+    controller: function($scope, netmapService) {
       $scope.tileTypes = netmapService.tileTypes;
       $scope.modes = {
         ADD_NODE: 'add',
@@ -21,7 +21,13 @@ angular
         'Warez'
       ];
       
-      $scope.netmap = netmapService.createNewNetmap(10, 10, 99);
+      const netmapWatcher = netmapService.getNetmapWatcher();
+      if (netmapWatcher.netmap) {
+        $scope.netmap = netmapWatcher.netmap;
+      } else {
+        $scope.netmap = netmapService.createNewNetmap(10, 10, 99);
+        netmapService.setOpenNetmap($scope.netmap);
+      }
       
       $scope.clickTile = (tile) => {
         if ($scope.mode === $scope.modes.ADDING_CONNECTION) {
@@ -58,6 +64,10 @@ angular
           }
         }
       };
+
+      $scope.editDatabattle = (node) => {
+        netmapService.openDatabattle(node);
+      }
   
       $scope.addNode = (node) => {
         $scope.netmap.addNode(node);
@@ -87,7 +97,7 @@ angular
       };
   
       $scope.generateJson = () => {
-        console.log(netmapService.generateJson());
+        console.log(netmapService.generateJson($scope.netmap));
       };
     },
   });
