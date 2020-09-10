@@ -2,14 +2,22 @@ angular
   .module('mapEditorApp')
   .factory('databattleService', ['gridService', function(gridService) {
     const service = {};
-    service.createNewDatabattle = (startingWidth, startingHeight, maxSize, initialTileType) => {
+    service.tileTypes = {
+      NONE: 'none',
+      BASIC: 'basic',
+      UPLOAD: 'upload',
+      ENEMY: 'enemy',
+      ITEM: 'item',
+    };
+
+    service.createNewDatabattle = (startingWidth, startingHeight, maxSize) => {
       const databattle = {};
-      databattle.tiles = gridService.createGrid(startingWidth, startingHeight, initialTileType);
+      databattle.tiles = gridService.createGrid(startingWidth, startingHeight, service.tileTypes.NONE);
       gridService.updateTileCoordinates(databattle.tiles);
       databattle.enemies = [];
 
       databattle.resize = (resizeParams) => {
-        gridService.resizeGrid(databattle.tiles, resizeParams, maxSize, initialTileType);
+        gridService.resizeGrid(databattle.tiles, resizeParams, maxSize, service.tileTypes.NONE);
       }
       
       databattle.updateTile = (tile, newType, newItem, newProgram, newStyle) => {
@@ -24,7 +32,7 @@ angular
         });
         if (enemyIndex !== -1) {
           databattle.enemies[enemyIndex].tiles.forEach((enemyTile) => {
-            enemyTile.type = initialTileType;
+            enemyTile.type = service.tileTypes.NONE;
             enemyTile.item = undefined;
             enemyTile.program = undefined;
             enemyTile.style = undefined;
@@ -37,7 +45,7 @@ angular
         tile.style = newStyle;
       };
 
-      databattle.startEnemy = (name, tile, enemyTileType) => {
+      databattle.startEnemy = (name, tile) => {
         const r = Math.floor(Math.random() * 255);
         const g = Math.floor(Math.random() * 255);
         const b = Math.floor(Math.random() * 255);
@@ -51,12 +59,12 @@ angular
             'border-bottom': `4px solid rgba(${r}, ${g}, ${b}, 1)`,
           }
         }
-        databattle.updateTile(tile, enemyTileType, undefined, name, { ...enemy.style });
+        databattle.updateTile(tile, service.tileTypes.ENEMY, undefined, name, { ...enemy.style });
         return enemy;
       }
 
-      databattle.addToEnemy = (enemy, tile, previousTile, enemyTileType) => {
-        databattle.updateTile(tile, enemyTileType, undefined, undefined,
+      databattle.addToEnemy = (enemy, tile, previousTile) => {
+        databattle.updateTile(tile, service.tileTypes.ENEMY, undefined, undefined,
           { ...enemy.style });
         enemy.tiles.push(tile);
         if (tile.x > previousTile.x) {
@@ -76,8 +84,9 @@ angular
       return databattle;
     }
 
-    service.createDatabattleFromJson = (battleJson) => {
-      const databattle = service.createNewDatabattle();
+    service.createDatabattleFromJson = (battleInput) => {
+      const battleJson = JSON.parse(battleInput);
+      const databattle = service.createNewDatabattle(10, 10, 99);
       databattle.name = battleJson.name;
       databattle.tiles = [];
       databattle.reward = battleJson.reward;
@@ -89,25 +98,26 @@ angular
             newRow.push({
               x,
               y,
-              type: $scope.tileTypes.UPLOAD,
+              type: service.tileTypes.UPLOAD,
             });
           } else if (tile === '#') {
             newRow.push({
               x,
               y,
-              type: $scope.tileTypes.BASIC,
+              type: service.tileTypes.BASIC,
             });
           } else {
             newRow.push({
               x,
               y,
-              type: $scope.tileTypes.NONE,
+              type: service.tileTypes.NONE,
             });
           }
         });
         databattle.tiles.push(newRow);
       });
 
+      databattle.enemies = [];
       battleJson.enemies.forEach((enemy) => {
         let previousTile = databattle.tiles[enemy.coords[0].y][enemy.coords[0].x]
         const newEnemy = databattle.startEnemy(enemy.name, previousTile);
@@ -116,18 +126,76 @@ angular
           databattle.addToEnemy(newEnemy, tile, previousTile)
           previousTile = tile;
         });
-        enemies.push(newEnemy);
+        databattle.enemies.push(newEnemy);
       });
 
       battleJson.items.forEach((item) => {
         const tile = databattle.tiles[item.coords.y][item.coords.x];
-        tile.type = databattle.tileTypes.ITEM;
+        tile.type = service.tileTypes.ITEM;
         tile.item = {
           name: item.type,
           amount: item.amount,
         }
       });
+      return databattle;
     }
+
+    service.getJsonFromDatabattle = (databattle) => {
+      const battle = {};
+      battle.name = databattle.name;
+      battle.height = databattle.tiles.length;
+      battle.width = databattle.tiles[0].length;
+      battle.reward = parseInt(databattle.reward, 10);
+      battle.field = [];
+      battle.enemies = [];
+      battle.items = [];
+      databattle.tiles.forEach((row, y) => {
+        let newRow = '';
+        row.forEach((tile, x) => {
+          switch (tile.type) {
+            default:
+              newRow += ' ';
+              break;
+            case service.tileTypes.NONE:
+              newRow += ' ';
+              break;
+            case service.tileTypes.BASIC:
+            case service.tileTypes.ENEMY:
+              newRow += '#';
+              break;
+            case service.tileTypes.UPLOAD:
+              newRow += '@';
+              break;
+            case service.tileTypes.ITEM:
+              newRow += '#';
+              battle.items.push({
+                type: tile.item.name,
+                amount: tile.item.amount,
+                coords: {
+                  x,
+                  y,
+                },
+              });
+          }
+        });
+        battle.field.push(newRow);
+      });
+
+      databattle.enemies.forEach((enemy) => {
+        const enemyTiles = [];
+        enemy.tiles.forEach((tile) => {
+          enemyTiles.push({
+            x: tile.x,
+            y: tile.y,
+          });
+        });
+        battle.enemies.push({
+          name: enemy.name,
+          coords: enemyTiles,
+        });
+      });
+      return JSON.stringify(battle);
+    };
 
     return service;
   }]);

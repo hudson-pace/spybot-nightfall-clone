@@ -2,17 +2,8 @@ angular
   .module('mapEditorApp')
   .component('databattleEditor', {
     templateUrl: 'components/databattle-editor/databattle-editor.html',
-    controller: function DatabattleEditorController($scope, $http, gridService, databattleService) {
-      $scope.tileTypes = {
-        NONE: 'none',
-        BASIC: 'basic',
-        UPLOAD: 'upload',
-        ENEMY: 'enemy',
-        ITEM: 'item',
-      };
-      const defaultWidth = 10;
-      const defaultHeight = 10;
-      const maxSize = 99; 
+    controller: function DatabattleEditorController($scope, $http, databattleService) {
+      $scope.tileTypes = databattleService.tileTypes;
   
       $http.get('../assets/agents.json')
         .then((data) => {
@@ -25,7 +16,7 @@ angular
         'data',
       ];
 
-      $scope.databattle = databattleService.createNewDatabattle(10, 10, 99, $scope.tileTypes.NONE);
+      $scope.databattle = databattleService.createNewDatabattle(10, 10, 99);
   
 
       let currentEnemy;
@@ -39,7 +30,7 @@ angular
         if ($scope.selectedType) {
           if ($scope.selectedType === $scope.tileTypes.ENEMY) {
             if ($scope.selectedProgram) {
-              currentEnemy = $scope.databattle.startEnemy($scope.selectedProgram, tile, $scope.tileTypes.ENEMY);
+              currentEnemy = $scope.databattle.startEnemy($scope.selectedProgram, tile);
               currentEnemyTile = tile;
             }
           } else if ($scope.selectedType === $scope.tileTypes.ITEM) {
@@ -67,7 +58,7 @@ angular
         if (event.buttons === 1) {
           if (currentEnemy) {
             if (!currentEnemy.tiles.find((t) => t === tile)) {
-              $scope.databattle.addToEnemy(currentEnemy, tile, currentEnemyTile, $scope.tileTypes.ENEMY);
+              $scope.databattle.addToEnemy(currentEnemy, tile, currentEnemyTile);
             }
             currentEnemyTile = tile;
           } else {
@@ -78,64 +69,12 @@ angular
           currentEnemy = undefined;
         }
       };
-      
+
       $scope.generateJSON = () => {
-        const battle = {};
-        battle.name = $scope.databattle.name;
-        battle.height = $scope.databattle.tiles.length;
-        battle.width = $scope.databattle.tiles[0].length;
-        battle.reward = parseInt($scope.databattle.reward, 10);
-        battle.field = [];
-        battle.enemies = [];
-        battle.items = [];
-        $scope.databattle.tiles.forEach((row, y) => {
-          let newRow = '';
-          row.forEach((tile, x) => {
-            switch (tile.type) {
-              default:
-                newRow += ' ';
-                break;
-              case $scope.tileTypes.NONE:
-                newRow += ' ';
-                break;
-              case $scope.tileTypes.BASIC:
-              case $scope.tileTypes.ENEMY:
-                newRow += '#';
-                break;
-              case $scope.tileTypes.UPLOAD:
-                newRow += '@';
-                break;
-              case $scope.tileTypes.ITEM:
-                newRow += '#';
-                battle.items.push({
-                  type: tile.item.name,
-                  amount: tile.item.amount,
-                  coords: {
-                    x,
-                    y,
-                  },
-                });
-            }
-          });
-          battle.field.push(newRow);
-        });
-  
-        $scope.databattle.enemies.forEach((enemy) => {
-          const enemyTiles = [];
-          enemy.tiles.forEach((tile) => {
-            enemyTiles.push({
-              x: tile.x,
-              y: tile.y,
-            });
-          });
-          battle.enemies.push({
-            name: enemy.name,
-            coords: enemyTiles,
-          });
-        });
-        console.log(JSON.stringify(battle));
-      };
-  
-      
+        console.log(databattleService.getJsonFromDatabattle($scope.databattle));
+      }
+      $scope.loadDatabattle = (battleJson) => {
+        $scope.databattle = databattleService.createDatabattleFromJson(battleJson);
+      }
     },
   });
