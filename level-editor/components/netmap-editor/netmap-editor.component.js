@@ -82,7 +82,6 @@ angular
       $scope.addConnection = () => {
         $scope.mode = $scope.modes.ADDING_CONNECTION;
         $scope.currentConnection = [$scope.selectedNode.tile];
-        $scope.netmap.addConnection($scope.currentConnection);
       };
       $scope.cancelConnection = () => {
         $scope.mode = $scope.modes.EDIT;
@@ -91,7 +90,6 @@ angular
             tile.type = $scope.tileTypes.NONE;
           }
         });
-        $scope.netmap.removeConnection($scope.currentConnection);
         $scope.currentConnection = undefined;
         $scope.clickTile($scope.selectedNode.tile);
       };

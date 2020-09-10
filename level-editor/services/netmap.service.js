@@ -26,7 +26,6 @@ angular
     };
 
     service.openDatabattle = (node) => {
-      console.log('hey ho let go');
       databattleService.setOpenDatabattle(node.battle);
     }
 
@@ -48,7 +47,7 @@ angular
           name: node.name,
           owner: node.owner,
           desc: node.desc,
-          startsOutOwned: node.startsOutOwned,
+          ownedByUser: node.ownedByUser,
           securityLevel: parseInt(node.securityLevel, 10),
           imageName: node.imageName,
           battle: databattleService.createNewDatabattle(10, 10, 99),
@@ -67,12 +66,13 @@ angular
         node = undefined;
       }
 
-      netmap.addConnection = (connection) => {
+      /* netmap.addConnection = (connection) => {
         const tile = connection[0];
         const node = netmap.nodes.find((node) => node.tile === tile);
         node.connections.push(connection);
       }
-      netmap.removeConnection = (connection) => {
+
+      /* netmap.removeConnection = (connection) => {
         const tiles = [connection[0]];
         if (connection[connection.length - 1].type === service.tileTypes.NODE) {
           tiles.push(connection[connection.length - 1]);
@@ -96,13 +96,16 @@ angular
             node.connections.splice(connectionIndex, 1);
           }
         });
-      }
+      } */
       
       netmap.addToConnection = (connection, tile) => {
         connection.push(tile);
         if (tile.type === service.tileTypes.NODE) {
-          const node = netmap.nodes.find((n) => n.tile === tile);
-          node.connections.push([ ...connection ].reverse());
+          const startNode = netmap.nodes.find((node) => node.tile === connection[0]);
+          const endNode = netmap.nodes.find((node) => node.tile === tile);
+          console.log(startNode);
+          startNode.connections.push({ node: endNode, path: connection });
+          endNode.connections.push({ node: startNode, path: [ ...connection ].reverse() });
         }
         netmap.updateConnectionOrientations(connection);
       }
@@ -196,7 +199,7 @@ angular
         };
         node.connections.forEach((connection) => {
           const segments = [];
-          connection.forEach((tile) => {
+          connection.path.forEach((tile) => {
             const tileX = ((tile.x - tile.y + map.tiles.length) - 1) / 2;
             const tileY = (tile.x + tile.y) / 2;
             if (tile.type === service.tileTypes.CONNECTION_VERTICAL) {
@@ -288,7 +291,7 @@ angular
               }
             }
           });
-          const lastTile = connection[connection.length - 1];
+          const lastTile = connection.path[connection.path.length - 1];
           points.push({
             x: (((lastTile.x - lastTile.y + map.tiles.length) - 1) / 2) + 0.5,
             y: ((lastTile.x + lastTile.y) / 2) + 0.5,
@@ -307,7 +310,7 @@ angular
             previousSlope = slope;
           });
           relevantPoints.push(points[points.length - 1]);
-          newNode.connections.push(relevantPoints);
+          newNode.connections.push({ node: connection.node.name, path: relevantPoints });
         });
         netmap.nodes.push(newNode);
       });

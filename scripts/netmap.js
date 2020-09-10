@@ -12,18 +12,19 @@ function compareArrays(arr1, arr2) {
   return arr1.length === arr2.length && arr1.every((element, index) => element === arr2[index]);
 }
 function addConnectionsFromNode(node) {
-  node.connectedNodes.forEach((destinationNodeName) => {
-    const newConnection = [node.name, destinationNodeName].sort();
-    if (!connections.some((connection) => compareArrays(connection, newConnection))) {
-      connections.push(newConnection);
-      console.log(`Adding connection: ${newConnection[0]} <---> ${newConnection[1]}`);
-      const destinationNode = nodes.find((destNode) => destNode.name === destinationNodeName);
+  node.connections.forEach((connection) => {
+    if (!connections.find((c) => compareArrays(connection.path, c)
+      || compareArrays(connection.path, [...c].reverse()))) {
+      connections.push(connection.path);
+      console.log(`Adding connection: ${node.name} <--> ${connection.node}`);
+      console.log(connection.path);
+      const destinationNode = nodes.find((destNode) => destNode.name === connection.node);
       destinationNode.activate();
     }
   });
 }
 
-export default function NetMap(url, assets, inventory, startDataBattleCallback, startMenuCallback) {
+export default function NetMap(assets, inventory, startDataBattleCallback, startMenuCallback) {
   let showingGrid = false;
   const canvas = $('canvas')[0];
   const context = canvas.getContext('2d');
@@ -45,12 +46,26 @@ export default function NetMap(url, assets, inventory, startDataBattleCallback, 
   ));
 
   const map = assets.netmap;
-  const mapWidth = map.width;
-  const mapHeight = map.height;
+  console.log(map);
+  const mapWidth = map.size * 1000;
+  const mapHeight = map.size * 1000;
   const maxZoom = Math.min(mapWidth / 100, mapHeight / 500);
   map.nodes.forEach((node) => {
     nodes.push(new NetworkNode(node, assets.images[node.image]));
   });
+
+  /*
+  connections.forEach((connection) => {
+    const startNode = nodes.find((node) => node.name === connection[0]);
+    const endNode = nodes.find((node) => node.name === connection[1]);
+    context.beginPath();
+    context.strokeStyle = 'green';
+    context.moveTo(startNode.center.x - screenPosition[0],
+      startNode.center.y - screenPosition[1]);
+    context.lineTo(endNode.center.x - screenPosition[0], endNode.center.y - screenPosition[1]);
+    context.stroke();
+  });
+  */
 
   this.draw = function draw() {
     console.log('Redrawing netmap.');
@@ -61,14 +76,14 @@ export default function NetMap(url, assets, inventory, startDataBattleCallback, 
     }
 
     context.lineWidth = 4;
+    context.strokeStyle = 'green';
     connections.forEach((connection) => {
-      const startNode = nodes.find((node) => node.name === connection[0]);
-      const endNode = nodes.find((node) => node.name === connection[1]);
       context.beginPath();
-      context.strokeStyle = 'green';
-      context.moveTo(startNode.center.x - screenPosition[0],
-        startNode.center.y - screenPosition[1]);
-      context.lineTo(endNode.center.x - screenPosition[0], endNode.center.y - screenPosition[1]);
+      context.moveTo((connection[0].x * 100) - screenPosition[0],
+        (connection[0].y * 100) - screenPosition[1]);
+      connection.slice(1).forEach((point) => {
+        context.lineTo((point.x * 100) - screenPosition[0], (point.y * 100) - screenPosition[1]);
+      });
       context.stroke();
     });
     context.lineWidth = 1;
@@ -153,7 +168,6 @@ export default function NetMap(url, assets, inventory, startDataBattleCallback, 
   this.createInitialConnections = function createInitialConnections() {
     nodes.forEach((node) => {
       if (node.isOwned) {
-        console.log(node);
         this.ownNode(node);
       }
     });
@@ -305,11 +319,8 @@ export default function NetMap(url, assets, inventory, startDataBattleCallback, 
 
   this.returnFromBattle = function returnFromBattle(wonBattle, reward, bonusCredits) {
     if (wonBattle) {
-      console.log(`${reward} credits, plus ${bonusCredits} bonus credits`);
       this.ownNode(selectedNode);
       inventory.addCredits(reward + bonusCredits);
-    } else {
-      console.log('You lose. In your face. Haha what a loser.');
     }
     setTimeout(() => {
       this.draw();
@@ -319,7 +330,7 @@ export default function NetMap(url, assets, inventory, startDataBattleCallback, 
     if (selectedNode.owner === 'Warez') {
       this.startShop(selectedNode);
     } else if (selectedNode.owner !== 'S.M.A.R.T.') {
-      startDataBattleCallback(selectedNode.name);
+      startDataBattleCallback(selectedNode.battle);
     } else {
       this.draw();
     }

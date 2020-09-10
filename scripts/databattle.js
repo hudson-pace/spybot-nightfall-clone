@@ -11,14 +11,12 @@ const itemTypes = {
   DATA: 'data',
 };
 
-export default function DataBattle(name, url, assets, inventory, battleLoadedCallback,
-  exitBattleCallback) {
+export default function DataBattle(battleData, assets, inventory, exitBattleCallback) {
   const canvas = $('canvas')[0];
   const context = canvas.getContext('2d');
   let map;
   const agents = [];
   const enemyAgents = [];
-  let items;
   let bonusCredits = 0;
   let gameIsStarted = false;
   let running = true;
@@ -74,16 +72,9 @@ export default function DataBattle(name, url, assets, inventory, battleLoadedCal
     console.log('agents loaded');
     this.tryToLoadEnemyAgents();
   });
-  $.getJSON(url, (data) => {
-    console.log('battle loaded');
-    const battle = data.battles.find((b) => b.name === name);
-    map = new BattleMap(battle, canvas, assets.images);
-    this.battleData = battle;
-    items = this.battleData.items;
-
-    battleLoadedCallback();
-    this.tryToLoadEnemyAgents();
-  });
+  this.battleData = battleData;
+  map = new BattleMap(battleData, canvas, assets.images);
+  const { items } = this.battleData;
 
   this.draw = function draw() {
     console.log('Redrawing databattle');

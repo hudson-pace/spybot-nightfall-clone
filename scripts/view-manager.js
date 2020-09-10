@@ -51,7 +51,7 @@ function updateEventHandlers(currentView) {
   });
 }
 
-export default function ViewManager(url, assets) {
+export default function ViewManager(assets) {
   const canvas = $('canvas')[0];
   const inventory = new Inventory();
   let currentView;
@@ -65,16 +65,14 @@ export default function ViewManager(url, assets) {
     setCurrentView(netMap);
     currentView.returnFromBattle(wonBattle, reward, bonusCredits);
   }
-  function startDataBattle(name) {
-    const dataBattle = new DataBattle(name, `${url}/battles.json`, assets, inventory, () => {
-      console.log('Databattle loaded.');
-      setCurrentView(dataBattle);
-    }, switchToNetMap);
+  function startDataBattle(battleData) {
+    const dataBattle = new DataBattle(battleData, assets, inventory, switchToNetMap);
+    setCurrentView(dataBattle);
   }
 
   const startMenu = new StartMenu(canvas, () => {
     if (!netMap) {
-      netMap = new NetMap(`${url}/netmap.json`, assets, inventory, startDataBattle, () => {
+      netMap = new NetMap(assets, inventory, startDataBattle, () => {
         setCurrentView(startMenu);
         startMenu.draw();
       });
