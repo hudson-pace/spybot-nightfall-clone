@@ -54,19 +54,6 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
     nodes.push(new NetworkNode(node, assets.images[node.image]));
   });
 
-  /*
-  connections.forEach((connection) => {
-    const startNode = nodes.find((node) => node.name === connection[0]);
-    const endNode = nodes.find((node) => node.name === connection[1]);
-    context.beginPath();
-    context.strokeStyle = 'green';
-    context.moveTo(startNode.center.x - screenPosition[0],
-      startNode.center.y - screenPosition[1]);
-    context.lineTo(endNode.center.x - screenPosition[0], endNode.center.y - screenPosition[1]);
-    context.stroke();
-  });
-  */
-
   this.draw = function draw() {
     console.log('Redrawing netmap.');
     context.clearRect(0, 0, canvas.width, canvas.height);

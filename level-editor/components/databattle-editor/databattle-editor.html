@@ -1,6 +1,5 @@
 <div>
   <div class="option">
-    <p>Title: <input type="text" ng-model="databattle.name"></p>
     <p>Reward: <input type="text" ng-model="databattle.reward"></p>
   </div>
   <div class="option">
@@ -15,8 +14,8 @@
     </select>
     <input type="text" ng-model="creditAmount" ng-show="selectedType === tileTypes.ITEM && selectedItem === 'credit'"></input>
   </div>
-  <div class="option" ng-if="!netmapWatcher.netmap">
-    <button ng-click="generateJSON()">Generate JSON</button> (Logged to console) <br>
+  <div class="option">
+    <div ng-if="!netmapWatcher.netmap"><button ng-click="generateJSON()">Generate JSON</button> (Logged to console)</div>
     <input ng-model="inputJson" type="text"><button ng-click="loadDatabattle(inputJson)">Generate Battle from JSON</button>
   </div>
   <div class="option" ng-if="netmapWatcher.netmap">

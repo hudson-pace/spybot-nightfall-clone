@@ -36,8 +36,10 @@
       Image Name <input type="text" ng-model="selectedNode.imageName"></input> <br>
       Starts Owned: <input type="checkbox" ng-model="selectedNode.ownedByUser"></input> <br>
       Battle: <button ng-click="editDatabattle(selectedNode)">Edit Battle</button> <br>
-      <button ng-click="removeNode()">Remove Node</button>
+      
       <button ng-click="addConnection()">Add Connection</button>
+      <button ng-click="clearConnections()">Clear Connections</button> <br>
+      <button ng-click="removeNode()">Remove Node</button>
     </div>
     <div class="netmap-option" ng-show="mode === modes.ADDING_CONNECTION">
       <button ng-click="cancelConnection()">Cancel</button>

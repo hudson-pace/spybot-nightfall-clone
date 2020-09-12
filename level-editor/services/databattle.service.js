@@ -97,8 +97,10 @@ angular
 
     service.createDatabattleFromJson = (battleInput) => {
       const battleJson = JSON.parse(battleInput);
-      const databattle = service.createNewDatabattle(10, 10, 99);
-      databattle.name = battleJson.name;
+      let databattle = databattleWatcher.databattle;
+      if (!databattle) {
+        databattle = service.createNewDatabattle(10, 10, 99);
+      }
       databattle.tiles = [];
       databattle.reward = battleJson.reward;
 
@@ -153,7 +155,6 @@ angular
 
     service.getJsonFromDatabattle = (databattle) => {
       const battle = {};
-      battle.name = databattle.name;
       battle.height = databattle.tiles.length;
       battle.width = databattle.tiles[0].length;
       battle.reward = parseInt(databattle.reward, 10);

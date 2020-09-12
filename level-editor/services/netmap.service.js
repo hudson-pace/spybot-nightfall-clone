@@ -66,17 +66,9 @@ angular
         node = undefined;
       }
 
-      /* netmap.addConnection = (connection) => {
-        const tile = connection[0];
-        const node = netmap.nodes.find((node) => node.tile === tile);
-        node.connections.push(connection);
-      }
-
-      /* netmap.removeConnection = (connection) => {
-        const tiles = [connection[0]];
-        if (connection[connection.length - 1].type === service.tileTypes.NODE) {
-          tiles.push(connection[connection.length - 1]);
-        }
+      netmap.removeConnection = (connection) => {
+        const tiles = [connection.path[0], connection.path[connection.path.length - 1]];
+        
         tiles.forEach((tile) => {
           const node = netmap.nodes.find((node) => node.tile === tile);
 
@@ -85,25 +77,30 @@ angular
             if (c === connection) {
               return true;
             }
-            c.forEach((tile, index) => {
-              if (tile !== connections[connections.length - (1 + index)]) {
-                return false;
+            let isReversedPath = true;
+            c.path.forEach((tile, index) => {
+              if (tile !== connection.path[connection.path.length - (1 + index)]) {
+                isReversedPath = false;
               }
             });
-            return true;
+            return isReversedPath;
           });
           if (connectionIndex !== -1) {
+            connection.path.forEach((tile) => {
+              if (tile.type !== service.tileTypes.NODE) {
+                tile.type = service.tileTypes.NONE;
+              }
+            });
             node.connections.splice(connectionIndex, 1);
           }
         });
-      } */
+      }
       
       netmap.addToConnection = (connection, tile) => {
         connection.push(tile);
         if (tile.type === service.tileTypes.NODE) {
           const startNode = netmap.nodes.find((node) => node.tile === connection[0]);
           const endNode = netmap.nodes.find((node) => node.tile === tile);
-          console.log(startNode);
           startNode.connections.push({ node: endNode, path: connection });
           endNode.connections.push({ node: startNode, path: [ ...connection ].reverse() });
         }
@@ -179,6 +176,8 @@ angular
       const netmap = {};
       
       netmap.size = (map.tiles.length + map.tiles[0].length) / 2;
+      netmap.height = map.tiles.length;
+      netmap.width = map.tiles[0].length;
       netmap.nodes = [];
       map.nodes.forEach((node) => {
         const x = ((node.tile.x - node.tile.y + map.tiles.length) - 1) / 2;
@@ -316,6 +315,19 @@ angular
       });
       return JSON.stringify(netmap);
     };
+
+    service.createNetmapFromJson = (netmapJson) => {
+      let netmap = netmapWatcher.netmap;
+      if (!netmap) {
+        netmap = createNewNetmap(10, 10, 99);
+        netmapWatcher.netmap = netmap;
+      }
+      netmap.resize({
+        left: netmapJson.width - netmap.tiles.length,
+        top: netmapJson.height - netmap.tiles.height,
+      });
+      
+    }
 
     return service;
   }]);

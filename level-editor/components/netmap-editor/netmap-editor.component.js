@@ -93,6 +93,11 @@ angular
         $scope.currentConnection = undefined;
         $scope.clickTile($scope.selectedNode.tile);
       };
+      $scope.clearConnections = () => {
+        while ($scope.selectedNode.connections.length > 0) {
+          $scope.netmap.removeConnection($scope.selectedNode.connections[0]);
+        }
+      }
   
       $scope.generateJson = () => {
         console.log(netmapService.generateJson($scope.netmap));
