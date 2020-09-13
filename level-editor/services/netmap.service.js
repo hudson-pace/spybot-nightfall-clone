@@ -167,7 +167,13 @@ angular
         }
       }
 
-      
+      netmap.getTileFromCoords = (x, y) => {
+        let gridY = (y - x) + ((json.height - 1) / 2);
+        let gridX = x + y + ((1 - json.height) / 2);
+        console.log(gridX);
+        console.log(gridY);
+        return netmap.tiles[gridY][gridX];
+      }
 
       return netmap;
     }
@@ -317,16 +323,127 @@ angular
     };
 
     service.createNetmapFromJson = (netmapJson) => {
-      let netmap = netmapWatcher.netmap;
-      if (!netmap) {
-        netmap = createNewNetmap(10, 10, 99);
-        netmapWatcher.netmap = netmap;
-      }
-      netmap.resize({
-        left: netmapJson.width - netmap.tiles.length,
-        top: netmapJson.height - netmap.tiles.height,
+      json = JSON.parse(netmapJson);
+      const netmap = service.createNewNetmap(json.width, json.height, 99);
+      netmapWatcher.netmap = netmap;
+      json.nodes.forEach((node) => {
+        node.tile = netmap.getTileFromCoords(node.coords.x, node.coords.y);
+        netmap.addNode(node);
       });
-      
+      json.nodes.forEach((node) => {
+        node.connections.forEach((connection) => {
+          const destNode = netmap.nodes.find((n) => n.name === connection.node);
+          if (!destNode.connections.find((con) => con.node.name === node.name)) {
+            const newConnection = [node.tile];
+            let previousPoint;
+            let x = node.tile.x;
+            let y = node.tile.y;
+            connection.path.forEach((point) => {
+              
+              if (previousPoint) {
+                deltaX = point.x - previousPoint.x;
+                deltaY = point.y - previousPoint.y;
+                if (Math.abs(deltaX) !== 0.25 && Math.abs(deltaY) !== 0.25
+                && Math.abs(deltaX) !== 0.75 && Math.abs(deltaY) !== 0.75) {
+                  if (deltaX === deltaY) {
+                    if (deltaX < 0) {
+                      deltaX = -0.5;
+                      deltaY = -0.5;
+                    } else {
+                      deltaX = 0.5;
+                      deltaY = 0.5;
+                    }
+                  } else if (deltaX === deltaY * -1) {
+                    if (deltaX < 0) {
+                      deltaX = -0.5;
+                      deltaY = 0.5; 
+                    } else {
+                      deltaX = 0.5;
+                      deltaY = -0.5;
+                    }
+                  } else if (deltaY === 0) {
+                    if (deltaX < 0) {
+                      deltaX = -0.5;
+                    } else if (deltaX > 0) {
+                      deltaX = 0.5;
+                    }
+                  } else if (deltaX === 0) {
+                    if (deltaY < 0) {
+                      deltaY = -0.5;
+                    } else if (deltaY > 0) {
+                      deltaY = 0.5;
+                    }
+                  }
+                }
+
+                let iterations;
+                if (deltaX === 0) {
+                  iterations = (point.y - previousPoint.y) / deltaY;
+                } else if (deltaY === 0) {
+                  iterations = (point.x - previousPoint.x) / deltaX;
+                } else {
+                  iterations = Math.max((point.x - previousPoint.x) / deltaX, (point.y - previousPoint.y) / deltaY);
+                }
+                if (point === connection.path[connection.path.length - 1]) {
+                  // Don't add anything after the last tile.
+                  iterations = 0;
+                  console.log('end');
+                }
+                console.log(iterations);
+                let index = 0;
+                while (index < iterations) {
+                  index += 1;
+                  if (deltaX === deltaY) {
+                    if (deltaX < 0) {
+                      x -= 1;
+                    } else if (deltaX > 0) {
+                      x += 1;
+                    }
+                  } else if (deltaX === deltaY * -1) {
+                    if (deltaX < 0) {
+                      y += 1;
+                    } else if (deltaX > 0) {
+                      y -= 1;
+                    }
+                  } else if (deltaX === 0) {
+                    if (deltaY < 0) {
+                      if (newConnection.length > 1 && newConnection[newConnection.length - 2].x === newConnection[newConnection.length - 1].x) {
+                        x -= 1;
+                      } else {
+                        y -= 1;
+                      }
+                    } else {
+                      if (newConnection.length > 1 && newConnection[newConnection.length - 2].x === newConnection[newConnection.length - 1].x) {
+                        x += 1;
+                      } else {
+                        y += 1;
+                      }
+                    }
+                  } else if (deltaY === 0) {
+                    if (deltaX < 0) {
+                      if (newConnection.length > 1 && newConnection[newConnection.length - 2].y === newConnection[newConnection.length - 1].y) {
+                        y += 1;
+                      } else {
+                        x -= 1;
+                      }
+                    } else {
+                      if (newConnection.length > 1 && newConnection[newConnection.length - 2].y === newConnection[newConnection.length - 1].y) {
+                        y -= 1;
+                      } else {
+                        x += 1;
+                      }
+                    }
+                  }
+                  const tile = netmap.tiles[y][x];
+                  netmap.addToConnection(newConnection, tile);
+                }
+              }
+              previousPoint = point;
+            });
+          }
+        });
+      });
+      return netmap;
     }
 
     return service;

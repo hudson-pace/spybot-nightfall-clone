@@ -13,6 +13,7 @@
   <div id="netmap-options">
     <div class="netmap-option">
       <button ng-click="generateJson()">Generate JSON</button>
+      <input ng-model="inputJson" type="text"><button ng-click="loadDatabattle(inputJson)">Generate Battle from JSON</button>
     </div>
     <div class="netmap-option" ng-show="mode === modes.ADD_NODE">
       Add Node: <br>

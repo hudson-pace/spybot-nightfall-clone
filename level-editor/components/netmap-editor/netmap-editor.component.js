@@ -75,6 +75,7 @@ angular
         $scope.clickTile(node.tile);
       };
       $scope.removeNode = () => {
+        $scope.clearConnections();
         const tile = $scope.selectedNode.tile;
         $scope.netmap.removeNode($scope.selectedNode);
         $scope.clickTile(tile);
@@ -102,5 +103,9 @@ angular
       $scope.generateJson = () => {
         console.log(netmapService.generateJson($scope.netmap));
       };
+
+      $scope.loadDatabattle = (json) => {
+        $scope.netmap = netmapService.createNetmapFromJson(json);
+      }
     },
   });
