@@ -43,17 +43,22 @@ angular
       netmap.nodes = [];
 
       netmap.addNode = (node) => {
-        netmap.nodes.push({
+        const newNode = {
           name: node.name,
           owner: node.owner,
           desc: node.desc,
           ownedByUser: node.ownedByUser,
           securityLevel: parseInt(node.securityLevel, 10),
           imageName: node.imageName,
-          battle: databattleService.createNewDatabattle(10, 10, 99),
           tile: node.tile,
           connections: [],
-        });
+        };
+        if (!node.battle) {
+          newNode.battle = databattleService.createNewDatabattle(10, 10, 99);
+        } else {
+          newNode.battle = databattleService.createDatabattleFromJson(JSON.stringify(node.battle));
+        }
+        netmap.nodes.push(newNode);
         
         const tile = node.tile;
         tile.type = service.tileTypes.NODE;
@@ -170,8 +175,6 @@ angular
       netmap.getTileFromCoords = (x, y) => {
         let gridY = (y - x) + ((json.height - 1) / 2);
         let gridX = x + y + ((1 - json.height) / 2);
-        console.log(gridX);
-        console.log(gridY);
         return netmap.tiles[gridY][gridX];
       }
 
@@ -387,9 +390,7 @@ angular
                 if (point === connection.path[connection.path.length - 1]) {
                   // Don't add anything after the last tile.
                   iterations = 0;
-                  console.log('end');
                 }
-                console.log(iterations);
                 let index = 0;
                 while (index < iterations) {
                   index += 1;
