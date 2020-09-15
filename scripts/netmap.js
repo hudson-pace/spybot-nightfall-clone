@@ -254,9 +254,10 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
       const clickedNode = nodes.find((node) => node.containsPoint(coords));
       if (clickedNode && clickedNode.isVisible) {
         selectedNode = clickedNode;
-        this.openNodeMenu(selectedNode);
         if (selectedNode.owner === 'Warez' && !selectedNode.isOwned) {
           this.ownNode(selectedNode);
+        } else {
+          this.openNodeMenu(selectedNode);
         }
         this.draw();
       }

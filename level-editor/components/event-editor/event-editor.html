@@ -17,11 +17,13 @@
 <div id="dialogueLineContainer">
   <div ng-repeat="line in event.dialogue" class="dialogueLine">
     <div>{{ line.number }}</div>
-    Image: <input type="text" ng-model="line.image"></input><br>
+    <button ng-click="deleteLine(line)">Delete</button> <br>
+    Image: <input type="text" ng-model="line.image"></input> <br>
     Text: <textarea ng-model="line.text"></textarea>
     <div>
       Responses:
       <div ng-repeat="response in line.responses" class="response">
+        <button ng-click="deleteResponse(line, response)">Delete</button> <br>
         Text: <textarea ng-model="response.text"></textarea> <br>
         Number: <input type="text" ng-model="response.number"></input>
       </div>

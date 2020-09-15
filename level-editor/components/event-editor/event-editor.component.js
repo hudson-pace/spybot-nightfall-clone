@@ -30,5 +30,14 @@ angular
       $scope.addResponse = (line) => {
         line.responses.push({});
       }
+
+      $scope.deleteLine = (line) => {
+        const index = $scope.event.dialogue.findIndex((l) => l === line);
+        $scope.event.dialogue.splice(index, 1);
+      }
+      $scope.deleteResponse = (line, response) => {
+        const index = line.responses.findIndex((r) => r === response);
+        line.responses.splice(index, 1);
+      }
     },
   });
