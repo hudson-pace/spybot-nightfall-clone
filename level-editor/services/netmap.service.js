@@ -39,6 +39,16 @@ angular
       }
     }
 
+    service.openShop = (node) => {
+      if (!node.shop) {
+        node.shop = [];
+      }
+      netmapWatcher.netmap.openShop = node.shop;
+    }
+    service.closeShop = () => {
+      netmapWatcher.netmap.openShop = undefined;
+    }
+
     service.createNewNetmap = (initialWidth, initialHeight, maxSize) => {
       const netmap = {};
       netmap.resize = (resizeParams) => {
@@ -71,6 +81,10 @@ angular
 
         if (node.event) {
           newNode.event = eventService.createEventFromJson(JSON.stringify(node.event));
+        }
+
+        if (node.shop) {
+          newNode.shop = node.shop;
         }
         
         netmap.nodes.push(newNode);
@@ -211,7 +225,6 @@ angular
           owner: node.owner,
           desc: node.desc,
           image: node.imageName,
-          battle: JSON.parse(databattleService.getJsonFromDatabattle(node.battle)),
           ownedByUser: node.ownedByUser,
           securityLevel: node.securityLevel,
           coords: {
@@ -220,8 +233,14 @@ angular
           },
           connections: [],
         };
+        if (node.battle) {
+          newNode.battle = JSON.parse(databattleService.getJsonFromDatabattle(node.battle));
+        }
         if (node.event) {
           newNode.event = JSON.parse(eventService.getJsonFromEvent(node.event));
+        }
+        if (node.shop) {
+          newNode.shop = JSON.parse(angular.toJson(node.shop));
         }
         node.connections.forEach((connection) => {
           const segments = [];

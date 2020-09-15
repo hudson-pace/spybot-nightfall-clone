@@ -9,6 +9,7 @@
   <script src="components/databattle-editor/databattle-editor.component.js"></script>
   <script src="components/netmap-editor/netmap-editor.component.js"></script>
   <script src="components/event-editor/event-editor.component.js"></script>
+  <script src="components/shop-editor/shop-editor.component.js"></script>
   <script src="services/grid.service.js"></script>
   <script src="services/databattle.service.js"></script>
   <script src="services/netmap.service.js"></script>
@@ -21,9 +22,10 @@
       <button ng-click="startNetmapEditor()">Netmap</button> <br>
       <button ng-click="startEventEditor()">Event</button> <br>
     </div>
-    <netmap-editor ng-if="!databattleWatcher.databattle && !eventWatcher.event && netmapWatcher.netmap"></netmap-editor>
+    <netmap-editor ng-if="!databattleWatcher.databattle && !eventWatcher.event && netmapWatcher.netmap && !netmapWatcher.netmap.openShop"></netmap-editor>
     <databattle-editor ng-if="databattleWatcher.databattle"></databattle-editor>
     <event-editor ng-if="eventWatcher.event"></event-editor>
+    <shop-editor ng-if="netmapWatcher.netmap.openShop"></shop-editor>
   </div>
 </body>
 </html>

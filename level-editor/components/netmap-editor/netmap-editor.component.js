@@ -111,5 +111,8 @@ angular
       $scope.editEvent = (node) => {
         netmapService.openEvent(node);
       }
+      $scope.editShop = (node) => {
+        netmapService.openShop(node);
+      }
     },
   });
