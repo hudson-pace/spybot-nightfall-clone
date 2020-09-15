@@ -13,7 +13,7 @@
   <div id="netmap-options">
     <div class="netmap-option">
       <button ng-click="generateJson()">Generate JSON</button>
-      <input ng-model="inputJson" type="text"><button ng-click="loadDatabattle(inputJson)">Generate Battle from JSON</button>
+      <input ng-model="inputJson" type="text"><button ng-click="loadNetmap(inputJson)">Generate Map from JSON</button>
     </div>
     <div class="netmap-option" ng-show="mode === modes.ADD_NODE">
       Add Node: <br>
@@ -37,6 +37,7 @@
       Image Name <input type="text" ng-model="selectedNode.imageName"></input> <br>
       Starts Owned: <input type="checkbox" ng-model="selectedNode.ownedByUser"></input> <br>
       Battle: <button ng-click="editDatabattle(selectedNode)">Edit Battle</button> <br>
+      Event: <button ng-click="editEvent(selectedNode)">Edit Event</button> <br>
       
       <button ng-click="addConnection()">Add Connection</button>
       <button ng-click="clearConnections()">Clear Connections</button> <br>

@@ -1,6 +1,7 @@
 angular
   .module('mapEditorApp')
-  .factory('netmapService', ['gridService', 'databattleService', function(gridService, databattleService) {
+  .factory('netmapService', ['gridService', 'databattleService', 'eventService',
+    function(gridService, databattleService, eventService) {
     const service = {};
     service.tileTypes = {
       NONE: 'none',
@@ -27,6 +28,15 @@ angular
 
     service.openDatabattle = (node) => {
       databattleService.setOpenDatabattle(node.battle);
+    }
+    service.openEvent = (node) => {
+      if (node.event) {
+        eventService.setOpenEvent(node.event);
+      } else {
+        const event = eventService.createNewEvent();
+        node.event = event;
+        eventService.setOpenEvent(node.event);
+      }
     }
 
     service.createNewNetmap = (initialWidth, initialHeight, maxSize) => {
@@ -58,6 +68,11 @@ angular
         } else {
           newNode.battle = databattleService.createDatabattleFromJson(JSON.stringify(node.battle));
         }
+
+        if (node.event) {
+          newNode.event = eventService.createEventFromJson(JSON.stringify(node.event));
+        }
+        
         netmap.nodes.push(newNode);
         
         const tile = node.tile;
@@ -205,6 +220,9 @@ angular
           },
           connections: [],
         };
+        if (node.event) {
+          newNode.event = JSON.parse(eventService.getJsonFromEvent(node.event));
+        }
         node.connections.forEach((connection) => {
           const segments = [];
           connection.path.forEach((tile) => {
@@ -341,13 +359,13 @@ angular
             let previousPoint;
             let x = node.tile.x;
             let y = node.tile.y;
+            let finished = false;
             connection.path.forEach((point) => {
               
               if (previousPoint) {
                 deltaX = point.x - previousPoint.x;
                 deltaY = point.y - previousPoint.y;
-                if (Math.abs(deltaX) !== 0.25 && Math.abs(deltaY) !== 0.25
-                && Math.abs(deltaX) !== 0.75 && Math.abs(deltaY) !== 0.75) {
+                if (Math.abs(deltaX) !== 0.25 && Math.abs(deltaY) !== 0.25) {
                   if (deltaX === deltaY) {
                     if (deltaX < 0) {
                       deltaX = -0.5;
@@ -386,10 +404,6 @@ angular
                   iterations = (point.x - previousPoint.x) / deltaX;
                 } else {
                   iterations = Math.max((point.x - previousPoint.x) / deltaX, (point.y - previousPoint.y) / deltaY);
-                }
-                if (point === connection.path[connection.path.length - 1]) {
-                  // Don't add anything after the last tile.
-                  iterations = 0;
                 }
                 let index = 0;
                 while (index < iterations) {
@@ -436,7 +450,12 @@ angular
                     }
                   }
                   const tile = netmap.tiles[y][x];
-                  netmap.addToConnection(newConnection, tile);
+                  if (!finished) {
+                    netmap.addToConnection(newConnection, tile);
+                  }
+                  if (tile.type === service.tileTypes.NODE) {
+                    finished = true;
+                  }
                 }
               }
               previousPoint = point;
@@ -445,6 +464,12 @@ angular
         });
       });
       return netmap;
+    }
+
+    service.getNodeList = () => {
+      if (netmapWatcher.netmap) {
+        return netmapWatcher.netmap.nodes;
+      }
     }
 
     return service;

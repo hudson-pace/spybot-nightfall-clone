@@ -151,3 +151,16 @@ input.resize {
 .collapse:hover {
   background-color: rgba(255, 0, 0, 0.5);
 }
+
+#dialogueLineContainer {
+  border: 2px solid black;
+  padding: 16px;
+}
+.dialogueLine {
+  border: 2px solid black;
+  padding: 8px;
+}
+.response {
+  border: 1px solid black;
+  padding: 8px;
+}

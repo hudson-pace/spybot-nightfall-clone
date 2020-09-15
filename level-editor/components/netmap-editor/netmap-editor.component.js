@@ -104,8 +104,12 @@ angular
         console.log(netmapService.generateJson($scope.netmap));
       };
 
-      $scope.loadDatabattle = (json) => {
+      $scope.loadNetmap = (json) => {
         $scope.netmap = netmapService.createNetmapFromJson(json);
+      }
+
+      $scope.editEvent = (node) => {
+        netmapService.openEvent(node);
       }
     },
   });
