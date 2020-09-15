@@ -254,7 +254,7 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
       if (clickedNode && clickedNode.isVisible) {
         selectedNode = clickedNode;
         this.openNodeMenu(selectedNode);
-        if (selectedNode.owner === 'Warez') {
+        if (selectedNode.owner === 'Warez' && !selectedNode.isOwned) {
           this.ownNode(selectedNode);
         }
         this.draw();
