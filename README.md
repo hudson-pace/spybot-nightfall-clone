@@ -5,19 +5,14 @@ A clone of LEGO's Spybot: The Nightfall Incident, one of my favorite flash game 
 ## Planned Features
 
 ### Missing Features From the Original
-As it stands, this project is approaching a facsimile of the original. Notable missing features include:
+As it stands, this project is approaching a facsimile of the original. Major missing features include:
 
 - The ability to save progress.
-- Dialogue and story.
-- Zones with security levels.
+- Music and sound effects.
 
-### Level Editor
+### Map Editor
 
-This project includes a basic level editor for battles (https://hudson-pace.github.io/spybot-nightfall-clone/level-editor, or use the link in the main game). More features will be added, including:
-- Editing existing battles.
-- Creating entire maps, with nodes, battles, and connections.
-
-It also needs some work to make it look less ugly.
+This project includes a map editor (https://hudson-pace.github.io/spybot-nightfall-clone/level-editor, or use the link in the main game). It's fully functional, but I would like to make it prettier and more user-friendly. It also needs to be more thoroughly tested, especially for cross-browser support.
 
 ### Misc
 - I need to sort out my messy UI and improve the artwork.
