@@ -69,7 +69,7 @@ angular
           desc: node.desc,
           ownedByUser: node.ownedByUser,
           securityLevel: parseInt(node.securityLevel, 10),
-          imageName: node.imageName,
+          image: node.image,
           tile: node.tile,
           connections: [],
         };
@@ -224,7 +224,7 @@ angular
           name: node.name,
           owner: node.owner,
           desc: node.desc,
-          image: node.imageName,
+          image: node.image,
           ownedByUser: node.ownedByUser,
           securityLevel: node.securityLevel,
           coords: {

@@ -20,6 +20,7 @@ angular
             name: newItem.name,
             price: parseInt(newItem.price, 10),
           });
+          $scope.shop.sort((a, b) => a.name < b.name ? -1 : 1);
         }
       }
       $scope.removeItem = (item) => {

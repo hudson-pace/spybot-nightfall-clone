@@ -23,7 +23,7 @@
       Name: <input type="text" ng-model="newNode.name"></input> <br>
       Desc: <input type="text" ng-model="newNode.desc"></input> <br>
       Sec. Level: <input type="text" maxLength="3" ng-model="newNode.securityLevel"></input> <br>
-      Image Name <input type="text" ng-model="newNode.imageName"></input> <br>
+      Image: <input type="text" ng-model="newNode.image"></input> <br>
       Starts Owned: <input type="checkbox" ng-model="newNode.ownedByUser"></input> <br>
       <button ng-click="addNode(newNode)">Add Node</button>
     </div>
@@ -34,7 +34,7 @@
       Name: <input type="text" ng-model="selectedNode.name"></input> <br>
       Desc: <input type="text" ng-model="selectedNode.desc"></input> <br>
       Sec. Level: <input type="text" maxLength="2" ng-model="selectedNode.securityLevel"></input> <br>
-      Image Name <input type="text" ng-model="selectedNode.imageName"></input> <br>
+      Image: <input type="text" ng-model="selectedNode.image"></input> <br>
       Starts Owned: <input type="checkbox" ng-model="selectedNode.ownedByUser"></input> <br>
       Battle: <button ng-click="editDatabattle(selectedNode)">Edit Battle</button> <br>
       Event: <button ng-click="editEvent(selectedNode)">Edit Event</button> <br>
