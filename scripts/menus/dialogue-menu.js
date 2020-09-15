@@ -10,15 +10,15 @@ export default class DialogueMenu {
     this.menu = new Menu(600, 200, 350, 150, context);
     this.menu.addTextBlock(dialogue[index].text, 16, false);
     dialogue[index].responses.forEach((response) => {
-      this.menu.addButton(response, 16, 300, false, true, () => {
-        if (index < dialogue.length - 1) {
-          this.createNewDialogueMenu(dialogue, context, index + 1);
+      const number = parseInt(response.number, 10);
+      this.menu.addButton(response.text, 16, 300, false, true, () => {
+        if (number < dialogue.length) {
+          this.createNewDialogueMenu(dialogue, context, number);
         } else {
           this.endDialogueCallback();
         }
       });
     });
-    this.draw();
   }
 
   draw() {

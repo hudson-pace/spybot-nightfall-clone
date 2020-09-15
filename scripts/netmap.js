@@ -243,6 +243,7 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
       programMenu.onClick(point);
     } else if (this.dialogueMenu && this.dialogueMenu.containsPoint(point)) {
       this.dialogueMenu.onClick(point);
+      this.draw();
     } else if (!this.dialogueMenu) {
       const coords = {
         x: (((event.offsetX / canvas.clientWidth)
