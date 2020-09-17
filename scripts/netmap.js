@@ -116,6 +116,12 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
     this.draw();
   };
 
+  this.centerScreenOnPoint = function centerScreenOnPoint(x, y) {
+    screenPosition[0] = x - canvas.width / (2 * zoomFactor);
+    screenPosition[1] = y - canvas.height / (2 * zoomFactor);
+    this.draw();
+  };
+
   this.ownNode = function ownNode(node) {
     node.own();
     addConnectionsFromNode(node);
@@ -138,6 +144,7 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
             this.moveScreen(-10000, -10000);
             this.moveScreen(newNode.center.x - (canvas.width / 2),
               newNode.center.y - (canvas.height / 2));
+            this.centerScreenOnPoint(newNode.center.x, newNode.center.y);
             break;
           }
           case 'increase security level':
@@ -148,8 +155,7 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
         this.draw();
       });
     }
-    this.moveScreen(-10000, -10000);
-    this.moveScreen(node.center.x - (canvas.width / 2), node.center.y - (canvas.height / 2));
+    this.centerScreenOnPoint(node.center.x, node.center.y);
   };
 
   this.createInitialConnections = function createInitialConnections() {
@@ -222,7 +228,8 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
     relativeMousePosition[0] = event.offsetX / canvas.clientWidth;
     relativeMousePosition[1] = event.offsetY / canvas.clientHeight;
     if (isDragging) {
-      this.moveScreen(oldX - event.offsetX, oldY - event.offsetY);
+      this.moveScreen(((oldX - event.offsetX) / canvas.clientWidth) * canvas.width,
+        ((oldY - event.offsetY) / canvas.clientHeight) * canvas.height);
       oldX = event.offsetX;
       oldY = event.offsetY;
     }
