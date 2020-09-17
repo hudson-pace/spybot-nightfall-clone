@@ -55,26 +55,16 @@ export default function DataBattle(battleData, assets, inventory, exitBattleCall
     exitBattleCallback(false);
   });
 
-  this.tryToLoadEnemyAgents = function tryToLoadEnemyAgents() {
-    if (this.agentData && this.battleData) {
-      this.battleData.enemies.forEach((enemy) => {
-        const agent = this.agentData.find((a) => a.name === enemy.name);
-        if (agent) {
-          enemyAgents.push(new Agent(agent, enemy.coords, assets, context, map));
-        }
-      });
-      this.draw();
-    }
-  };
-
-  $.getJSON('./assets/agents.json', (data) => {
-    this.agentData = data;
-    console.log('agents loaded');
-    this.tryToLoadEnemyAgents();
-  });
   this.battleData = battleData;
   map = new BattleMap(battleData, canvas, assets.images);
-  const { items } = this.battleData;
+  const items = [...this.battleData.items];
+
+  this.battleData.enemies.forEach((enemy) => {
+    const agent = assets.agents.find((a) => a.name === enemy.name);
+    if (agent) {
+      enemyAgents.push(new Agent(agent, enemy.coords, assets, context, map));
+    }
+  });
 
   this.draw = function draw() {
     console.log('Redrawing databattle');
@@ -364,12 +354,14 @@ export default function DataBattle(battleData, assets, inventory, exitBattleCall
       if (command.damage < 0) {
         if (tile.type === tileTypes.NONE) {
           tile.changeType(tileTypes.BASIC);
+          this.draw();
         }
       } else {
         const itemOnTile = items.find((item) => item.coords.x === tile.x
           && item.coords.y === tile.y);
         if (tile.type === tileTypes.BASIC && !itemOnTile) {
           tile.changeType(tileTypes.NONE);
+          this.draw();
         }
       }
     }, totalDelay);
@@ -479,4 +471,5 @@ export default function DataBattle(battleData, assets, inventory, exitBattleCall
       console.log(item.amount);
     }
   };
+  this.draw();
 }

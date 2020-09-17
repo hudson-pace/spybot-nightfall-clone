@@ -318,9 +318,7 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
       this.ownNode(selectedNode);
       inventory.addCredits(reward + bonusCredits);
     }
-    setTimeout(() => {
-      this.draw();
-    }, 500);
+    this.draw();
   };
   this.startNode = function startNode() {
     if (selectedNode.owner === 'Warez') {
