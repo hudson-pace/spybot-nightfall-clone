@@ -150,6 +150,9 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
           case 'increase security level':
             this.securityLevel += 1;
             break;
+          case 'add credits':
+            inventory.addCredits(parseInt(node.event.credits, 10));
+            break;
         }
         this.dialogueMenu = undefined;
         this.draw();

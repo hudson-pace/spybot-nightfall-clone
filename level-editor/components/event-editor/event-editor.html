@@ -12,7 +12,9 @@
   <select ng-if="event.type === eventTypes.REVEAL_NODE" ng-model="event.nodeName">
     <option ng-repeat="node in nodeList">{{ node.name }}</option>
   </select>
+  <input type="text" ng-if="event.type === eventTypes.ADD_CREDITS" ng-model="event.credits"></input>
 </div>
+
 
 <div id="dialogueLineContainer">
   <div ng-repeat="line in event.dialogue" class="dialogueLine">
