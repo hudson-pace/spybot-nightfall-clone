@@ -129,6 +129,12 @@ export default function DataBattle(battleData, assets, inventory, exitBattleCall
         }, totalDelay);
         totalDelay += delay;
         totalDelay += this.executeCommand(turn.targetTile, agent, totalDelay);
+      } else {
+        totalDelay += delay;
+        setTimeout(() => {
+          agent.executeCommand();
+          this.draw();
+        }, totalDelay);
       }
       totalDelay += delay;
       setTimeout(() => {
@@ -228,6 +234,7 @@ export default function DataBattle(battleData, assets, inventory, exitBattleCall
         leaveButton.click();
       } else if (programMenu.containsPoint({ x, y })) {
         programMenu.onClick({ x, y });
+        this.draw();
       } else if (!gameIsStarted) {
         if (startButton.containsPoint({ x, y })) {
           startButton.click();

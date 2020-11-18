@@ -251,6 +251,7 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
       startMenuCallback();
     } else if (programMenu.containsPoint(point)) {
       programMenu.onClick(point);
+      this.draw();
     } else if (this.dialogueMenu && this.dialogueMenu.containsPoint(point)) {
       this.dialogueMenu.onClick(point);
       this.draw();

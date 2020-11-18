@@ -82,6 +82,11 @@ export default class ProgramMenu {
         if (selectCommandCallback) {
           selectCommandCallback(commandName);
         }
+
+        program.highlightTiles(
+          program.getValidMoves(command.range, command.type),
+          command.type,
+        );
       });
 
     if (selectMoveCallback) {
@@ -104,10 +109,8 @@ export default class ProgramMenu {
   onClick(point) {
     if (this.programListMenu.containsPoint(point)) {
       this.programListMenu.onClick(point);
-      this.draw();
     } else if (this.programInfoMenu && this.programInfoMenu.containsPoint(point)) {
       this.programInfoMenu.onClick(point);
-      this.draw();
     }
   }
 
