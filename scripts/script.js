@@ -27,7 +27,7 @@ function loadAssets(allAssetsLoadedCallback) {
   const assetNames = [
     'images/nodeCAR.png', 'images/nodeDD.png', 'images/nodeLMM.png', 'images/nodePEDC.png', 'images/nodePharmhaus.png', 'images/nodeSmart.png',
     'images/nodeUnknown.png', 'images/nodeWarez.png', 'images/agents.png', 'images/tileOverlays.png', 'images/agentDone.png', 'images/items.png',
-    'worlds/test/netmap.json', 'agents.json', 'commands.json',
+    'worlds/nightfall_incident/netmap.json', 'agents.json', 'commands.json',
   ];
   let loadedCount = 0;
 
