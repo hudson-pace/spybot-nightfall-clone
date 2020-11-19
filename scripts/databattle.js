@@ -187,6 +187,9 @@ export default function DataBattle(battleData, assets, inventory, exitBattleCall
             this.draw();
           }
         }
+      } else {
+        // At least one agent's turn is not over.
+        this.selectNextAgent();
       }
     }
   };
@@ -270,16 +273,7 @@ export default function DataBattle(battleData, assets, inventory, exitBattleCall
           if (selectedAgent) {
             selectedAgent.deselect();
           }
-          map.clearTileOverlays();
-          clickedAgent.select();
-          programMenu.showProgramInfo(clickedAgent, (commandName) => {
-            clickedAgent.chooseCommand(commandName);
-          }, () => {
-            clickedAgent.chooseMove();
-          }, () => {
-            clickedAgent.chooseEndTurn();
-            this.checkForEndOfTurn();
-          });
+          this.selectAgent(clickedAgent);
         } else if (selectedAgent && !selectedAgent.isAttacking && !selectedAgent.turnIsOver) {
           selectedAgent.move(tile);
           const newTile = selectedAgent.head;
@@ -477,6 +471,26 @@ export default function DataBattle(battleData, assets, inventory, exitBattleCall
       bonusCredits += item.amount;
       console.log(item.amount);
     }
+  };
+  this.selectNextAgent = function selectNextAgent() {
+    const selectedAgent = agents.find((a) => a.selected);
+    selectedAgent.deselect();
+    const nextAgent = agents.find((a) => !a.turnIsOver);
+    if (nextAgent) {
+      this.selectAgent(nextAgent);
+    }
+  };
+  this.selectAgent = function selectAgent(agent) {
+    agent.select();
+    programMenu.showProgramInfo(agent, (commandName) => {
+      agent.chooseCommand(commandName);
+    }, () => {
+      agent.chooseMove();
+    }, () => {
+      agent.chooseEndTurn();
+      this.checkForEndOfTurn();
+    });
+    this.draw();
   };
   this.draw();
 }
