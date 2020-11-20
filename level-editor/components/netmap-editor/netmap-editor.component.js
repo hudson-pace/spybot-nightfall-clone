@@ -66,6 +66,9 @@ angular
       };
 
       $scope.editDatabattle = (node) => {
+        if ($scope.selectedTile) {
+          $scope.selectedTile.selected = false;
+        }
         netmapService.openDatabattle(node);
       }
   
