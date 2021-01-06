@@ -67,11 +67,17 @@ angular
           } else {
             $scope.clickTile(tile);
           }
-        } else if (currentEnemy) {
+        } else {
+          $scope.mouseUp();
+        }
+      };
+
+      $scope.mouseUp = () => {
+        if (currentEnemy) {
           $scope.databattle.enemies.push(currentEnemy);
           currentEnemy = undefined;
         }
-      };
+      }
 
       $scope.generateJSON = () => {
         console.log(databattleService.getJsonFromDatabattle($scope.databattle));
