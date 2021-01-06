@@ -51,9 +51,10 @@ function updateEventHandlers(currentView) {
   });
 }
 
-export default function ViewManager(assets) {
+export default function ViewManager() {
   const canvas = $('canvas')[0];
   const inventory = new Inventory();
+  let assets;
   let currentView;
   function setCurrentView(newView) {
     currentView = newView;
@@ -70,7 +71,8 @@ export default function ViewManager(assets) {
     setCurrentView(dataBattle);
   }
 
-  const startMenu = new StartMenu(canvas, () => {
+  const startMenu = new StartMenu(canvas, (newAssets) => {
+    assets = newAssets;
     if (!netMap) {
       netMap = new NetMap(assets, inventory, startDataBattle, () => {
         setCurrentView(startMenu);

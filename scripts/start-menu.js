@@ -1,4 +1,5 @@
 import { calculateTextPadding, drawRect, rectContainsPoint } from './helpers.js';
+import loadAssets from './asset-loader.js';
 
 export default class StartMenu {
   constructor(canvas, startGameCallback) {
@@ -40,7 +41,9 @@ export default class StartMenu {
       y: (event.offsetY / this.canvas.clientHeight) * this.canvas.height,
     };
     if (rectContainsPoint(this.startButton, point)) {
-      this.startGameCallback();
+      loadAssets((assets) => {
+        this.startGameCallback(assets);
+      });
     } else if (rectContainsPoint(this.levelEditorButton, point)) {
       const path = window.location.pathname;
       window.open(`${path}level-editor`, '_blank');
