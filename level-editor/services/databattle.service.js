@@ -28,7 +28,36 @@ angular
       databattle.enemies = [];
 
       databattle.resize = (resizeParams) => {
-        gridService.resizeGrid(databattle.tiles, resizeParams, maxSize, service.tileTypes.NONE);
+        const params = {
+          left: parseInt(resizeParams.left, 10),
+          right: parseInt(resizeParams.right, 10),
+          top: parseInt(resizeParams.top, 10),
+          bottom: parseInt(resizeParams.bottom, 10),
+        };
+        const enemiesToRemove = databattle.enemies.filter((enemy) => {
+          let remove = false;
+          enemy.tiles.forEach((tile) => {
+            if ((params.left < 0 && tile.x < params.left * -1)
+              || (params.right < 0 && tile.x >= databattle.tiles[0].length + params.right)
+              || (params.top < 0 && tile.y < params.top * -1)
+              || (params.bottom < 0 && tile.y >= databattle.tiles.length + params.bottom)) {
+              remove = true;
+            }
+          });
+          return remove;
+        });
+        enemiesToRemove.forEach((enemy) => {
+          const index = databattle.enemies.findIndex((e) => enemy === e);
+          enemy.tiles.forEach((tile) => {
+            tile.type = service.tileTypes.NONE;
+            tile.item = undefined;
+            tile.program = undefined;
+            tile.style = undefined;
+          });
+          databattle.enemies.splice(index, 1);
+        });
+
+        databattle.tiles = gridService.resizeGrid(databattle.tiles, resizeParams, maxSize, service.tileTypes.NONE);
       }
       
       databattle.updateTile = (tile, newType, newItem, newProgram, newStyle) => {

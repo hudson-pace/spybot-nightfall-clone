@@ -30,6 +30,11 @@ angular
     };
 
     grid.resizeGrid = (tiles, resizeParams, maxSize, defaultType) => {
+      newTiles = [];
+      tiles.forEach((row) => {
+        newTiles.push([...row]);
+      });
+
       if (resizeParams) {
         const params = {
           left: parseInt(resizeParams.left, 10),
@@ -37,9 +42,9 @@ angular
           top: parseInt(resizeParams.top, 10),
           bottom: parseInt(resizeParams.bottom, 10),
         };
-        if (params.left && params.left !== 0 && params.left + tiles[0].length > 0
-          && params.left + tiles[0].length < maxSize) {
-          tiles.forEach((row) => {
+        if (params.left && params.left !== 0 && params.left + newTiles[0].length > 0
+          && params.left + newTiles[0].length < maxSize) {
+          newTiles.forEach((row) => {
             if (params.left > 0) {
               for (let i = 0; i < params.left; i += 1) {
                 row.unshift({
@@ -51,9 +56,9 @@ angular
             }
           });
         }
-        if (params.right && params.right !== 0 && params.right + tiles[0].length > 0
-          && params.right + tiles[0].length < maxSize) {
-          tiles.forEach((row) => {
+        if (params.right && params.right !== 0 && params.right + newTiles[0].length > 0
+          && params.right + newTiles[0].length < maxSize) {
+            newTiles.forEach((row) => {
             if (params.right > 0) {
               for (let i = 0; i < params.right; i += 1) {
                 row.push({
@@ -65,40 +70,41 @@ angular
             }
           });
         }
-        if (params.top && params.top !== 0 && params.top + tiles.length > 0
-          && params.top + tiles.length < maxSize) {
+        if (params.top && params.top !== 0 && params.top + newTiles.length > 0
+          && params.top + newTiles.length < maxSize) {
           if (params.top > 0) {
             for (let i = 0; i < params.top; i += 1) {
               const newRow = [];
-              for (let j = 0; j < tiles[0].length; j += 1) {
+              for (let j = 0; j < newTiles[0].length; j += 1) {
                 newRow.push({
                   type: defaultType,
                 });
               }
-              tiles.unshift(newRow);
+              newTiles.unshift(newRow);
             }
           } else {
-            tiles.splice(0, params.top * -1);
+            newTiles.splice(0, params.top * -1);
           }
         }
-        if (params.bottom && params.bottom !== 0 && params.bottom + tiles.length > 0
-          && params.bottom + tiles.length < maxSize) {
+        if (params.bottom && params.bottom !== 0 && params.bottom + newTiles.length > 0
+          && params.bottom + newTiles.length < maxSize) {
           if (params.bottom > 0) {
             for (let i = 0; i < params.bottom; i += 1) {
               const newRow = [];
-              for (let j = 0; j < tiles[0].length; j += 1) {
+              for (let j = 0; j < newTiles[0].length; j += 1) {
                 newRow.push({
                   type: defaultType,
                 });
               }
-              tiles.push(newRow);
+              newTiles.push(newRow);
             }
           } else {
-            tiles.splice(tiles.length - (params.bottom * -1));
+            newTiles.splice(newTiles.length - (params.bottom * -1));
           }
         }
       }
-      grid.updateTileCoordinates(tiles);
+      grid.updateTileCoordinates(newTiles);
+      return newTiles;
     };
     return grid;
   });

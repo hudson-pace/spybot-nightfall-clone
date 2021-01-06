@@ -29,10 +29,6 @@ angular
       let currentEnemy;
       let currentEnemyTile;
       
-      $scope.resize = () => {
-        $scope.databattle.resize($scope.resizeParams);
-      }
-      
       $scope.clickTile = (tile) => {
         if ($scope.selectedType) {
           if ($scope.selectedType === $scope.tileTypes.ENEMY) {

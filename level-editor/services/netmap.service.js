@@ -52,7 +52,7 @@ angular
     service.createNewNetmap = (initialWidth, initialHeight, maxSize) => {
       const netmap = {};
       netmap.resize = (resizeParams) => {
-        gridService.resizeGrid(netmap.tiles, resizeParams, maxSize, service.tileTypes.NONE);
+        netmap.tiles = gridService.resizeGrid(netmap.tiles, resizeParams, maxSize, service.tileTypes.NONE);
         netmap.tableMargin = {
           'margin-top': `${ ((((Math.sqrt(2) * netmap.tiles.length) + (Math.sqrt(2) * netmap.tiles[0].length)) / 2) - (netmap.tiles.length)) * 25 }px`,
           'margin-left': `${ ((((Math.sqrt(2) * netmap.tiles.length) + (Math.sqrt(2) * netmap.tiles[0].length)) / 2) - (netmap.tiles[0].length)) * 25 }px`,
