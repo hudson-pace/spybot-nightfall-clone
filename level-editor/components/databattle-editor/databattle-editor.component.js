@@ -61,9 +61,14 @@ angular
         if (event.buttons === 1) {
           if (currentEnemy) {
             if (!currentEnemy.tiles.find((t) => t === tile)) {
-              $scope.databattle.addToEnemy(currentEnemy, tile, currentEnemyTile);
+              if (currentEnemy.tiles.find((t) => t === currentEnemyTile && (Math.abs(t.x - tile.x) + Math.abs(t.y - tile.y) === 1))) {
+                // Only allow adjacent tiles. Also, the user must add the new tile from an existing enemy tile. This ensures a contiguous outline.
+                $scope.databattle.addToEnemy(currentEnemy, tile, currentEnemyTile);
+                currentEnemyTile = tile;
+              }
+            } else {
+              currentEnemyTile = tile;
             }
-            currentEnemyTile = tile;
           } else {
             $scope.clickTile(tile);
           }
