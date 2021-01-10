@@ -338,6 +338,7 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
     this.shop = new Menu(canvas.width * 0.3, canvas.height * 0.3, canvas.width * 0.4, 0, context);
     this.shop.addTextBlock(node.name, 20, true);
     this.shop.addTextBlock(node.owner, 15, true);
+    node.shop.sort((a, b) => ((a.name > b.name) ? 1 : -1));
     this.shop.addScrollList(8, 14,
       node.shop.map((item) => ({ name: item.name, desc: item.price })),
       (itemName) => {

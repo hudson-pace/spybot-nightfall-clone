@@ -8,6 +8,7 @@ angular
       $http.get('../assets/agents.json')
         .then((data) => {
           $scope.programList = data.data;
+          $scope.programList.sort((a, b) => ((a.name > b.name) ? 1 : -1));
         }, () => {
           console.log('could not load program list.');
         });
