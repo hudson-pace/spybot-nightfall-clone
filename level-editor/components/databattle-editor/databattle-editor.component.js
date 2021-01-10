@@ -8,6 +8,7 @@ angular
       $http.get('../assets/agents.json')
         .then((data) => {
           $scope.programList = data.data;
+          $scope.programList.sort((a, b) => ((a.name > b.name) ? 1 : -1));
         }, () => {
           console.log('could not load program list.');
         });
@@ -29,36 +30,38 @@ angular
       let currentEnemy;
       let currentEnemyTile;
       
-      $scope.clickTile = (tile) => {
-        if ($scope.selectedType) {
-          if ($scope.selectedType === $scope.tileTypes.ENEMY) {
-            if ($scope.selectedProgram) {
-              currentEnemy = $scope.databattle.startEnemy($scope.selectedProgram, tile);
-              currentEnemyTile = tile;
-            }
-          } else if ($scope.selectedType === $scope.tileTypes.ITEM) {
-            if ($scope.selectedItem) {
-              if ($scope.selectedItem === 'credit') {
-                const amount = parseInt($scope.creditAmount, 10);
-                if (amount > 0) {
-                  const item = {
-                    name: $scope.selectedItem,
-                    amount,
-                  };
-                  $scope.databattle.updateTile(tile, $scope.selectedType, item);
-                }
-              } else {
-                $scope.databattle.updateTile(tile, $scope.selectedType, { name: $scope.selectedItem });
+      $scope.clickTile = (event, tile) => {
+        if (event.button === 0) {
+          if ($scope.selectedType) {
+            if ($scope.selectedType === $scope.tileTypes.ENEMY) {
+              if ($scope.selectedProgram) {
+                currentEnemy = $scope.databattle.startEnemy($scope.selectedProgram, tile);
+                currentEnemyTile = tile;
               }
+            } else if ($scope.selectedType === $scope.tileTypes.ITEM) {
+              if ($scope.selectedItem) {
+                if ($scope.selectedItem === 'credit') {
+                  const amount = parseInt($scope.creditAmount, 10);
+                  if (amount > 0) {
+                    const item = {
+                      name: $scope.selectedItem,
+                      amount,
+                    };
+                    $scope.databattle.updateTile(tile, $scope.selectedType, item);
+                  }
+                } else {
+                  $scope.databattle.updateTile(tile, $scope.selectedType, { name: $scope.selectedItem });
+                }
+              }
+            } else {
+              $scope.databattle.updateTile(tile, $scope.selectedType);
             }
-          } else {
-            $scope.databattle.updateTile(tile, $scope.selectedType);
           }
         }
       };
   
-      $scope.mouseenterTile = (event, tile) => {
-        if (event.buttons === 1) {
+      $scope.mouseEnterTile = (event, tile) => {
+        if (event.button === 0) {
           if (currentEnemy) {
             if (!currentEnemy.tiles.find((t) => t === tile)) {
               if (currentEnemy.tiles.find((t) => t === currentEnemyTile && (Math.abs(t.x - tile.x) + Math.abs(t.y - tile.y) === 1))) {
@@ -77,10 +80,15 @@ angular
         }
       };
 
-      $scope.mouseUp = () => {
-        if (currentEnemy) {
-          $scope.databattle.enemies.push(currentEnemy);
-          currentEnemy = undefined;
+      $scope.mouseUp = (event) => {
+        if (event) {
+          console.log(event);
+        }
+        if (!event || event.button === 0) {
+          if (currentEnemy) {
+            $scope.databattle.enemies.push(currentEnemy);
+            currentEnemy = undefined;
+          }
         }
       }
 

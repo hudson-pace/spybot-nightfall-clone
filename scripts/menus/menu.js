@@ -58,8 +58,8 @@ export default class Menu {
         this.context.fillStyle = 'white';
         this.context.font = `${textHeight}px verdana`;
         this.context.textBaseline = 'top';
-        let { x } = newComponent.rect;
         lines.forEach((line, index) => {
+          let { x } = newComponent.rect;
           if (centerText) {
             x += Menu.calculateTextPadding(newComponent.rect.width, line, this.context);
           }

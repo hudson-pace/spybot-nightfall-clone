@@ -22,7 +22,7 @@
     <button ng-click="returnToNetmap()">Return to Netmap</button>
   </div>
 </div>
-<div class="grid-container">
+<div class="grid-container" oncontextmenu="return false">
   <div>
     <div class="horizontal-arrow expand" ng-click="databattle.resize({ top: 1 })"></div>
     <div class="horizontal-arrow collapse" ng-click="databattle.resize({ top: -1 })"></div>
@@ -33,7 +33,7 @@
     <table cellspacing="0" cellpadding="0">
       <tr ng-repeat="row in databattle.tiles">
         <td ng-repeat="tile in row">
-          <div class="tile" ng-mousedown="clickTile(tile)" ng-mouseenter="mouseenterTile($event, tile)" ng-mouseup="mouseUp()"
+          <div class="tile" ng-mousedown="clickTile($event, tile)" ng-mouseenter="mouseEnterTile($event, tile)" ng-mouseup="mouseUp($event)"
           ng-class="{
             'none': tile.type === tileTypes.NONE,
             'basic': tile.type === tileTypes.BASIC,
