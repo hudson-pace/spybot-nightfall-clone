@@ -28,7 +28,7 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
   saveGameCallback, oldSaveData) {
   const saveData = {};
   let showingGrid = false;
-  const canvas = $('canvas')[0];
+  const canvas = document.getElementsByTagName('canvas')[0];
   const context = canvas.getContext('2d');
   const screenPosition = [0, 0];
   let nodeMenu;
@@ -292,11 +292,11 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
         y: 500 * (event.offsetY / canvas.clientHeight),
       };
       if (this.shop && this.shop.containsPoint(point)) {
-        this.shop.onScroll(event.originalEvent.wheelDelta / 120);
+        this.shop.onScroll(event.wheelDelta / 120);
       } else if (programMenu.containsPoint(point)) {
-        programMenu.onScroll(point, event.originalEvent.wheelDelta / 120);
+        programMenu.onScroll(point, event.wheelDelta / 120);
       } else {
-        this.zoomScreen(event.originalEvent.wheelDelta / 120);
+        this.zoomScreen(event.wheelDelta / 120);
       }
     }
   };
