@@ -7,15 +7,19 @@ export default class DialogueMenu {
   }
 
   createNewDialogueMenu(dialogue, context, index) {
-    this.menu = new Menu(600, 200, 350, 150, context);
+    this.menu = new Menu(600, 200, 400, 150, context);
     this.menu.addTextBlock(dialogue[index].text, 16, false);
+    let choiceValue;
     dialogue[index].responses.forEach((response) => {
       const number = parseInt(response.number, 10);
       this.menu.addButton(response.text, 16, 300, false, true, () => {
+        if (response.choiceValue) {
+          choiceValue = response.choiceValue;
+        }
         if (number < dialogue.length) {
           this.createNewDialogueMenu(dialogue, context, number);
         } else {
-          this.endDialogueCallback();
+          this.endDialogueCallback(choiceValue);
         }
       });
     });

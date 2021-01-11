@@ -122,7 +122,7 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
     node.own();
     addConnectionsFromNode(node);
     if (node.event) {
-      this.dialogueMenu = new DialogueMenu(context, node.event.dialogue, () => {
+      this.dialogueMenu = new DialogueMenu(context, node.event.dialogue, (choiceValue) => {
         switch (node.event.type) {
           default:
             break;
@@ -134,10 +134,6 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
           case 'reveal node': {
             const newNode = nodes.find((n) => n.name === node.event.nodeName);
             newNode.reveal();
-            // temp fix. TODO: Add function to center the screen on a node.
-            this.moveScreen(-10000, -10000);
-            this.moveScreen(newNode.center.x - (canvas.width / 2),
-              newNode.center.y - (canvas.height / 2));
             this.centerScreenOnPoint(newNode.center.x, newNode.center.y);
             break;
           }
@@ -146,6 +142,11 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
             break;
           case 'add credits':
             inventory.addCredits(parseInt(node.event.credits, 10));
+            break;
+          case 'launch tutorial':
+            if (choiceValue === 'yes') {
+              // launch tutorial.
+            }
             break;
         }
         this.dialogueMenu = undefined;
