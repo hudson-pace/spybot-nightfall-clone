@@ -59,6 +59,16 @@ export default class StartMenu {
     }
   }
 
+  onMouseWheel(event) {
+    const point = {
+      x: (event.offsetX / this.canvas.clientWidth) * this.canvas.width,
+      y: (event.offsetY / this.canvas.clientHeight) * this.canvas.height,
+    };
+    if (this.savesMenu && rectContainsPoint(this.savesMenu.rect, point)) {
+      this.savesMenu.onScroll(point, event.originalEvent.wheelDelta / 120);
+    }
+  }
+
   generateSaveList() {
     const saveList = [];
     if (this.saves) {
