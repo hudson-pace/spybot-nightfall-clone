@@ -4,5 +4,9 @@ $(document).ready(() => {
   const canvas = $('canvas')[0];
   canvas.height = 500;
   canvas.width = 1000;
-  ViewManager();
+  let saves = JSON.parse(localStorage.getItem('saves'));
+  if (!saves) {
+    saves = [];
+  }
+  ViewManager(saves);
 });
