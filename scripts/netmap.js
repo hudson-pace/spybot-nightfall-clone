@@ -421,9 +421,7 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
     this.securityLevel = 1;
     nodes.forEach((node) => {
       if (node.isOwned) {
-        node.own();
-        addConnectionsFromNode(node);
-        this.centerScreenOnPoint(node.center.x, node.center.y);
+        this.ownNode(node);
       }
     });
 
