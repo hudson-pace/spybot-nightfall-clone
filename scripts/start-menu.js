@@ -59,7 +59,7 @@ export default class StartMenu {
     }
   }
 
-  openSavesMenu() {
+  generateSaveList() {
     const saveList = [];
     if (this.saves) {
       this.saves.forEach((save) => {
@@ -67,10 +67,14 @@ export default class StartMenu {
       });
     }
     saveList.push({ name: 'New Save', desc: '' });
+    return saveList;
+  }
+
+  openSavesMenu() {
     this.savesMenu = new Menu(this.canvas.width * 0.1, this.canvas.height * 0.1,
       this.canvas.width * 0.8, this.canvas.height * 0.8, this.context);
     let previousSelection;
-    this.savesMenu.addScrollList(6, 16, saveList, (name) => {
+    const saveList = this.savesMenu.addScrollList(6, 16, this.generateSaveList(), (name) => {
       this.savesMenu.popComponent();
       if (previousSelection) {
         this.savesMenu.popComponent();
@@ -105,7 +109,11 @@ export default class StartMenu {
           console.log(btoa(JSON.stringify(saveData)));
         });
         this.savesMenu.addButton('Delete', 18, 0, true, false, () => {
-          console.log('delete');
+          const index = this.saves.findIndex((save) => save.name === name);
+          this.saves.splice(index, 1);
+          localStorage.setItem('saves', JSON.stringify(this.saves));
+          saveList.updateMembers(this.generateSaveList());
+          this.draw();
         });
       }
       this.savesMenu.addButton('Cancel', 20, 0, true, true, () => {
