@@ -7,7 +7,8 @@ angular
       INCREASE_SECURITY_LEVEL: 'increase security level',
       ADD_PROGRAM: 'add program',
       REVEAL_NODE: 'reveal node',
-      ADD_CREDITS: 'add credits'
+      ADD_CREDITS: 'add credits',
+      TUTORIAL: 'launch tutorial',
     };
     const eventWatcher = {};
 

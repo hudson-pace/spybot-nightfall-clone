@@ -29,6 +29,7 @@ export default class ProgramMenu {
   }
 
   showProgramInfo(program, selectCommandCallback, selectMoveCallback, selectEndTurnCallback) {
+    this.selectedProgram = program.name;
     this.programInfoMenu = new Menu(0, this.canvas.height * 0.3, 200,
       this.canvas.height * 0.7, this.context);
     this.programInfoMenu.addTextBlock('Program Info', 18, true);
