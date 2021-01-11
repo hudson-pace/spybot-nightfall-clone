@@ -16,15 +16,15 @@ function addConnectionsFromNode(node) {
     if (!connections.find((c) => compareArrays(connection.path, c)
       || compareArrays(connection.path, [...c].reverse()))) {
       connections.push(connection.path);
-      console.log(`Adding connection: ${node.name} <--> ${connection.node}`);
-      console.log(connection.path);
       const destinationNode = nodes.find((destNode) => destNode.name === connection.node);
       destinationNode.activate();
     }
   });
 }
 
-export default function NetMap(assets, inventory, startDataBattleCallback, startMenuCallback) {
+export default function NetMap(assets, inventory, startDataBattleCallback, startMenuCallback,
+  saveGameCallback, oldSaveData) {
+  const saveData = {};
   let showingGrid = false;
   const canvas = $('canvas')[0];
   const context = canvas.getContext('2d');
@@ -39,14 +39,10 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
     width: 50,
     height: 30,
   };
-  this.securityLevel = 1;
 
-  const programMenu = new ProgramMenu(assets, canvas, inventory.programs.map(
-    (program) => ({ name: program.name, desc: `x${program.quantity}` }),
-  ));
+  let programMenu;
 
   const map = assets.netmap;
-  console.log(map);
   const mapWidth = map.size * 1000;
   const mapHeight = map.size * 1000;
   const maxZoom = Math.min(mapWidth / 100, mapHeight / 500);
@@ -125,9 +121,7 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
   this.ownNode = function ownNode(node) {
     node.own();
     addConnectionsFromNode(node);
-    console.log(`Node ${node.name} has been owned.`);
     if (node.event) {
-      console.log(node.event);
       this.dialogueMenu = new DialogueMenu(context, node.event.dialogue, () => {
         switch (node.event.type) {
           default:
@@ -160,16 +154,6 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
     }
     this.centerScreenOnPoint(node.center.x, node.center.y);
   };
-
-  this.createInitialConnections = function createInitialConnections() {
-    nodes.forEach((node) => {
-      if (node.isOwned) {
-        this.ownNode(node);
-      }
-    });
-  };
-
-  this.createInitialConnections();
 
   this.drawGrid = function drawGrid() {
     for (let i = -1 * (screenPosition[1] % 100); i < mapHeight; i += 100) {
@@ -291,6 +275,8 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
     if (event.keyCode === 71) {
       showingGrid = !showingGrid;
       this.draw();
+    } else if (event.keyCode === 72) {
+      this.updateSaveData();
     }
   };
 
@@ -323,6 +309,7 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
       inventory.addCredits(reward + bonusCredits);
     }
     this.draw();
+    this.updateSaveData();
   };
   this.startNode = function startNode() {
     if (selectedNode.owner === 'Warez') {
@@ -355,8 +342,97 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
     });
     this.shop.addButton('Close', 16, 0, true, true, () => {
       this.shop = undefined;
+      this.updateSaveData();
     });
 
     this.draw();
   };
+
+  this.updateSaveData = function updateSaveData() {
+    saveData.credits = inventory.credits;
+    saveData.programs = inventory.programs;
+    saveData.securityLevel = this.securityLevel;
+    saveData.ownedNodes = [];
+    saveData.visibleNodes = [];
+    nodes.forEach((node) => {
+      if (node.isOwned) {
+        saveData.ownedNodes.push(node.name);
+      } else if (node.isVisible) {
+        saveData.visibleNodes.push(node.name);
+      }
+    });
+
+    saveGameCallback(saveData);
+  };
+
+  this.loadSave = function loadSave() {
+    saveData.name = oldSaveData.name;
+    saveData.credits = oldSaveData.credits;
+    saveData.programs = oldSaveData.programs;
+    saveData.securityLevel = oldSaveData.securityLevel;
+    saveData.ownedNodes = oldSaveData.ownedNodes;
+    saveData.visibleNodes = oldSaveData.visibleNodes;
+
+    console.log(saveData);
+
+    inventory.addCredits(saveData.credits);
+
+    saveData.programs.forEach((program) => {
+      inventory.addProgram(program.name, program.quantity);
+    });
+
+    programMenu = new ProgramMenu(assets, canvas, inventory.programs.map(
+      (program) => ({ name: program.name, desc: `x${program.quantity}` }),
+    ));
+
+    this.securityLevel = saveData.securityLevel;
+
+    nodes.forEach((node) => {
+      if (saveData.ownedNodes.find((ownedNode) => ownedNode === node.name)) {
+        node.own();
+        addConnectionsFromNode(node);
+        this.centerScreenOnPoint(node.center.x, node.center.y);
+      } else if (saveData.visibleNodes.find((visibleNode) => visibleNode.name === node.name)) {
+        node.reveal();
+      }
+    });
+
+    this.updateSaveData();
+  };
+  this.newSave = function newSave() {
+    inventory.addCredits(10000);
+
+    inventory.addProgram('Hack', 2);
+    inventory.addProgram('Bug', 1);
+    inventory.addProgram('Slingshot', 1);
+    inventory.addProgram('Data Doctor', 1);
+    inventory.addProgram('Hack 2.0', 1);
+    inventory.addProgram('Mud Golem', 1);
+    inventory.addProgram('Wolf Spider', 1);
+    inventory.addProgram('Seeker', 1);
+    inventory.addProgram('Tower', 1);
+    inventory.addProgram('Medic', 1);
+    inventory.addProgram('Turbo', 1);
+
+    programMenu = new ProgramMenu(assets, canvas, inventory.programs.map(
+      (program) => ({ name: program.name, desc: `x${program.quantity}` }),
+    ));
+
+    this.securityLevel = 1;
+    nodes.forEach((node) => {
+      if (node.isOwned) {
+        node.own();
+        addConnectionsFromNode(node);
+        this.centerScreenOnPoint(node.center.x, node.center.y);
+      }
+    });
+
+    this.updateSaveData();
+  };
+
+  if (oldSaveData) {
+    this.loadSave();
+  } else {
+    this.newSave();
+  }
 }

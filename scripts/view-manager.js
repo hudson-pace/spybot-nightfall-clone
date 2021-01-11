@@ -51,9 +51,9 @@ function updateEventHandlers(currentView) {
   });
 }
 
-export default function ViewManager() {
+export default function ViewManager(saves) {
   const canvas = $('canvas')[0];
-  const inventory = new Inventory();
+  let inventory = new Inventory();
   let assets;
   let currentView;
   function setCurrentView(newView) {
@@ -71,14 +71,32 @@ export default function ViewManager() {
     setCurrentView(dataBattle);
   }
 
-  const startMenu = new StartMenu(canvas, (newAssets) => {
+  const startMenu = new StartMenu(canvas, saves, (newAssets, saveData) => {
     assets = newAssets;
-    if (!netMap) {
-      netMap = new NetMap(assets, inventory, startDataBattle, () => {
-        setCurrentView(startMenu);
-        startMenu.draw();
-      });
-    }
+    inventory = new Inventory();
+    netMap = new NetMap(assets, inventory, startDataBattle, () => {
+      setCurrentView(startMenu);
+      startMenu.draw();
+    }, (data) => {
+      const newSaveData = data;
+      const newSaves = saves;
+      if (!newSaveData.name) {
+        let highest = 0;
+        saves.forEach((save) => {
+          const saveNum = parseInt(save.name.slice(5), 10);
+          if (saveNum > highest) {
+            highest = saveNum;
+          }
+        });
+        newSaveData.name = `save_${highest + 1}`;
+        newSaves.push(newSaveData);
+      } else {
+        const index = saves.findIndex((save) => save.name === newSaveData.name);
+        newSaves[index] = newSaveData;
+      }
+      localStorage.setItem('saves', JSON.stringify(newSaves));
+      startMenu.setSaves(newSaves);
+    }, saveData);
     setCurrentView(netMap);
     netMap.draw();
   });

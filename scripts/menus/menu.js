@@ -31,9 +31,9 @@ export default class Menu {
     });
   }
 
-  onScroll(amount) {
+  onScroll(point, amount) {
     this.components.forEach((component) => {
-      if (component.onScroll) {
+      if (component.onScroll && rectContainsPoint(component.rect, point)) {
         component.onScroll(amount);
       }
     });
