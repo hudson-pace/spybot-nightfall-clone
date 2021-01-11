@@ -1,9 +1,8 @@
-import { overlayTypes } from './tile.js';
+import { overlayTypes, tileTypes } from './tile.js';
 import Agent from './agent.js';
 import Button from './button.js';
 import BattleMap from './battlemap.js';
 import { calculateTextPadding } from './helpers.js';
-import { tileTypes } from './tile.js'
 import ProgramMenu from './menus/program-menu.js';
 
 const itemTypes = {
@@ -11,9 +10,8 @@ const itemTypes = {
   DATA: 'data',
 };
 
-export default function DataBattle(battleData, assets, inventory, exitBattleCallback) {
-  const canvas = $('canvas')[0];
-  const context = canvas.getContext('2d');
+export default function DataBattle(canvas, context, battleData, assets, inventory,
+  exitBattleCallback) {
   let map;
   const agents = [];
   const enemyAgents = [];
@@ -318,7 +316,7 @@ export default function DataBattle(battleData, assets, inventory, exitBattleCall
       y: 500 * (event.offsetY / canvas.clientHeight),
     };
     if (programMenu.containsPoint(point)) {
-      programMenu.onScroll(point, event.originalEvent.wheelDelta / 120);
+      programMenu.onScroll(point, event.wheelDelta / 120);
     }
   };
   this.attack = function attack(tile, command, totalDelay) {

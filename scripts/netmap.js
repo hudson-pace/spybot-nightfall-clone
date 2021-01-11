@@ -5,6 +5,7 @@ import ProgramMenu from './menus/program-menu.js';
 import DialogueMenu from './menus/dialogue-menu.js';
 import Tutorial from './tutorial.js';
 import Inventory from './inventory.js';
+import DataBattle from './databattle.js';
 
 const nodes = [];
 const connections = [];
@@ -24,8 +25,7 @@ function addConnectionsFromNode(node) {
   });
 }
 
-export default function NetMap(assets, inventory, startDataBattleCallback, startMenuCallback,
-  saveGameCallback, oldSaveData) {
+export default function NetMap(assets, oldSaveData, saveManager, startMenuCallback) {
   const saveData = {};
   let showingGrid = false;
   const canvas = document.getElementsByTagName('canvas')[0];
@@ -53,9 +53,23 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
     nodes.push(new NetworkNode(node, assets.images[node.image]));
   });
 
+  this.inventory = new Inventory();
+  this.saveManager = saveManager;
+
+  this.launchDataBattle = function launchDataBattle(battleData) {
+    this.dataBattle = new DataBattle(canvas, context, battleData, assets, this.inventory,
+      (wonBattle, reward, bonusCredits) => {
+        this.returnFromBattle(wonBattle, reward, bonusCredits);
+        this.dataBattle = undefined;
+        this.draw();
+      });
+  };
+
   this.draw = function draw() {
     if (tutorial) {
       tutorial.draw();
+    } else if (this.dataBattle) {
+      this.dataBattle.draw();
     } else {
       console.log('Redrawing netmap.');
       context.clearRect(0, 0, canvas.width, canvas.height);
@@ -91,7 +105,7 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
       context.font = '16px verdana';
       context.textBaseline = 'middle';
       context.fillStyle = 'white';
-      context.fillText(`credits: ${inventory.credits}`, 800, 20);
+      context.fillText(`credits: ${this.inventory.credits}`, 800, 20);
       drawRect(this.menuButton, context);
       context.fillStyle = 'black';
       const [leftPad, topPad] = calculateTextPadding(this.menuButton, 'Menu', context);
@@ -134,8 +148,8 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
           default:
             break;
           case 'add program':
-            inventory.addProgram(node.event.programName);
-            programMenu.updateProgramList(inventory.programs.map((program) => (
+            this.inventory.addProgram(node.event.programName);
+            programMenu.updateProgramList(this.inventory.programs.map((program) => (
               { name: program.name, desc: `x${program.quantity}` })));
             break;
           case 'reveal node': {
@@ -148,18 +162,14 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
             this.securityLevel += 1;
             break;
           case 'add credits':
-            inventory.addCredits(parseInt(node.event.credits, 10));
+            this.inventory.addCredits(parseInt(node.event.credits, 10));
             break;
           case 'launch tutorial':
             if (choiceValue === 'yes') {
-              const tutorialInventory = new Inventory();
-              tutorialInventory.addProgram('Hack', 1);
-              tutorialInventory.addProgram('Slingshot', 1);
-              tutorial = new Tutorial(node.battle, assets, tutorialInventory, canvas,
-                context, () => {
-                  tutorial = undefined;
-                  this.draw();
-                });
+              tutorial = new Tutorial(node.battle, assets, canvas, context, () => {
+                tutorial = undefined;
+                this.draw();
+              });
             }
             break;
         }
@@ -204,6 +214,158 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
     this.moveScreen(((oldWidth - 1000 / zoomFactor) * relativeMousePosition[0]) * zoomFactor,
       ((oldHeight - 500 / zoomFactor) * (relativeMousePosition[1])) * zoomFactor);
   };
+
+  this.openNodeMenu = function startNodeMenu(node) {
+    nodeMenu = new Menu(canvas.width * 0.7, canvas.height * 0.2, canvas.width * 0.25, 0, context);
+    nodeMenu.addTextBlock(node.name, 20, true);
+    nodeMenu.addTextBlock(node.owner, 16, true);
+    nodeMenu.addGap(10);
+    nodeMenu.addTextBlock(node.desc, 15, false);
+    nodeMenu.addGap(10);
+    if (node.isActive) {
+      if (this.securityLevel >= node.securityLevel) {
+        nodeMenu.addButton('Start', 16, 100, true, true, () => {
+          nodeMenu = undefined;
+          this.startNode();
+        });
+      } else {
+        nodeMenu.addTextBlock('[Higher security clearance is needed to access this node.]', 16, false);
+      }
+    }
+    nodeMenu.addButton('Close', 16, 100, true, true, () => {
+      nodeMenu = undefined;
+      this.draw();
+    });
+  };
+
+  this.returnFromBattle = function returnFromBattle(wonBattle, reward, bonusCredits) {
+    if (wonBattle) {
+      this.ownNode(selectedNode);
+      this.inventory.addCredits(reward + bonusCredits);
+    }
+    this.draw();
+    this.updateSaveData();
+  };
+  this.startNode = function startNode() {
+    if (selectedNode.owner === 'Warez') {
+      this.startShop(selectedNode);
+    } else if (selectedNode.owner !== 'S.M.A.R.T.') {
+      this.launchDataBattle(selectedNode.battle);
+    } else {
+      this.draw();
+    }
+  };
+  this.startShop = function startShop(node) {
+    let selectedItem;
+    this.shop = new Menu(canvas.width * 0.3, canvas.height * 0.3, canvas.width * 0.4, 0, context);
+    this.shop.addTextBlock(node.name, 20, true);
+    this.shop.addTextBlock(node.owner, 15, true);
+    node.shop.sort((a, b) => ((a.name > b.name) ? 1 : -1));
+    this.shop.addScrollList(8, 14,
+      node.shop.map((item) => ({ name: item.name, desc: item.price })),
+      (itemName) => {
+        selectedItem = itemName;
+        programMenu.showProgramInfoFromName(itemName);
+      });
+    this.shop.addButton('Buy', 16, 0, true, true, () => {
+      const itemInfo = node.shop.find((item) => item.name === selectedItem);
+      if (itemInfo && this.inventory.spendCredits(itemInfo.price)) {
+        this.inventory.addProgram(itemInfo.name);
+        programMenu.updateProgramList(this.inventory.programs.map((program) => (
+          { name: program.name, desc: `x${program.quantity}` })));
+      }
+    });
+    this.shop.addButton('Close', 16, 0, true, true, () => {
+      this.shop = undefined;
+      this.updateSaveData();
+    });
+
+    this.draw();
+  };
+
+  this.updateSaveData = function updateSaveData() {
+    saveData.credits = this.inventory.credits;
+    saveData.programs = this.inventory.programs;
+    saveData.securityLevel = this.securityLevel;
+    saveData.ownedNodes = [];
+    saveData.visibleNodes = [];
+    nodes.forEach((node) => {
+      if (node.isOwned) {
+        saveData.ownedNodes.push(node.name);
+      } else if (node.isVisible) {
+        saveData.visibleNodes.push(node.name);
+      }
+    });
+
+    this.saveManager.updateSave(saveData);
+  };
+
+  this.loadSave = function loadSave() {
+    saveData.name = oldSaveData.name;
+    saveData.credits = oldSaveData.credits;
+    saveData.programs = oldSaveData.programs;
+    saveData.securityLevel = oldSaveData.securityLevel;
+    saveData.ownedNodes = oldSaveData.ownedNodes;
+    saveData.visibleNodes = oldSaveData.visibleNodes;
+
+    this.inventory.addCredits(saveData.credits);
+
+    saveData.programs.forEach((program) => {
+      this.inventory.addProgram(program.name, program.quantity);
+    });
+
+    programMenu = new ProgramMenu(assets, canvas, this.inventory.programs.map(
+      (program) => ({ name: program.name, desc: `x${program.quantity}` }),
+    ));
+
+    this.securityLevel = saveData.securityLevel;
+
+    nodes.forEach((node) => {
+      if (saveData.ownedNodes.find((ownedNode) => ownedNode === node.name)) {
+        node.own();
+        addConnectionsFromNode(node);
+        this.centerScreenOnPoint(node.center.x, node.center.y);
+      } else if (saveData.visibleNodes.find((visibleNode) => visibleNode.name === node.name)) {
+        node.reveal();
+      }
+    });
+
+    this.updateSaveData();
+  };
+  this.newSave = function newSave() {
+    this.inventory.addCredits(10000);
+
+    this.inventory.addProgram('Hack', 2);
+    this.inventory.addProgram('Bug', 1);
+    this.inventory.addProgram('Slingshot', 1);
+    this.inventory.addProgram('Data Doctor', 1);
+    this.inventory.addProgram('Hack 2.0', 1);
+    this.inventory.addProgram('Mud Golem', 1);
+    this.inventory.addProgram('Wolf Spider', 1);
+    this.inventory.addProgram('Seeker', 1);
+    this.inventory.addProgram('Tower', 1);
+    this.inventory.addProgram('Medic', 1);
+    this.inventory.addProgram('Turbo', 1);
+
+    programMenu = new ProgramMenu(assets, canvas, this.inventory.programs.map(
+      (program) => ({ name: program.name, desc: `x${program.quantity}` }),
+    ));
+
+    this.securityLevel = 1;
+    nodes.forEach((node) => {
+      if (node.isOwned) {
+        this.ownNode(node);
+      }
+    });
+
+    this.updateSaveData();
+  };
+
+  if (oldSaveData) {
+    this.loadSave();
+  } else {
+    this.newSave();
+  }
 
   let isDragging = false;
   let oldX;
@@ -251,6 +413,8 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
     };
     if (tutorial) {
       tutorial.onClick(point, event);
+    } else if (this.dataBattle) {
+      this.dataBattle.onClick(event);
     } else if (nodeMenu && nodeMenu.containsPoint(point)) {
       nodeMenu.onClick(point);
     } else if (this.shop && this.shop.containsPoint(point)) {
@@ -286,6 +450,8 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
   this.onMouseWheel = function onMouseWheel(event) {
     if (tutorial) {
       tutorial.onMouseWheel(event);
+    } else if (this.dataBattle) {
+      this.dataBattle.onMouseWheel(event);
     } else {
       const point = {
         x: 1000 * (event.offsetX / canvas.clientWidth),
@@ -310,158 +476,4 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
       }
     }
   };
-
-  this.openNodeMenu = function startNodeMenu(node) {
-    nodeMenu = new Menu(canvas.width * 0.7, canvas.height * 0.2, canvas.width * 0.25, 0, context);
-    nodeMenu.addTextBlock(node.name, 20, true);
-    nodeMenu.addTextBlock(node.owner, 16, true);
-    nodeMenu.addGap(10);
-    nodeMenu.addTextBlock(node.desc, 15, false);
-    nodeMenu.addGap(10);
-    if (node.isActive) {
-      if (this.securityLevel >= node.securityLevel) {
-        nodeMenu.addButton('Start', 16, 100, true, true, () => {
-          nodeMenu = undefined;
-          this.startNode();
-        });
-      } else {
-        nodeMenu.addTextBlock('[Higher security clearance is needed to access this node.]', 16, false);
-      }
-    }
-    nodeMenu.addButton('Close', 16, 100, true, true, () => {
-      nodeMenu = undefined;
-      this.draw();
-    });
-  };
-
-  this.returnFromBattle = function returnFromBattle(wonBattle, reward, bonusCredits) {
-    if (wonBattle) {
-      this.ownNode(selectedNode);
-      inventory.addCredits(reward + bonusCredits);
-    }
-    this.draw();
-    this.updateSaveData();
-  };
-  this.startNode = function startNode() {
-    if (selectedNode.owner === 'Warez') {
-      this.startShop(selectedNode);
-    } else if (selectedNode.owner !== 'S.M.A.R.T.') {
-      startDataBattleCallback(selectedNode.battle);
-    } else {
-      this.draw();
-    }
-  };
-  this.startShop = function startShop(node) {
-    let selectedItem;
-    this.shop = new Menu(canvas.width * 0.3, canvas.height * 0.3, canvas.width * 0.4, 0, context);
-    this.shop.addTextBlock(node.name, 20, true);
-    this.shop.addTextBlock(node.owner, 15, true);
-    node.shop.sort((a, b) => ((a.name > b.name) ? 1 : -1));
-    this.shop.addScrollList(8, 14,
-      node.shop.map((item) => ({ name: item.name, desc: item.price })),
-      (itemName) => {
-        selectedItem = itemName;
-        programMenu.showProgramInfoFromName(itemName);
-      });
-    this.shop.addButton('Buy', 16, 0, true, true, () => {
-      const itemInfo = node.shop.find((item) => item.name === selectedItem);
-      if (itemInfo && inventory.spendCredits(itemInfo.price)) {
-        inventory.addProgram(itemInfo.name);
-        programMenu.updateProgramList(inventory.programs.map((program) => (
-          { name: program.name, desc: `x${program.quantity}` })));
-      }
-    });
-    this.shop.addButton('Close', 16, 0, true, true, () => {
-      this.shop = undefined;
-      this.updateSaveData();
-    });
-
-    this.draw();
-  };
-
-  this.updateSaveData = function updateSaveData() {
-    saveData.credits = inventory.credits;
-    saveData.programs = inventory.programs;
-    saveData.securityLevel = this.securityLevel;
-    saveData.ownedNodes = [];
-    saveData.visibleNodes = [];
-    nodes.forEach((node) => {
-      if (node.isOwned) {
-        saveData.ownedNodes.push(node.name);
-      } else if (node.isVisible) {
-        saveData.visibleNodes.push(node.name);
-      }
-    });
-
-    saveGameCallback(saveData);
-  };
-
-  this.loadSave = function loadSave() {
-    saveData.name = oldSaveData.name;
-    saveData.credits = oldSaveData.credits;
-    saveData.programs = oldSaveData.programs;
-    saveData.securityLevel = oldSaveData.securityLevel;
-    saveData.ownedNodes = oldSaveData.ownedNodes;
-    saveData.visibleNodes = oldSaveData.visibleNodes;
-
-    console.log(saveData);
-
-    inventory.addCredits(saveData.credits);
-
-    saveData.programs.forEach((program) => {
-      inventory.addProgram(program.name, program.quantity);
-    });
-
-    programMenu = new ProgramMenu(assets, canvas, inventory.programs.map(
-      (program) => ({ name: program.name, desc: `x${program.quantity}` }),
-    ));
-
-    this.securityLevel = saveData.securityLevel;
-
-    nodes.forEach((node) => {
-      if (saveData.ownedNodes.find((ownedNode) => ownedNode === node.name)) {
-        node.own();
-        addConnectionsFromNode(node);
-        this.centerScreenOnPoint(node.center.x, node.center.y);
-      } else if (saveData.visibleNodes.find((visibleNode) => visibleNode.name === node.name)) {
-        node.reveal();
-      }
-    });
-
-    this.updateSaveData();
-  };
-  this.newSave = function newSave() {
-    inventory.addCredits(10000);
-
-    inventory.addProgram('Hack', 2);
-    inventory.addProgram('Bug', 1);
-    inventory.addProgram('Slingshot', 1);
-    inventory.addProgram('Data Doctor', 1);
-    inventory.addProgram('Hack 2.0', 1);
-    inventory.addProgram('Mud Golem', 1);
-    inventory.addProgram('Wolf Spider', 1);
-    inventory.addProgram('Seeker', 1);
-    inventory.addProgram('Tower', 1);
-    inventory.addProgram('Medic', 1);
-    inventory.addProgram('Turbo', 1);
-
-    programMenu = new ProgramMenu(assets, canvas, inventory.programs.map(
-      (program) => ({ name: program.name, desc: `x${program.quantity}` }),
-    ));
-
-    this.securityLevel = 1;
-    nodes.forEach((node) => {
-      if (node.isOwned) {
-        this.ownNode(node);
-      }
-    });
-
-    this.updateSaveData();
-  };
-
-  if (oldSaveData) {
-    this.loadSave();
-  } else {
-    this.newSave();
-  }
 }
