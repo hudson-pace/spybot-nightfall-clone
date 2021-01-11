@@ -396,6 +396,8 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
         node.reveal();
       }
     });
+
+    this.updateSaveData();
   };
   this.newSave = function newSave() {
     inventory.addCredits(10000);

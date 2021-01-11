@@ -74,8 +74,8 @@ export default class StartMenu {
       this.savesMenu.popComponent();
       if (previousSelection) {
         this.savesMenu.popComponent();
+        this.savesMenu.popComponent();
         if (previousSelection !== 'New Save') {
-          this.savesMenu.popComponent();
           this.savesMenu.popComponent();
         }
       }
@@ -88,7 +88,19 @@ export default class StartMenu {
           this.savesMenu = undefined;
         });
       });
-      if (name !== 'New Save') {
+      if (name === 'New Save') {
+        this.savesMenu.addButton('Import Save', 18, 0, true, false, () => {
+          const saveString = prompt('Please enter your save information:');
+          if (saveString) {
+            const data = JSON.parse(atob(saveString));
+            delete data.name;
+            loadAssets((assets) => {
+              this.startGameCallback(assets, data);
+              this.savesMenu = undefined;
+            });
+          }
+        });
+      } else {
         this.savesMenu.addButton('Export Save', 18, 0, true, false, () => {
           console.log(btoa(JSON.stringify(saveData)));
         });
