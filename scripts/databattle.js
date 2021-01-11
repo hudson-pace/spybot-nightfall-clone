@@ -66,6 +66,14 @@ export default function DataBattle(battleData, assets, inventory, exitBattleCall
     }
   });
 
+  this.getTutorialInfo = function getTutorialInfo() {
+    return {
+      startButton,
+      programMenu,
+      map,
+    };
+  };
+
   this.draw = function draw() {
     console.log('Redrawing databattle');
     context.clearRect(0, 0, canvas.width, canvas.height);

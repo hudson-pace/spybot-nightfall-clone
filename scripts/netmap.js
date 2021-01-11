@@ -3,6 +3,8 @@ import { drawRect, calculateTextPadding, rectContainsPoint } from './helpers.js'
 import Menu from './menus/menu.js';
 import ProgramMenu from './menus/program-menu.js';
 import DialogueMenu from './menus/dialogue-menu.js';
+import Tutorial from './tutorial.js';
+import Inventory from './inventory.js';
 
 const nodes = [];
 const connections = [];
@@ -30,6 +32,7 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
   const context = canvas.getContext('2d');
   const screenPosition = [0, 0];
   let nodeMenu;
+  let tutorial;
   // Gives mouse position as fraction of element width. Used to zoom in on cursor.
   const relativeMousePosition = [0, 0];
   let zoomFactor = 1;
@@ -51,48 +54,52 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
   });
 
   this.draw = function draw() {
-    console.log('Redrawing netmap.');
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    context.scale(zoomFactor, zoomFactor);
-    if (showingGrid) {
-      this.drawGrid();
-    }
-
-    context.lineWidth = 4;
-    context.strokeStyle = 'green';
-    connections.forEach((connection) => {
-      context.beginPath();
-      context.moveTo((connection[0].x * 100) - screenPosition[0],
-        (connection[0].y * 100) - screenPosition[1]);
-      connection.slice(1).forEach((point) => {
-        context.lineTo((point.x * 100) - screenPosition[0], (point.y * 100) - screenPosition[1]);
-      });
-      context.stroke();
-    });
-    context.lineWidth = 1;
-    nodes.forEach((node) => {
-      if (node.isVisible) {
-        node.draw(context, screenPosition);
+    if (tutorial) {
+      tutorial.draw();
+    } else {
+      console.log('Redrawing netmap.');
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.scale(zoomFactor, zoomFactor);
+      if (showingGrid) {
+        this.drawGrid();
       }
-    });
-    context.scale(1 / zoomFactor, 1 / zoomFactor);
-    if (nodeMenu) {
-      nodeMenu.draw(context);
-    }
-    if (this.shop) {
-      this.shop.draw();
-    }
-    context.font = '16px verdana';
-    context.textBaseline = 'middle';
-    context.fillStyle = 'white';
-    context.fillText(`credits: ${inventory.credits}`, 800, 20);
-    drawRect(this.menuButton, context);
-    context.fillStyle = 'black';
-    const [leftPad, topPad] = calculateTextPadding(this.menuButton, 'Menu', context);
-    context.fillText('Menu', this.menuButton.x + leftPad, this.menuButton.y + topPad);
-    programMenu.draw();
-    if (this.dialogueMenu) {
-      this.dialogueMenu.draw();
+
+      context.lineWidth = 4;
+      context.strokeStyle = 'green';
+      connections.forEach((connection) => {
+        context.beginPath();
+        context.moveTo((connection[0].x * 100) - screenPosition[0],
+          (connection[0].y * 100) - screenPosition[1]);
+        connection.slice(1).forEach((point) => {
+          context.lineTo((point.x * 100) - screenPosition[0], (point.y * 100) - screenPosition[1]);
+        });
+        context.stroke();
+      });
+      context.lineWidth = 1;
+      nodes.forEach((node) => {
+        if (node.isVisible) {
+          node.draw(context, screenPosition);
+        }
+      });
+      context.scale(1 / zoomFactor, 1 / zoomFactor);
+      if (nodeMenu) {
+        nodeMenu.draw(context);
+      }
+      if (this.shop) {
+        this.shop.draw();
+      }
+      context.font = '16px verdana';
+      context.textBaseline = 'middle';
+      context.fillStyle = 'white';
+      context.fillText(`credits: ${inventory.credits}`, 800, 20);
+      drawRect(this.menuButton, context);
+      context.fillStyle = 'black';
+      const [leftPad, topPad] = calculateTextPadding(this.menuButton, 'Menu', context);
+      context.fillText('Menu', this.menuButton.x + leftPad, this.menuButton.y + topPad);
+      programMenu.draw();
+      if (this.dialogueMenu) {
+        this.dialogueMenu.draw();
+      }
     }
   };
 
@@ -145,7 +152,14 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
             break;
           case 'launch tutorial':
             if (choiceValue === 'yes') {
-              // launch tutorial.
+              const tutorialInventory = new Inventory();
+              tutorialInventory.addProgram('Hack', 1);
+              tutorialInventory.addProgram('Slingshot', 1);
+              tutorial = new Tutorial(node.battle, assets, tutorialInventory, canvas,
+                context, () => {
+                  tutorial = undefined;
+                  this.draw();
+                });
             }
             break;
         }
@@ -195,31 +209,39 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
   let oldX;
   let oldY;
   this.onMouseDown = function onMouseDown(event) {
-    const point = {
-      x: canvas.width * (event.offsetX / canvas.clientWidth),
-      y: canvas.height * (event.offsetY / canvas.clientHeight),
-    };
-    if (!programMenu.containsPoint(point) && (!nodeMenu || !nodeMenu.containsPoint(point))
-      && (!this.dialogueMenu || !this.dialogueMenu.containsPoint(point))) {
-      isDragging = true;
-    }
-    oldX = event.offsetX;
-    oldY = event.offsetY;
-  };
-  this.onMouseUp = function onMouseUp() {
-    isDragging = false;
-  };
-  this.onMouseLeave = function onMouseLeave() {
-    isDragging = false;
-  };
-  this.onMouseMove = function onMouseMove(event) {
-    relativeMousePosition[0] = event.offsetX / canvas.clientWidth;
-    relativeMousePosition[1] = event.offsetY / canvas.clientHeight;
-    if (isDragging) {
-      this.moveScreen(((oldX - event.offsetX) / canvas.clientWidth) * canvas.width,
-        ((oldY - event.offsetY) / canvas.clientHeight) * canvas.height);
+    if (!tutorial) {
+      const point = {
+        x: canvas.width * (event.offsetX / canvas.clientWidth),
+        y: canvas.height * (event.offsetY / canvas.clientHeight),
+      };
+      if (!programMenu.containsPoint(point) && (!nodeMenu || !nodeMenu.containsPoint(point))
+        && (!this.dialogueMenu || !this.dialogueMenu.containsPoint(point))) {
+        isDragging = true;
+      }
       oldX = event.offsetX;
       oldY = event.offsetY;
+    }
+  };
+  this.onMouseUp = function onMouseUp() {
+    if (!tutorial) {
+      isDragging = false;
+    }
+  };
+  this.onMouseLeave = function onMouseLeave() {
+    if (!tutorial) {
+      isDragging = false;
+    }
+  };
+  this.onMouseMove = function onMouseMove(event) {
+    if (!tutorial) {
+      relativeMousePosition[0] = event.offsetX / canvas.clientWidth;
+      relativeMousePosition[1] = event.offsetY / canvas.clientHeight;
+      if (isDragging) {
+        this.moveScreen(((oldX - event.offsetX) / canvas.clientWidth) * canvas.width,
+          ((oldY - event.offsetY) / canvas.clientHeight) * canvas.height);
+        oldX = event.offsetX;
+        oldY = event.offsetY;
+      }
     }
   };
   this.onClick = function onClick(event) {
@@ -227,7 +249,9 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
       x: canvas.width * (event.offsetX / canvas.clientWidth),
       y: canvas.height * (event.offsetY / canvas.clientHeight),
     };
-    if (nodeMenu && nodeMenu.containsPoint(point)) {
+    if (tutorial) {
+      tutorial.onClick(point, event);
+    } else if (nodeMenu && nodeMenu.containsPoint(point)) {
       nodeMenu.onClick(point);
     } else if (this.shop && this.shop.containsPoint(point)) {
       this.shop.onClick(point);
@@ -260,24 +284,30 @@ export default function NetMap(assets, inventory, startDataBattleCallback, start
     }
   };
   this.onMouseWheel = function onMouseWheel(event) {
-    const point = {
-      x: 1000 * (event.offsetX / canvas.clientWidth),
-      y: 500 * (event.offsetY / canvas.clientHeight),
-    };
-    if (this.shop && this.shop.containsPoint(point)) {
-      this.shop.onScroll(event.originalEvent.wheelDelta / 120);
-    } else if (programMenu.containsPoint(point)) {
-      programMenu.onScroll(point, event.originalEvent.wheelDelta / 120);
+    if (tutorial) {
+      tutorial.onMouseWheel(event);
     } else {
-      this.zoomScreen(event.originalEvent.wheelDelta / 120);
+      const point = {
+        x: 1000 * (event.offsetX / canvas.clientWidth),
+        y: 500 * (event.offsetY / canvas.clientHeight),
+      };
+      if (this.shop && this.shop.containsPoint(point)) {
+        this.shop.onScroll(event.originalEvent.wheelDelta / 120);
+      } else if (programMenu.containsPoint(point)) {
+        programMenu.onScroll(point, event.originalEvent.wheelDelta / 120);
+      } else {
+        this.zoomScreen(event.originalEvent.wheelDelta / 120);
+      }
     }
   };
   this.onKeydown = function onKeydown(event) {
-    if (event.keyCode === 71) {
-      showingGrid = !showingGrid;
-      this.draw();
-    } else if (event.keyCode === 72) {
-      this.updateSaveData();
+    if (!tutorial) {
+      if (event.keyCode === 71) {
+        showingGrid = !showingGrid;
+        this.draw();
+      } else if (event.keyCode === 72) {
+        this.updateSaveData();
+      }
     }
   };
 
