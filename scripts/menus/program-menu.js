@@ -117,9 +117,9 @@ export default class ProgramMenu {
 
   onScroll(point, amount) {
     if (this.programListMenu && this.programListMenu.containsPoint(point)) {
-      this.programListMenu.onScroll(amount);
+      this.programListMenu.onScroll(point, amount);
     } else if (this.programInfoMenu && this.programInfoMenu.containsPoint(point)) {
-      this.programInfoMenu.onScroll(amount);
+      this.programInfoMenu.onScroll(point, amount);
     }
   }
 
