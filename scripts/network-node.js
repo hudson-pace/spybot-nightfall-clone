@@ -2,7 +2,7 @@ export default class NetworkNode {
   constructor(node, image) {
     this.rect = {
       x: node.coords.x * 100,
-      y: node.coords.y * 100,
+      y: (node.coords.y) * 100,
       width: 100,
       height: 100,
     };
@@ -25,7 +25,7 @@ export default class NetworkNode {
     this.connections = node.connections;
   }
 
-  draw(context, screenPosition) {
+  draw(context, screenPosition, showingDebugInfo) {
     const imageSource = {
       x: 0,
       y: 0,
@@ -40,11 +40,13 @@ export default class NetworkNode {
     context.drawImage(this.image,
       imageSource.x, imageSource.y, imageSource.width, imageSource.height,
       drawX, drawY, imageSource.width, imageSource.height);
-    context.beginPath();
-    context.strokeStyle = 'red';
-    context.rect(this.rect.x - screenPosition[0], this.rect.y - screenPosition[1],
-      this.rect.width, this.rect.height);
-    context.stroke();
+    if (showingDebugInfo) {
+      context.beginPath();
+      context.strokeStyle = 'red';
+      context.rect(this.rect.x - screenPosition[0], this.rect.y - screenPosition[1],
+        this.rect.width, this.rect.height);
+      context.stroke();
+    }
   }
 
   containsPoint(point) {
