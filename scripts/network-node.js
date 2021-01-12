@@ -1,29 +1,31 @@
-export default function NetworkNode(node, image) {
-  this.rect = {
-    x: node.coords.x * 100,
-    y: node.coords.y * 100,
-    width: 100,
-    height: 100,
-  };
-  this.center = {
-    x: this.rect.x + (this.rect.width / 2),
-    y: this.rect.y + (this.rect.height / 2),
-  };
-  this.image = image;
-  this.name = node.name;
-  this.desc = node.desc;
-  this.owner = node.owner;
-  this.shop = node.shop;
-  this.event = node.event;
-  this.securityLevel = node.securityLevel;
-  this.battle = node.battle;
+export default class NetworkNode {
+  constructor(node, image) {
+    this.rect = {
+      x: node.coords.x * 100,
+      y: node.coords.y * 100,
+      width: 100,
+      height: 100,
+    };
+    this.center = {
+      x: this.rect.x + (this.rect.width / 2),
+      y: this.rect.y + (this.rect.height / 2),
+    };
+    this.image = image;
+    this.name = node.name;
+    this.desc = node.desc;
+    this.owner = node.owner;
+    this.shop = node.shop;
+    this.event = node.event;
+    this.securityLevel = node.securityLevel;
+    this.battle = node.battle;
 
-  this.isVisible = node.ownedByUser;
-  this.isActive = node.ownedByUser;
-  this.isOwned = node.ownedByUser;
-  this.connections = node.connections;
+    this.isVisible = node.ownedByUser;
+    this.isActive = node.ownedByUser;
+    this.isOwned = node.ownedByUser;
+    this.connections = node.connections;
+  }
 
-  this.draw = function draw(context, screenPosition) {
+  draw(context, screenPosition) {
     const imageSource = {
       x: 0,
       y: 0,
@@ -43,21 +45,25 @@ export default function NetworkNode(node, image) {
     context.rect(this.rect.x - screenPosition[0], this.rect.y - screenPosition[1],
       this.rect.width, this.rect.height);
     context.stroke();
-  };
-  this.containsPoint = function containsPoint(point) {
+  }
+
+  containsPoint(point) {
     return (point.x >= this.rect.x && point.x < this.rect.x + this.rect.width
       && point.y >= this.rect.y && point.y < this.rect.y + this.rect.height);
-  };
-  this.reveal = function reveal() {
+  }
+
+  reveal() {
     this.isVisible = true;
-  };
-  this.activate = function activate() {
+  }
+
+  activate() {
     this.isVisible = true;
     this.isActive = true;
-  };
-  this.own = function own() {
+  }
+
+  own() {
     this.isVisible = true;
     this.isActive = true;
     this.isOwned = true;
-  };
+  }
 }

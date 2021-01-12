@@ -1,9 +1,13 @@
 import DataBattle from './databattle.js';
 import Menu from './menus/menu.js';
+import Inventory from './inventory.js';
 
 export default class Tutorial {
-  constructor(battleData, assets, inventory, canvas, context, exitTutorialCallback) {
-    this.databattle = new DataBattle(battleData, assets, inventory, () => {
+  constructor(battleData, assets, canvas, context, exitTutorialCallback) {
+    const inventory = new Inventory();
+    inventory.addProgram('Hack', 1);
+    inventory.addProgram('Slingshot', 1);
+    this.databattle = new DataBattle(canvas, context, battleData, assets, inventory, () => {
       exitTutorialCallback();
     });
     const { startButton, programMenu, map } = this.databattle.getTutorialInfo();

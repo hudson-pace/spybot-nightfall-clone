@@ -1,3 +1,15 @@
+function loadJSON(src, callback) {
+  const xmlHttpReq = new XMLHttpRequest();
+  xmlHttpReq.overrideMimeType('application/json');
+  xmlHttpReq.open('GET', src, true);
+  xmlHttpReq.onreadystatechange = () => {
+    if (xmlHttpReq.readyState === 4 && xmlHttpReq.status === 200) {
+      callback(JSON.parse(xmlHttpReq.responseText));
+    }
+  };
+  xmlHttpReq.send(null);
+}
+
 function loadAsset(src, assetLoadedCallback) {
   const [,, extension] = src.split('.');
   let asset;
@@ -11,7 +23,7 @@ function loadAsset(src, assetLoadedCallback) {
       asset.onload = () => assetLoadedCallback(asset);
       break;
     case 'json':
-      $.getJSON(src, (data) => {
+      loadJSON(src, (data) => {
         assetLoadedCallback(data);
       });
       break;

@@ -1,9 +1,11 @@
 import { calculateTextPadding, drawRect, rectContainsPoint } from './helpers.js';
 import loadAssets from './asset-loader.js';
 import Menu from './menus/menu.js';
+import SaveManager from './save-manager.js';
+import NetMap from './netmap.js';
 
 export default class StartMenu {
-  constructor(canvas, saves, startGameCallback) {
+  constructor(canvas) {
     this.startButton = {
       x: 100,
       y: 100,
@@ -16,66 +18,38 @@ export default class StartMenu {
       width: 200,
       height: 50,
     };
-    this.startGameCallback = startGameCallback;
     this.canvas = canvas;
     this.context = this.canvas.getContext('2d');
-    this.saves = saves;
+    this.saveManager = new SaveManager();
     this.draw();
   }
 
-  setSaves(saves) {
-    this.saves = saves;
-  }
-
   draw() {
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.context.fillStyle = 'white';
-    drawRect(this.startButton, this.context);
-    drawRect(this.levelEditorButton, this.context);
-    this.context.font = '20px verdana';
-    this.context.textBaseline = 'middle';
-    this.context.fillStyle = 'black';
-    let [leftPad, topPad] = calculateTextPadding(this.startButton, 'Start Game', this.context);
-    this.context.fillText('Start Game', this.startButton.x + leftPad, this.startButton.y + topPad);
-    [leftPad, topPad] = calculateTextPadding(this.levelEditorButton, 'Level Editor', this.context);
-    this.context.fillText('Level Editor', this.levelEditorButton.x + leftPad, this.levelEditorButton.y + topPad);
-    if (this.savesMenu) {
-      this.savesMenu.draw();
-    }
-  }
-
-  onClick(event) {
-    const point = {
-      x: (event.offsetX / this.canvas.clientWidth) * this.canvas.width,
-      y: (event.offsetY / this.canvas.clientHeight) * this.canvas.height,
-    };
-    if (this.savesMenu && rectContainsPoint(this.savesMenu.rect, point)) {
-      this.savesMenu.onClick(point);
-    } else if (rectContainsPoint(this.startButton, point)) {
-      this.openSavesMenu();
-    } else if (rectContainsPoint(this.levelEditorButton, point)) {
-      const path = window.location.pathname;
-      window.open(`${path}level-editor`, '_blank');
-    }
-  }
-
-  onMouseWheel(event) {
-    const point = {
-      x: (event.offsetX / this.canvas.clientWidth) * this.canvas.width,
-      y: (event.offsetY / this.canvas.clientHeight) * this.canvas.height,
-    };
-    if (this.savesMenu && rectContainsPoint(this.savesMenu.rect, point)) {
-      this.savesMenu.onScroll(point, event.originalEvent.wheelDelta / 120);
+    if (this.netMap) {
+      this.netMap.draw();
+    } else {
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.context.fillStyle = 'white';
+      drawRect(this.startButton, this.context);
+      drawRect(this.levelEditorButton, this.context);
+      this.context.font = '20px verdana';
+      this.context.textBaseline = 'middle';
+      this.context.fillStyle = 'black';
+      let [leftPad, topPad] = calculateTextPadding(this.startButton, 'Start Game', this.context);
+      this.context.fillText('Start Game', this.startButton.x + leftPad, this.startButton.y + topPad);
+      [leftPad, topPad] = calculateTextPadding(this.levelEditorButton, 'Level Editor', this.context);
+      this.context.fillText('Level Editor', this.levelEditorButton.x + leftPad, this.levelEditorButton.y + topPad);
+      if (this.savesMenu) {
+        this.savesMenu.draw();
+      }
     }
   }
 
   generateSaveList() {
     const saveList = [];
-    if (this.saves) {
-      this.saves.forEach((save) => {
-        saveList.push({ name: save.name, desc: save.credits });
-      });
-    }
+    this.saveManager.saves.forEach((save) => {
+      saveList.push({ name: save.name, desc: save.credits });
+    });
     saveList.push({ name: 'New Save', desc: '' });
     return saveList;
   }
@@ -95,10 +69,10 @@ export default class StartMenu {
       }
       previousSelection = name;
 
-      const saveData = this.saves.find((save) => save.name === name);
+      const saveData = this.saveManager.saves.find((save) => save.name === name);
       this.savesMenu.addButton('Start Game', 18, 0, true, false, () => {
         loadAssets((assets) => {
-          this.startGameCallback(assets, saveData);
+          this.launchNetmap(assets, saveData);
           this.savesMenu = undefined;
         });
       });
@@ -109,7 +83,7 @@ export default class StartMenu {
             const data = JSON.parse(atob(saveString));
             delete data.name;
             loadAssets((assets) => {
-              this.startGameCallback(assets, data);
+              this.launchNetmap(assets, data);
               this.savesMenu = undefined;
             });
           }
@@ -119,9 +93,7 @@ export default class StartMenu {
           console.log(btoa(JSON.stringify(saveData)));
         });
         this.savesMenu.addButton('Delete', 18, 0, true, false, () => {
-          const index = this.saves.findIndex((save) => save.name === name);
-          this.saves.splice(index, 1);
-          localStorage.setItem('saves', JSON.stringify(this.saves));
+          this.saveManager.deleteSave(name);
           saveList.updateMembers(this.generateSaveList());
           this.draw();
         });
@@ -137,5 +109,75 @@ export default class StartMenu {
       this.draw();
     });
     this.draw();
+  }
+
+  launchNetmap(assets, saveData) {
+    this.netMap = new NetMap(assets, saveData, this.saveManager, () => {
+      this.netMap = undefined;
+      this.draw();
+    });
+  }
+
+  onMouseDown(event) {
+    if (this.netMap) {
+      this.netMap.onMouseDown(event);
+    }
+  }
+
+  onMouseUp(event) {
+    if (this.netMap) {
+      this.netMap.onMouseUp(event);
+    }
+  }
+
+  onMouseLeave(event) {
+    if (this.netMap) {
+      this.netMap.onMouseLeave(event);
+    }
+  }
+
+  onMouseMove(event) {
+    if (this.netMap) {
+      this.netMap.onMouseMove(event);
+    }
+  }
+
+  onClick(event) {
+    if (this.netMap) {
+      this.netMap.onClick(event);
+    } else {
+      const point = {
+        x: (event.offsetX / this.canvas.clientWidth) * this.canvas.width,
+        y: (event.offsetY / this.canvas.clientHeight) * this.canvas.height,
+      };
+      if (this.savesMenu && rectContainsPoint(this.savesMenu.rect, point)) {
+        this.savesMenu.onClick(point);
+      } else if (rectContainsPoint(this.startButton, point)) {
+        this.openSavesMenu();
+      } else if (rectContainsPoint(this.levelEditorButton, point)) {
+        const path = window.location.pathname;
+        window.open(`${path}level-editor`, '_blank');
+      }
+    }
+  }
+
+  onMouseWheel(event) {
+    if (this.netMap) {
+      this.netMap.onMouseWheel(event);
+    } else {
+      const point = {
+        x: (event.offsetX / this.canvas.clientWidth) * this.canvas.width,
+        y: (event.offsetY / this.canvas.clientHeight) * this.canvas.height,
+      };
+      if (this.savesMenu && rectContainsPoint(this.savesMenu.rect, point)) {
+        this.savesMenu.onScroll(point, event.wheelDelta / 120);
+      }
+    }
+  }
+
+  onKeyDown(event) {
+    if (this.netMap) {
+      this.netMap.onKeyDown(event);
+    }
   }
 }
