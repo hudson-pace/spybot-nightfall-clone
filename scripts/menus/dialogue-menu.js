@@ -1,4 +1,4 @@
-import Menu from "./menu.js";
+import Menu from './menu.js';
 
 export default class DialogueMenu {
   constructor(context, dialogue, endDialogueCallback) {

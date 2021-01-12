@@ -1,4 +1,4 @@
-import { rectContainsPoint } from "../helpers.js";
+import { rectContainsPoint } from '../helpers.js';
 
 export default class Menu {
   constructor(x, y, width, minHeight, context) {

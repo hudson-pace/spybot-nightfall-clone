@@ -1,18 +1,22 @@
-export default function Inventory() {
-  this.credits = 0;
-  this.programs = [];
+export default class Inventory {
+  constructor() {
+    this.credits = 0;
+    this.programs = [];
+  }
 
-  this.addCredits = function addCredits(amount) {
+  addCredits(amount) {
     this.credits += amount;
-  };
-  this.spendCredits = function spendCredits(amount) {
+  }
+
+  spendCredits(amount) {
     if (this.credits >= amount) {
       this.credits -= amount;
       return true;
     }
     return false;
-  };
-  this.addProgram = function addProgram(programName, count) {
+  }
+
+  addProgram(programName, count) {
     let quantity = count;
     if (!count) {
       quantity = 1;
@@ -27,16 +31,17 @@ export default function Inventory() {
       });
       this.sortPrograms();
     }
-  };
-  this.sortPrograms = function sortPrograms() {
+  }
+
+  sortPrograms() {
     this.programs.sort((a, b) => ((a.name > b.name) ? 1 : -1));
-  };
-  this.sortPrograms();
-  this.getCopyOfProgramList = function getCopyOfProgramList() {
+  }
+
+  getCopyOfProgramList() {
     const programList = [];
     this.programs.forEach((program) => {
       programList.push({ ...program });
     });
     return programList;
-  };
+  }
 }

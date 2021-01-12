@@ -84,10 +84,13 @@ export default class ProgramMenu {
           selectCommandCallback(commandName);
         }
 
-        program.highlightTiles(
-          program.getValidMoves(command.range, command.type),
-          command.type,
-        );
+        if (program.highlightTiles) {
+          // program may not be an instance of Agent, it may just be program info.
+          program.highlightTiles(
+            program.getValidMoves(command.range, command.type),
+            command.type,
+          );
+        }
       });
 
     if (selectMoveCallback) {
