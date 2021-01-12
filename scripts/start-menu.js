@@ -137,8 +137,14 @@ export default class StartMenu {
   }
 
   onMouseMove(event) {
+    const point = {
+      x: this.canvas.width * (event.offsetX / this.canvas.clientWidth),
+      y: this.canvas.height * (event.offsetY / this.canvas.clientHeight),
+    };
     if (this.netMap) {
       this.netMap.onMouseMove(event);
+    } else if (this.savesMenu) {
+      this.savesMenu.onMouseMove(point);
     }
   }
 

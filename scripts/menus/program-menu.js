@@ -19,7 +19,7 @@ export default class ProgramMenu {
   }
 
   updateProgramList(members) {
-    this.programList.updateMembers(members);
+    this.programList.updateListItems(members);
   }
 
   showProgramInfoFromName(programName) {

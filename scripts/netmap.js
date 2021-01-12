@@ -409,7 +409,17 @@ export default class NetMap {
   }
 
   onMouseMove(event) {
+    const point = {
+      x: this.canvas.width * (event.offsetX / this.canvas.clientWidth),
+      y: this.canvas.height * (event.offsetY / this.canvas.clientHeight),
+    };
     if (!this.tutorial) {
+      if (this.nodeMenu) {
+        this.nodeMenu.onMouseMove(point);
+      }
+      if (this.dialogueMenu) {
+        this.dialogueMenu.onMouseMove(point);
+      }
       this.relativeMousePosition[0] = event.offsetX / this.canvas.clientWidth;
       this.relativeMousePosition[1] = event.offsetY / this.canvas.clientHeight;
       if (this.isDragging) {
