@@ -11,7 +11,8 @@ function loadJSON(src, callback) {
 }
 
 function loadAsset(src, assetLoadedCallback) {
-  const [,, extension] = src.split('.');
+  const sourcePath = '../assets';
+  const [, extension] = src.split('.');
   let asset;
   switch (extension) {
     default:
@@ -19,11 +20,11 @@ function loadAsset(src, assetLoadedCallback) {
       break;
     case 'png':
       asset = new Image();
-      asset.src = src;
+      asset.src = `${sourcePath}/${src}`;
       asset.onload = () => assetLoadedCallback(asset);
       break;
     case 'json':
-      loadJSON(src, (data) => {
+      loadJSON(`${sourcePath}/${src}`, (data) => {
         assetLoadedCallback(data);
       });
       break;
@@ -33,7 +34,6 @@ function loadAsset(src, assetLoadedCallback) {
 const assets = {};
 assets.images = {};
 export default function loadAssets(allAssetsLoadedCallback) {
-  const sourcePath = './assets';
   const assetNames = [
     'images/nodeCAR.png', 'images/nodeDD.png', 'images/nodeLMM.png', 'images/nodePEDC.png', 'images/nodePharmhaus.png', 'images/nodeSmart.png',
     'images/nodeUnknown.png', 'images/nodeWarez.png', 'images/agents.png', 'images/tileOverlays.png', 'images/agentDone.png', 'images/items.png',
@@ -44,7 +44,7 @@ export default function loadAssets(allAssetsLoadedCallback) {
   assetNames.forEach((source) => {
     const words = source.split('/');
     const name = words[words.length - 1].slice(0, words[words.length - 1].indexOf('.'));
-    loadAsset(`${sourcePath}/${source}`, (asset) => {
+    loadAsset(source, (asset) => {
       loadedCount += 1;
       if (source.startsWith('images/')) {
         assets.images[name] = asset;

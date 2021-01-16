@@ -156,7 +156,7 @@ export default class StartMenu {
         this.openSavesMenu();
       } else if (rectContainsPoint(this.levelEditorButton, point)) {
         const path = window.location.pathname;
-        window.open(`${path}level-editor`, '_blank');
+        window.open(`${path}../level-editor`, '_blank');
       }
     }
   }
