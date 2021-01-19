@@ -18,4 +18,9 @@ public class UserController {
   public Iterable<User> getAllUsers() {
     return userRepository.findAll();
   }
+
+  @GetMapping("/unprotected")
+  public Iterable<User> getAlltUsers() {
+    return userRepository.findAll();
+  }
 }
