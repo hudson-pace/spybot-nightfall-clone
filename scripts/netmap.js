@@ -19,7 +19,7 @@ export default class NetMap {
     this.startMenuCallback = startMenuCallback;
 
     this.saveData = {};
-    this.showingGrid = false;
+    this.showingDebugInfo = false;
     [this.canvas] = document.getElementsByTagName('canvas');
     this.context = this.canvas.getContext('2d');
     this.screenPosition = [0, 0];
@@ -84,12 +84,12 @@ export default class NetMap {
       console.log('Redrawing netmap.');
       this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.context.scale(this.zoomFactor, this.zoomFactor);
-      if (this.showingGrid) {
+      if (this.showingDebugInfo) {
         this.drawGrid();
       }
 
-      this.context.lineWidth = 4;
-      this.context.strokeStyle = 'green';
+      this.context.lineWidth = 2;
+      this.context.strokeStyle = '#d8ebff';
       this.connections.forEach((connection) => {
         this.context.beginPath();
         this.context.moveTo((connection[0].x * 100) - this.screenPosition[0],
@@ -103,7 +103,7 @@ export default class NetMap {
       this.context.lineWidth = 1;
       this.nodes.forEach((node) => {
         if (node.isVisible) {
-          node.draw(this.context, this.screenPosition);
+          node.draw(this.context, this.screenPosition, this.showingDebugInfo);
         }
       });
       this.context.scale(1 / this.zoomFactor, 1 / this.zoomFactor);
@@ -195,14 +195,14 @@ export default class NetMap {
   drawGrid() {
     for (let i = -1 * (this.screenPosition[1] % 100); i < this.mapHeight; i += 100) {
       this.context.beginPath();
-      this.context.strokeStyle = 'grey';
+      this.context.strokeStyle = 'white';
       this.context.moveTo(0, i);
       this.context.lineTo(this.mapWidth, i);
       this.context.stroke();
     }
     for (let i = -1 * (this.screenPosition[0] % 100); i < this.mapWidth; i += 100) {
       this.context.beginPath();
-      this.context.strokeStyle = 'grey';
+      this.context.strokeStyle = 'white';
       this.context.moveTo(i, 0);
       this.context.lineTo(i, this.mapHeight);
       this.context.stroke();
@@ -409,7 +409,17 @@ export default class NetMap {
   }
 
   onMouseMove(event) {
+    const point = {
+      x: this.canvas.width * (event.offsetX / this.canvas.clientWidth),
+      y: this.canvas.height * (event.offsetY / this.canvas.clientHeight),
+    };
     if (!this.tutorial) {
+      if (this.nodeMenu) {
+        this.nodeMenu.onMouseMove(point);
+      }
+      if (this.dialogueMenu) {
+        this.dialogueMenu.onMouseMove(point);
+      }
       this.relativeMousePosition[0] = event.offsetX / this.canvas.clientWidth;
       this.relativeMousePosition[1] = event.offsetY / this.canvas.clientHeight;
       if (this.isDragging) {
@@ -483,10 +493,10 @@ export default class NetMap {
     }
   }
 
-  onKeydown(event) {
+  onKeyDown(event) {
     if (!this.tutorial) {
       if (event.keyCode === 71) {
-        this.showingGrid = !this.showingGrid;
+        this.showingDebugInfo = !this.showingDebugInfo;
         this.draw();
       } else if (event.keyCode === 72) {
         this.updateSaveData();

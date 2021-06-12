@@ -33,6 +33,10 @@ export default class DialogueMenu {
     this.menu.onClick(point);
   }
 
+  onMouseMove(point) {
+    this.menu.onMouseMove(point);
+  }
+
   containsPoint(point) {
     return this.menu.containsPoint(point);
   }
