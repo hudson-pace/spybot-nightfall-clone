@@ -94,7 +94,7 @@ export default class StartMenu {
         });
         this.savesMenu.addButton('Delete', 18, 0, true, false, () => {
           this.saveManager.deleteSave(name);
-          saveList.updateMembers(this.generateSaveList());
+          saveList.updateListItems(this.generateSaveList());
           this.draw();
         });
       }

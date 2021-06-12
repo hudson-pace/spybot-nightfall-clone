@@ -23,6 +23,7 @@ export default class SaveManager {
       this.saves[index] = saveData;
     }
     localStorage.setItem('saves', JSON.stringify(this.saves));
+    return saveData
   }
 
   deleteSave(name) {
