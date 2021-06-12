@@ -315,7 +315,7 @@ export default class NetMap {
       }
     });
 
-    this.saveManager.updateSave(this.saveData);
+    this.saveData = this.saveManager.updateSave(this.saveData);
   }
 
   loadSave() {

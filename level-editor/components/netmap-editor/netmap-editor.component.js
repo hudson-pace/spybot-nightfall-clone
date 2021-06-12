@@ -112,9 +112,15 @@ angular
       }
 
       $scope.editEvent = (node) => {
+        if ($scope.selectedTile) {
+          $scope.selectedTile.selected = false;
+        }
         netmapService.openEvent(node);
       }
       $scope.editShop = (node) => {
+        if ($scope.selectedTile) {
+          $scope.selectedTile.selected = false;
+        }
         netmapService.openShop(node);
       }
     },

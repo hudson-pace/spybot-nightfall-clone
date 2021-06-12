@@ -2,7 +2,7 @@ export default class NetworkNode {
   constructor(node, image) {
     this.rect = {
       x: node.coords.x * 100,
-      y: (node.coords.y) * 100,
+      y: node.coords.y * 100,
       width: 100,
       height: 100,
     };
