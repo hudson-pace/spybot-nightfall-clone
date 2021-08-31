@@ -1,0 +1,166 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+html {
+  height: 100%;
+}
+body {
+  text-align: center;
+  height: 100%;
+}
+table {
+  border: 1px solid black;
+  display: inline-block;
+  user-select: none;
+}
+.tile {
+  width: 50px;
+  height: 50px;
+  border: 1px solid black;
+  overflow: hidden;
+  box-sizing: border-box;
+  text-align: center;
+}
+.tile.none {
+  background-color: white;
+}
+.tile.basic {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+.tile.upload {
+  background-color: blue;
+}
+.tile.enemy {
+  background-color: red;
+}
+.tile.item {
+  background-color: green;
+}
+.tile.node {
+  background-color: blue;
+}
+.tile.selected {
+  border: 3px solid pink;
+}
+.connection-horizontal {
+  background-color: black;
+  height: 100%;
+  width: 5px;
+  display: inline-block;
+}
+.connection-vertical {
+  background-color: black;
+  height: 100%;
+  width: 5px;
+  display: inline-block;
+  transform: rotate(90deg);
+}
+.connection-top-corner {
+  background-color: black;
+  height: 100%;
+  width: 5px;
+  display: inline-block;
+  transform: rotate(45deg) translateX(-18px);
+}
+.connection-bottom-corner {
+  background-color: black;
+  height: 100%;
+  width: 5px;
+  display: inline-block;
+  transform: rotate(45deg) translateX(18px);
+}
+.connection-right-corner {
+  background-color: black;
+  height: 100%;
+  width: 5px;
+  display: inline-block;
+  transform: rotate(-45deg) translateX(18px);
+}
+.connection-left-corner {
+  background-color: black;
+  height: 100%;
+  width: 5px;
+  display: inline-block;
+  transform: rotate(-45deg) translateX(-18px);
+}
+input.resize {
+  width: 20px;
+  padding: 0 5px;
+}
+.option {
+  border: 1px solid black;
+  padding: 8px 0;
+}
+.netmap-option {
+  border: 2px solid black;
+  padding: 8px;
+}
+
+#app-container {
+  height: 100%;
+}
+#view-container {
+  height: 80%;
+}
+#netmap-container {
+  height: 100%;
+  display: flex;
+}
+#netmap-options {
+  box-sizing: border-box;
+  border: 2px solid pink;
+  flex: 0 0 300px;
+  text-align: left;
+}
+#netmap-grid-container {
+  overflow: scroll;
+  border: 1px solid black;
+  flex: 0 0 80%;
+  text-align: left;
+}
+#netmap {
+  transform: rotate(45deg);
+}
+
+.table-options {
+  display: flex;
+  justify-content: center;
+}
+
+.grid-container {
+  display: inline-block;
+}
+
+.vertical-arrow {
+  flex: 0 0 20px;
+}
+.horizontal-arrow {
+  height: 20px;
+}
+
+.expand {
+  background-color: rgba(0, 255, 0, 0.1);
+}
+.expand:hover {
+  background-color: rgba(0, 255, 0, 0.5);
+}
+.collapse {
+  background-color: rgba(255, 0, 0, 0.1);
+}
+.collapse:hover {
+  background-color: rgba(255, 0, 0, 0.5);
+}
+
+#dialogueLineContainer {
+  border: 2px solid black;
+  padding: 16px;
+}
+.dialogueLine {
+  border: 2px solid black;
+  padding: 8px;
+}
+.response {
+  border: 1px solid black;
+  padding: 8px;
+}

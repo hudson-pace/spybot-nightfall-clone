@@ -1,0 +1,16 @@
+<div class="option">
+  <button ng-click="returnToNetmap()">Return to Netmap</button>
+</div>
+<div class="option">
+  Program Type:
+  <select ng-model="newItem.name">
+    <option ng-repeat="program in programList">{{ program.name }}</option>
+  </select>
+  Price:
+  <input type="text" ng-model="newItem.price"></input>
+  <button ng-click="addItem(newItem)">Add Item</button>
+</div>
+
+<div ng-repeat="item in shop" class="option">
+  <p>{{ item.name }} : {{ item.price }} <button ng-click="removeItem(item)">Remove</button></p>
+</div>

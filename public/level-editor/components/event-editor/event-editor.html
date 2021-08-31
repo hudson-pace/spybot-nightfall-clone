@@ -1,0 +1,37 @@
+<div class="option" ng-if="netmapWatcher.netmap">
+  <button ng-click="returnToNetmap()">Return to Netmap</button>
+</div>
+<div class="option">
+  Event Type: 
+  <select ng-model="event.type">
+    <option ng-repeat="type in eventTypes">{{ type }}</option>
+  </select>
+  <select ng-if="event.type === eventTypes.ADD_PROGRAM" ng-model="event.programName">
+    <option ng-repeat="program in programList">{{ program.name }}</option>
+  </select>
+  <select ng-if="event.type === eventTypes.REVEAL_NODE" ng-model="event.nodeName">
+    <option ng-repeat="node in nodeList">{{ node.name }}</option>
+  </select>
+  <input type="text" ng-if="event.type === eventTypes.ADD_CREDITS" ng-model="event.credits"></input>
+</div>
+
+
+<div id="dialogueLineContainer">
+  <div ng-repeat="line in event.dialogue" class="dialogueLine">
+    <div>{{ line.number }}</div>
+    <button ng-click="deleteLine(line)">Delete</button> <br>
+    Image: <input type="text" ng-model="line.image"></input> <br>
+    Text: <textarea ng-model="line.text"></textarea>
+    <div>
+      Responses:
+      <div ng-repeat="response in line.responses" class="response">
+        <button ng-click="deleteResponse(line, response)">Delete</button> <br>
+        Text: <textarea ng-model="response.text"></textarea> <br>
+        Number: <input type="text" ng-model="response.number"></input>
+        Choice Value: <input type="text" ng-model="response.choiceValue"></input>
+      </div>
+      <button ng-click="addResponse(line)">Add Response</button>
+    </div>
+  </div>
+  <button ng-click="addLineOfDialogue()">Add Line</button>
+</div>
