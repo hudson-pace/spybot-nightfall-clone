@@ -1,7 +1,7 @@
 {
   "name": "nightfall-api",
   "version": "1.0.0",
-  "description": "An api for data relating to the spybot-nightfall game.",
+  "description": "The server for my spybot-nightfall clone.",
   "main": "index.js",
   "scripts": {
     "test": "test",
