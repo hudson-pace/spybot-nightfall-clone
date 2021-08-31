@@ -4,7 +4,7 @@ angular
     templateUrl: 'components/shop-editor/shop-editor.html',
     controller: function($scope, $http, netmapService) {
       $scope.shop = netmapService.getNetmapWatcher().netmap.openShop;
-      $http.get('../assets/agents.json')
+      $http.get('/static/assets/agents.json')
         .then((data) => {
           $scope.programList = data.data;
         }, () => {

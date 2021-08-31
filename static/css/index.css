@@ -16,3 +16,7 @@ canvas {
   box-sizing: border-box;
   margin-top: 12px;
 }
+
+a {
+  color: white;
+}

@@ -11,7 +11,7 @@ function loadJSON(src, callback) {
 }
 
 function loadAsset(src, assetLoadedCallback) {
-  const sourcePath = '../assets';
+  const sourcePath = '/static/assets';
   const [, extension] = src.split('.');
   let asset;
   switch (extension) {

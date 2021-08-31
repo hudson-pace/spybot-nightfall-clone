@@ -6,7 +6,7 @@ angular
       $scope.event = eventService.getEventWatcher().event;
       $scope.netmapWatcher = netmapService.getNetmapWatcher();
       $scope.eventTypes = eventService.eventTypes;
-      $http.get('../assets/agents.json')
+      $http.get('/static/assets/agents.json')
         .then((data) => {
           $scope.programList = data.data;
         }, () => {

@@ -5,7 +5,7 @@ angular
     controller: function DatabattleEditorController($scope, $http, databattleService, netmapService) {
       $scope.tileTypes = databattleService.tileTypes;
   
-      $http.get('../assets/agents.json')
+      $http.get('/static/assets/agents.json')
         .then((data) => {
           $scope.programList = data.data;
           $scope.programList.sort((a, b) => ((a.name > b.name) ? 1 : -1));
