@@ -97,6 +97,9 @@ input.resize {
   padding: 8px;
 }
 
+#app {
+  height: 100%;
+}
 #app-container {
   height: 100%;
 }
@@ -112,15 +115,20 @@ input.resize {
   border: 2px solid pink;
   flex: 0 0 300px;
   text-align: left;
+  height: 100%;
 }
 #netmap-grid-container {
   overflow: scroll;
   border: 1px solid black;
-  flex: 0 0 80%;
+  flex: 1 0 0;
   text-align: left;
+  height: 100%;
+  box-sizing: border-box;
 }
-#netmap {
+
+#netmap-table-wrapper {
   transform: rotate(45deg);
+  display: inline-block;
 }
 
 .table-options {
@@ -163,4 +171,36 @@ input.resize {
 .response {
   border: 1px solid black;
   padding: 8px;
+}
+
+.netmap-option.hidden {
+  display: none;
+}
+
+.table-container {
+  display: flex;
+  justify-content: center;
+}
+.table-container table {
+  flex-shrink: 0;
+}
+
+.vertical-resizer {
+  height: 20px;
+}
+.horizontal-resizer {
+  flex: 0 0 20px;
+}
+
+.resizer-plus {
+  background-color: rgba(0, 255, 0, 0.2);
+}
+.resizer-plus:hover {
+  background-color: rgba(0, 255, 0, 0.5);
+}
+.resizer-minus {
+  background-color: rgba(255, 0, 0, 0.2);
+}
+.resizer-minus:hover {
+  background-color: rgba(255, 0, 0, 0.5);
 }
