@@ -10,27 +10,22 @@ export default class extends BaseView {
             <button ng-click="generateJson()">Generate JSON</button>
             <input ng-model="inputJson" type="text"><button ng-click="loadNetmap(inputJson)">Generate Map from JSON</button>
           </div>
-          <div id="add-node-options" class="netmap-option hidden">
-            Add Node: <br>
-            Owner: <select ng-model="newNode.owner">
-              <option ng-repeat="owner in ownerList">{{ owner }}</option>
+          <form id="add-node-options" class="netmap-option hidden" autocomplete="off">
+            <label for="owner">Owner: </label><select name="owner" required>
             </select> <br>
-            Name: <input type="text" ng-model="newNode.name"></input> <br>
-            Desc: <input type="text" ng-model="newNode.desc"></input> <br>
-            Sec. Level: <input type="text" maxLength="3" ng-model="newNode.securityLevel"></input> <br>
-            Image: <input type="text" ng-model="newNode.image"></input> <br>
-            Starts Owned: <input type="checkbox" ng-model="newNode.ownedByUser"></input> <br>
-            <button ng-click="addNode(newNode)">Add Node</button>
-          </div>
+            <label for="name">Name: </label><input type="text" name="name" required></input> <br>
+            <label for="description">Desc: </label><input type="text" name="description" required></input> <br>
+            <label for="securityLevel">Sec. Level: </label><input type="number" min="1" max="99" value="1" name="securityLevel"></input> <br>
+            <label for="startsOwned">Starts Owned: </label><input type="checkbox" name="startsOwned"></input> <br>
+            <button id="add-node-button">Add Node</button>
+          </form>
           <div id="edit-node-options" class="netmap-option hidden">
-            Owner: <select ng-model="selectedNode.owner">
-              <option ng-repeat="owner in ownerList">{{ owner }}</option>
+            <label for="owner">Owner: </label><select name="owner" required>
             </select>
-            Name: <input type="text" ng-model="selectedNode.name"></input> <br>
-            Desc: <input type="text" ng-model="selectedNode.desc"></input> <br>
-            Sec. Level: <input type="text" maxLength="2" ng-model="selectedNode.securityLevel"></input> <br>
-            Image: <input type="text" ng-model="selectedNode.image"></input> <br>
-            Starts Owned: <input type="checkbox" ng-model="selectedNode.ownedByUser"></input> <br>
+            Name: <input type="text"></input> <br>
+            Desc: <input type="text"></input> <br>
+            Sec. Level: <input type="number" min="1" max="99" value="1"></input> <br>
+            Starts Owned: <input type="checkbox"></input> <br>
             Battle: <button ng-click="editDatabattle(selectedNode)">Edit Battle</button> <br>
             Event: <button ng-click="editEvent(selectedNode)">Edit Event</button> <br>
             Shop: <button ng-click="editShop(selectedNode)">Edit Shop</button> <br>

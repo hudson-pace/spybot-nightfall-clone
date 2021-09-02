@@ -29,7 +29,25 @@ export default class {
     ];
 
     this.addNodeOptions = document.querySelector('#add-node-options');
+    this.addNodeOptions.addEventListener('submit', (e) => {
+      e.preventDefault();
+      new FormData(this.addNodeOptions);
+    });
+    this.addNodeOptions.addEventListener('formdata', (e) => {
+      const data = this.getObjectFromFormData(e.formData);
+      this.addNode(data, this.selectedTile);
+    });
+
     this.editNodeOptions = document.querySelector('#edit-node-options');
+    this.editNodeOptions.addEventListener('change', (e) => {
+      new FormData(this.editNodeOptions);
+    });
+    this.editNodeOptions.addEventListener('formdata', (e) => {
+      const data = this.getObjectFromFormData(e.formData);
+    });
+
+
+
     this.connectionOptions = document.querySelector('#connection-options');
   
     this.nodes = [];
@@ -39,8 +57,31 @@ export default class {
     this.calculateTableMargin();
 
     this.addResizerListeners();
+    this.loadOwnerLists();
   }
 
+  getObjectFromFormData (formData) {
+    const obj = {};
+    formData.forEach((val, key) => {
+      obj[key] = val;
+    })
+    return obj;
+  }
+  
+  loadOwnerLists () {
+    const options = [];
+    this.ownerList.forEach((owner) => {
+      const option = document.createElement('option');
+      option.innerHTML = owner;
+      options.push(option);
+    })
+    const selects = document.querySelectorAll('select[name="owner"]');
+    selects.forEach((select) => {
+      options.forEach((option) => {
+        select.appendChild(option.cloneNode(true));
+      })
+    })
+  }
   switchMode (newMode) {
     this.mode = newMode;
     this.addNodeOptions.classList.add('hidden');
@@ -49,18 +90,16 @@ export default class {
     switch (newMode) {
       case this.modes.ADD_NODE:
         this.addNodeOptions.classList.remove('hidden');
+        this.addNodeOptions.reset();
         break;
       case this.modes.EDIT:
         this.editNodeOptions.classList.remove('hidden');
+        
         break;
       case this.modes.ADDING_CONNECTION:
         this.connectionOptions.classList.remove('hidden');
         break;
     }
-  }
-
-  updateTableHtml () {
-
   }
 
   createTile () {
@@ -123,14 +162,15 @@ export default class {
       }
       */
     } else {
-      this.selectTile(tile);
-      if (tile.type === this.tileTypes.NODE) {
-        this.switchMode(this.modes.EDIT);
-        this.selectedNode = this.nodes.find((node) => node.tile === tile);
-      } else if (tile.type === this.tileTypes.NONE) {
-        this.switchMode(this.modes.ADD_NODE);
-      } else {
-        this.switchMode(this.modes.NONE);
+      if (tile !== this.selectedTile) {
+        this.selectTile(tile);
+        if (tile.type === this.tileTypes.NODE) {
+          this.switchMode(this.modes.EDIT);
+        } else if (tile.type === this.tileTypes.NONE) {
+          this.switchMode(this.modes.ADD_NODE);
+        } else {
+          this.switchMode(this.modes.NONE);
+        }
       }
     }
   }
@@ -203,21 +243,27 @@ export default class {
     tableWrapper.style.marginLeft = `${ ((Math.sqrt(2) * .5 * (height + width + 2)) - width) * 25 }px`;
   }
 
+  addNode (nodeData, tile) {
+    const { name, owner, description, startsOwned, securityLevel } = nodeData;
+    const node = { ...nodeData, tile };
+    this.nodes.push(node);
+    this.setTileType(tile, this.tileTypes.NODE);
+  }
+
+  removeNode (node) {
+    this.setTileType(tile, this.tileTypes.NONE);
+    const index = this.nodes.findIndex((n) => n === node);
+    this.nodes.splice(index, 1);
+  }
+
+  setTileType (tile, newType) {
+    tile.element.classList.remove(tile.type);
+    tile.element.classList.add(newType);
+    tile.type = newType;
+  }
 
 }
-
 /*
-service.createNewNetmap = (initialWidth, initialHeight, maxSize) => {
-  const netmap = {};
-  netmap.resize = (resizeParams) => {
-    netmap.tiles = gridService.resizeGrid(netmap.tiles, resizeParams, maxSize, service.tileTypes.NONE);
-    netmap.tableMargin = {
-      'margin-top': 
-      'margin-left': `,
-    }
-  }
-  netmap.tiles = gridService.createGrid(initialWidth, initialHeight, service.tileTypes.NONE);
-  netmap.resize({});
   netmap.nodes = [];
 
   netmap.addNode = (node) => {
@@ -250,13 +296,7 @@ service.createNewNetmap = (initialWidth, initialHeight, maxSize) => {
     const tile = node.tile;
     tile.type = service.tileTypes.NODE;
   }
-  netmap.removeNode = (node) => {
-    const tile = node.tile;
-    tile.type = service.tileTypes.NONE;
-    const index = netmap.nodes.findIndex((n) => n === node);
-    netmap.nodes.splice(index, 1);
-    node = undefined;
-  }
+
 
   netmap.removeConnection = (connection) => {
     const tiles = [connection.path[0], connection.path[connection.path.length - 1]];
