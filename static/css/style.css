@@ -14,10 +14,14 @@ table {
   display: inline-block;
   user-select: none;
 }
-.tile {
+td {
   width: 50px;
   height: 50px;
-  border: 1px solid black;
+}
+.tile {
+  width: 100%;
+  height: 100%;
+  border: 1px solid gray;
   overflow: hidden;
   box-sizing: border-box;
   text-align: center;
@@ -39,9 +43,10 @@ table {
 }
 .tile.node {
   background-color: blue;
+  transform: scale(2);
 }
 .tile.selected {
-  border: 3px solid pink;
+  border: 2px solid yellow;
 }
 .connection-horizontal div {
   background-color: black;
@@ -85,11 +90,51 @@ table {
   transform: rotate(-45deg) translateX(-18px);
 }
 
-.test-class-one div {
+td :not(:first-child) {
+  position: absolute;
+  height: 50px;
+  width: 6px;
+  transform-origin: bottom center;
+  z-index: -5;
+}
+
+.w-e-connector {
   background-color: black;
-  height: 100%;
-  width: 8px;
-  transform: translateX(20px);
+  transform: translateY(-75px) translateX(22px) rotate(45deg) scaleY(1.414);
+}
+
+.e-w-connector {
+  background-color: black;
+  transform: translateY(-75px) translateX(22px) rotate(225deg) scaleY(1.414);
+}
+
+.se-nw-connector {
+  background-color: black;
+  transform: translateY(-75px) translateX(22px) rotate(-90deg);
+}
+.nw-se-connector {
+  background-color: black;
+  transform: translateY(-75px) translateX(22px) rotate(90deg);
+}
+
+.sw-ne-connector {
+  background-color: black;
+  transform: translateY(-75px) translateX(22px);
+}
+
+.ne-sw-connector {
+  background-color: black;
+  transform: translateY(-75px) translateX(22px) rotate(180deg);
+}
+
+.s-n-connector {
+  background-color: black;
+  transform: translateY(-75px) translateX(22px) rotate(-45deg) scaleY(1.414);
+}
+
+.n-s-connector {
+  background-color: black;
+  transform: translateY(-75px) translateX(22px) rotate(135deg) scaleY(1.414);
 }
 
 input.resize {

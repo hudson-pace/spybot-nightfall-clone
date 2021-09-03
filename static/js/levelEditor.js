@@ -10,13 +10,21 @@ export default class {
     this.tileTypes = {
       NONE: 'none',
       NODE: 'node',
-      CONNECTION_HORIZONTAL: 'connection-horizontal',
-      CONNECTION_VERTICAL: 'connection-vertical',
-      CONNECTION_TOP_CORNER: 'connection-top-corner',
-      CONNECTION_LEFT_CORNER: 'connection-left-corner',
-      CONNECTION_RIGHT_CORNER: 'connection-right-corner',
-      CONNECTION_BOTTOM_CORNER: 'connection-bottom-corner',
+      CONNECTION: 'connection',
     };
+    
+    this.connectionTypes = {
+      N_S: 'n-s-connector',
+      S_N: 's-n-connector',
+      NE_SW: 'ne-sw-connector',
+      SW_NE: 'sw-ne-connector',
+      NW_SE: 'nw-se-connector',
+      SE_NW: 'se-nw-connector',
+      E_W: 'e-w-connector',
+      W_E: 'w-e-connector',
+      NONE: '',
+    };
+
     this.ownerList = [
       'Cellular Automata Research',
       'Doctor Donut',
@@ -92,8 +100,6 @@ export default class {
     this.grid = this.createGrid(width, height);
     this.updateTileCoords();
     this.calculateTableMargin();
-
-    this.setTileType(this.grid[5][4], 'test-class-one');
   }
 
   getObjectFromFormData (formData) {
@@ -158,11 +164,13 @@ export default class {
   }
 
   createTile () {
-    const innerDiv = document.createElement('div');
+    const tileDiv = document.createElement('div');
+    const connectorDiv = document.createElement('div');
     const td = document.createElement('td');
-    td.classList.add(this.tileTypes.NONE);
-    td.classList.add('tile');
-    td.appendChild(innerDiv);
+    tileDiv.classList.add(this.tileTypes.NONE);
+    tileDiv.classList.add('tile');
+    td.appendChild(tileDiv);
+    td.appendChild(connectorDiv);
     const tile = {
       type: this.tileTypes.NONE,
       element: td
@@ -207,22 +215,20 @@ export default class {
     }
   }
 
-  getTileFromCoords (x, y, height) {
-    console.log(`${x}, ${y} :)`)
-    const gridY = (y - x) + ((height - 1) / 2);
-    const gridX = x + y + ((1 - height) / 2);
-    return this.grid[gridY][gridX];
+  getTileFromCoords (x, y) {
+    return this.grid[y][x];
   }
 
   clickTile (tile) {
     if (this.mode === this.modes.ADDING_CONNECTION) {
       const previousTile = this.currentConnection[this.currentConnection.length - 1];
 
-      if (tile === previousTile && tile.type !== this.tileTypes.NODE) {
+      if (tile === previousTile && tile.type === this.tileTypes.CONNECTION) {
         this.popFromConnection(this.currentConnection);
       } else if (tile.type === this.tileTypes.NONE || tile.type === this.tileTypes.NODE) {
-        if (Math.abs(tile.x - previousTile.x) + Math.abs(tile.y - previousTile.y) === 1
-          && (tile !== this.currentConnection[0] || previousTile !== this.currentConnection[1])) {
+        const deltaX = Math.abs(tile.x - previousTile.x);
+        const deltaY = Math.abs(tile.y - previousTile.y);
+        if (deltaX < 2 && deltaY < 2 && tile !== this.currentConnection[0]) {
           this.addToConnection(this.currentConnection, tile);
         }
       }
@@ -242,11 +248,11 @@ export default class {
 
   selectTile (tile) {
     if (this.selectedTile) {
-      this.selectedTile.element.classList.remove('selected');
+      this.selectedTile.element.firstChild.classList.remove('selected');
     }
     this.selectedTile = tile;
     if (tile) {
-      tile.element.classList.add('selected');
+      tile.element.firstChild.classList.add('selected');
     }
     this.selectedNode = this.getNodeFromTile(tile);
   }
@@ -310,7 +316,6 @@ export default class {
   }
 
   addNode (nodeData, tile) {
-    console.log(tile);
     const { name, owner, description, startsOwned, securityLevel } = nodeData;
     const node = {
       ...nodeData,
@@ -345,9 +350,13 @@ export default class {
   }
 
   setTileType (tile, newType) {
-    tile.element.classList.remove(tile.type);
-    tile.element.classList.add(newType);
+    tile.element.firstChild.classList.remove(tile.type);
+    tile.element.firstChild.classList.add(newType);
     tile.type = newType;
+  }
+
+  setConnectionType (tile, newType) {
+    tile.element.children[1].className = newType;
   }
 
   addToConnection (connection, tile) {
@@ -360,79 +369,75 @@ export default class {
       } else {
         this.switchMode(this.modes.NONE);
       }
+    } else {
+      this.setTileType(tile, this.tileTypes.CONNECTION);
     }
     this.updateConnectionOrientations(connection);
   }
 
   popFromConnection (connection) {
     this.setTileType(connection[connection.length - 1], this.tileTypes.NONE);
+    this.setConnectionType(connection[connection.length - 1], this.connectionTypes.NONE);
     connection.pop();
     this.updateConnectionOrientations(connection);
   }
 
-  addConnection () {
-    this.switchMode(this.modes.ADDING_CONNECTION);
-    this.currentConnection = [this.selectedTile];
+  addConnection (connection) {
+    // Can add an entire connection immediately. If none is specified, switches page to connection mode.
+    if (connection) {
+      connection.forEach((tile) => {
+        if (tile.type !== this.tileTypes.NODE) {
+          this.setTileType(tile, this.tileTypes.CONNECTION);
+        }
+      });
+      this.connections.push(connection);
+      this.updateConnectionOrientations(connection, true);
+    } else {
+      this.switchMode(this.modes.ADDING_CONNECTION);
+      this.currentConnection = [this.selectedTile];
+    }
   }
 
 
-  updateConnectionOrientations (connection) {
-    /*
-    let newTileType;
-    if (connection.length > 2) {
-      if (connection[connection.length - 3].y > connection[connection.length - 2].y) {
-        if (connection[connection.length - 2].x > connection[connection.length - 1].x) {
-          this.setTileType(connection[connection.length - 2], this.tileTypes.CONNECTION_LEFT_CORNER);
-          newTileType = this.tileTypes.CONNECTION_VERTICAL;
-        } else if (connection[connection.length - 2].x < connection[connection.length - 1].x) {
-          this.setTileType(connection[connection.length - 2], this.tileTypes.CONNECTION_BOTTOM_CORNER);
-          newTileType = this.tileTypes.CONNECTION_VERTICAL;
-        } else {
-          newTileType = this.tileTypes.CONNECTION_HORIZONTAL;
-        }
-      } else if (connection[connection.length - 3].y < connection[connection.length - 2].y) {
-        if (connection[connection.length - 2].x > connection[connection.length - 1].x) {
-          this.setTileType(connection[connection.length - 2], this.tileTypes.CONNECTION_TOP_CORNER);
-          newTileType = this.tileTypes.CONNECTION_VERTICAL;
-        } else if (connection[connection.length - 2].x < connection[connection.length - 1].x) {
-          this.setTileType(connection[connection.length - 2], this.tileTypes.CONNECTION_RIGHT_CORNER);
-          newTileType = this.tileTypes.CONNECTION_VERTICAL;
-        } else {
-          newTileType = this.tileTypes.CONNECTION_HORIZONTAL;
-        }
-      } else if (connection[connection.length - 3].x > connection[connection.length - 2].x) {
-        if (connection[connection.length - 2].y > connection[connection.length - 1].y) {
-          this.setTileType(connection[connection.length - 2], this.tileTypes.CONNECTION_RIGHT_CORNER);
-          newTileType = this.tileTypes.CONNECTION_HORIZONTAL;
-        } else if (connection[connection.length - 2].y < connection[connection.length - 1].y) {
-          this.setTileType(connection[connection.length - 2], this.tileTypes.CONNECTION_BOTTOM_CORNER);
-          newTileType = this.tileTypes.CONNECTION_HORIZONTAL;
-        } else {
-          newTileType = this.tileTypes.CONNECTION_VERTICAL;
-        }
-      } else if (connection[connection.length - 3].x < connection[connection.length - 2].x) {
-        if (connection[connection.length - 2].y > connection[connection.length - 1].y) {
-          this.setTileType(connection[connection.length - 2], this.tileTypes.CONNECTION_TOP_CORNER);
-          newTileType = this.tileTypes.CONNECTION_HORIZONTAL;
-        } else if (connection[connection.length - 2].y < connection[connection.length - 1].y) {
-          this.setTileType(connection[connection.length - 2], this.tileTypes.CONNECTION_LEFT_CORNER);
-          newTileType = this.tileTypes.CONNECTION_HORIZONTAL;
-        } else {
-          newTileType = this.tileTypes.CONNECTION_VERTICAL;
-        }
-      }
-    } else {
-      if (connection[0].y !== connection[1].y) {
-        newTileType = this.tileTypes.CONNECTION_HORIZONTAL;
-      } else {
-        newTileType = this.tileTypes.CONNECTION_VERTICAL;
-      }
+  updateConnectionOrientations (connection, entirePath = false) {
+    if (connection.length === 0) {
+      return;
+    }
+    if (connection.length === 1) {
+      this.setConnectionType(connection[connection.length - 1], this.connectionTypes.NONE);
     }
 
-    if (connection[connection.length - 1].type !== this.tileTypes.NODE) {
-      this.setTileType(connection[connection.length - 1], newTileType);
+    let i = entirePath ? 2 : connection.length;
+    
+    for (i; i <= connection.length; i++) {
+      const curr = connection[i - 1];
+      const prev = connection[i - 2];
+      const deltaX = curr.x - prev.x;
+      const deltaY = curr.y - prev.y;
+      if (deltaX === -1) {
+        if (deltaY === -1) {
+          this.setConnectionType(prev, this.connectionTypes.S_N);
+        } else if (deltaY === 0) {
+          this.setConnectionType(prev, this.connectionTypes.SE_NW);
+        } else if (deltaY === 1) {
+          this.setConnectionType(prev, this.connectionTypes.E_W);
+        }
+      } else if (deltaX === 0) {
+        if (deltaY === -1) {
+          this.setConnectionType(prev, this.connectionTypes.SW_NE);
+        } else if (deltaY === 1) {
+          this.setConnectionType(prev, this.connectionTypes.NE_SW);
+        }
+      } else if (deltaX === 1) {
+        if (deltaY === -1) {
+          this.setConnectionType(prev, this.connectionTypes.W_E);
+        } else if (deltaY === 0) {
+          this.setConnectionType(prev, this.connectionTypes.NW_SE);
+        } else if (deltaY === 1) {
+          this.setConnectionType(prev, this.connectionTypes.N_S);
+        }
+      }
     }
-    */
   }
 
   clearConnections (tile) {
@@ -441,6 +446,7 @@ export default class {
         this.connections[i].forEach((t) => {
           if (t.type !== this.tileTypes.NODE) {
             this.setTileType(t, this.tileTypes.NONE);
+            this.setConnectionType(t, this.connectionTypes.NONE);
           }
         });
         this.connections.splice(i, 1);
@@ -453,6 +459,7 @@ export default class {
     this.currentConnection.forEach((tile) => {
       if (tile.type !== this.tileTypes.NODE) {
         this.setTileType(tile, this.tileTypes.NONE);
+        this.setConnectionType(tile, this.connectionTypes.NONE);
       }
     });
     this.currentConnection = undefined;
@@ -481,144 +488,33 @@ export default class {
     });
     */
 
-
-    const netmap = {
-      height: this.grid.length,
-      width: this.grid[0].length,
-
-    }
     return JSON.stringify({
       height: this.grid.length,
       width: this.grid[0].length,
-      nodes: this.nodes,
-      connections: this.connections
+      nodes: this.nodes.map((node) => ({
+        owner: node.owner,
+        name: node.name,
+        description: node.description,
+        securityLevel: node.securityLevel,
+        startsOwned: node.startsOwned,
+        x: node.tile.x,
+        y: node.tile.y
+      })),
+      connections: this.connections.map((connection) => connection.map((tile) => ({
+        x: tile.x,
+        y: tile.y
+      }))),
     });
   }
   
-  createNetmapFromJson (netmapJson) {
-    const json = JSON.parse(netmapJson);
+  createNetmapFromJson (inputJson) {
+    const json = JSON.parse(inputJson);
     this.initNetmap(json.width, json.height);
     json.nodes.forEach((node) => {
-      const tile = this.getTileFromCoords(node.coords.x, node.coords.y, json.height);
-      this.addNode(node, tile);
+      this.addNode(node, this.getTileFromCoords(node.x, node.y));
     });
-    json.nodes.forEach((node) => {
-      node.connections.forEach((connection) => {
-        const endTile = connection.path[connection.path.length - 1];
-        const { x, y } = this.getTileFromCoords(endTile.x, endTile.y, json.height);
-        console.log(`${x}, ${y}`);
-        console.log(this.nodes);
-        const destNode = this.nodes.find((n) => n.tile.x === x && n.tile.y === y);
-        if (!destNode.connections.find((con) => con.node.tile.x === node.tile.x && con.node.tile.y === node.tile.y)) {
-          const newConnection = [node.tile];
-          let previousPoint;
-          let x = node.tile.x;
-          let y = node.tile.y;
-          let finished = false;
-          connection.path.forEach((point) => {
-            
-            if (previousPoint) {
-              let deltaX = point.x - previousPoint.x;
-              let deltaY = point.y - previousPoint.y;
-              if (Math.abs(deltaX) !== 0.25 && Math.abs(deltaY) !== 0.25) {
-                if (deltaX === deltaY) {
-                  if (deltaX < 0) {
-                    deltaX = -0.5;
-                    deltaY = -0.5;
-                  } else {
-                    deltaX = 0.5;
-                    deltaY = 0.5;
-                  }
-                } else if (deltaX === deltaY * -1) {
-                  if (deltaX < 0) {
-                    deltaX = -0.5;
-                    deltaY = 0.5; 
-                  } else {
-                    deltaX = 0.5;
-                    deltaY = -0.5;
-                  }
-                } else if (deltaY === 0) {
-                  if (deltaX < 0) {
-                    deltaX = -0.5;
-                  } else if (deltaX > 0) {
-                    deltaX = 0.5;
-                  }
-                } else if (deltaX === 0) {
-                  if (deltaY < 0) {
-                    deltaY = -0.5;
-                  } else if (deltaY > 0) {
-                    deltaY = 0.5;
-                  }
-                }
-              }
-
-              let iterations;
-              if (deltaX === 0) {
-                iterations = (point.y - previousPoint.y) / deltaY;
-              } else if (deltaY === 0) {
-                iterations = (point.x - previousPoint.x) / deltaX;
-              } else {
-                iterations = Math.max((point.x - previousPoint.x) / deltaX, (point.y - previousPoint.y) / deltaY);
-              }
-              let index = 0;
-              while (index < iterations) {
-                index += 1;
-                if (deltaX === deltaY) {
-                  if (deltaX < 0) {
-                    x -= 1;
-                  } else if (deltaX > 0) {
-                    x += 1;
-                  }
-                } else if (deltaX === deltaY * -1) {
-                  if (deltaX < 0) {
-                    y += 1;
-                  } else if (deltaX > 0) {
-                    y -= 1;
-                  }
-                } else if (deltaX === 0) {
-                  if (deltaY < 0) {
-                    if (newConnection.length > 1 && newConnection[newConnection.length - 2].x === newConnection[newConnection.length - 1].x) {
-                      x -= 1;
-                    } else {
-                      y -= 1;
-                    }
-                  } else {
-                    if (newConnection.length > 1 && newConnection[newConnection.length - 2].x === newConnection[newConnection.length - 1].x) {
-                      x += 1;
-                    } else {
-                      y += 1;
-                    }
-                  }
-                } else if (deltaY === 0) {
-                  if (deltaX < 0) {
-                    if (newConnection.length > 1 && newConnection[newConnection.length - 2].y === newConnection[newConnection.length - 1].y) {
-                      y += 1;
-                    } else {
-                      x -= 1;
-                    }
-                  } else {
-                    if (newConnection.length > 1 && newConnection[newConnection.length - 2].y === newConnection[newConnection.length - 1].y) {
-                      y -= 1;
-                    } else {
-                      x += 1;
-                    }
-                  }
-                }
-                const tile = this.grid[y][x];
-                if (!finished) {
-                  this.addToConnection(newConnection, tile);
-                }
-                if (tile.type === this.tileTypes.NODE) {
-                  finished = true;
-                }
-              }
-            }
-            previousPoint = point;
-          });
-        }
-      });
+    json.connections.forEach((connection) => {
+      this.addConnection(connection.map((tile) => this.getTileFromCoords(tile.x, tile.y)));
     });
   }
-
 }
-
