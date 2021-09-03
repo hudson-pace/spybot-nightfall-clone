@@ -21,36 +21,7 @@ angular
         netmapService.openDatabattle(node);
       }
   
-      $scope.addNode = (node) => {
-        $scope.netmap.addNode(node);
-        $scope.newNode = undefined;
-        $scope.clickTile(node.tile);
-      };
-      $scope.removeNode = () => {
-        $scope.clearConnections();
-        const tile = $scope.selectedNode.tile;
-        $scope.netmap.removeNode($scope.selectedNode);
-        $scope.clickTile(tile);
-      };
-      $scope.addConnection = () => {
-        $scope.mode = $scope.modes.ADDING_CONNECTION;
-        $scope.currentConnection = [$scope.selectedNode.tile];
-      };
-      $scope.cancelConnection = () => {
-        $scope.mode = $scope.modes.EDIT;
-        $scope.currentConnection.forEach((tile) => {
-          if (tile.type !== $scope.tileTypes.NODE) {
-            tile.type = $scope.tileTypes.NONE;
-          }
-        });
-        $scope.currentConnection = undefined;
-        $scope.clickTile($scope.selectedNode.tile);
-      };
-      $scope.clearConnections = () => {
-        while ($scope.selectedNode.connections.length > 0) {
-          $scope.netmap.removeConnection($scope.selectedNode.connections[0]);
-        }
-      }
+
   
       $scope.generateJson = () => {
         console.log(netmapService.generateJson($scope.netmap));

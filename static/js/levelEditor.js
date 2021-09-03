@@ -25,39 +25,72 @@ export default class {
       'Pharmhaus',
       'S.M.A.R.T.',
       'Unknown',
-      'Warez'
+      'Warez',
     ];
 
     this.addNodeOptions = document.querySelector('#add-node-options');
-    this.addNodeOptions.addEventListener('submit', (e) => {
-      e.preventDefault();
-      new FormData(this.addNodeOptions);
-    });
-    this.addNodeOptions.addEventListener('formdata', (e) => {
-      const data = this.getObjectFromFormData(e.formData);
+
+    this.addNodeButton = document.querySelector('#add-node-button');
+    this.addNodeButton.addEventListener('click', () => {
+      const data = this.getObjectFromFormData(new FormData(this.addNodeOptions));
       this.addNode(data, this.selectedTile);
     });
 
     this.editNodeOptions = document.querySelector('#edit-node-options');
-    this.editNodeOptions.addEventListener('change', (e) => {
-      new FormData(this.editNodeOptions);
-    });
-    this.editNodeOptions.addEventListener('formdata', (e) => {
-      const data = this.getObjectFromFormData(e.formData);
+    this.editNodeOptions.addEventListener('change', () => {
+      const data = this.getObjectFromFormData(new FormData(this.editNodeOptions));
+      this.updateNode(data, this.selectedNode);
     });
 
+    this.addConnectionButton = document.querySelector('#add-connection-button');
+    this.addConnectionButton.addEventListener('click', () => {
+      this.addConnection();
+    })
 
+    this.clearConnectionsButton = document.querySelector('#clear-connections-button');
+    this.clearConnectionsButton.addEventListener('click', () => {
+      this.clearConnections(this.selectedNode);
+    })
+
+    this.removeNodeButton = document.querySelector('#remove-node-button');
+    this.removeNodeButton.addEventListener('click', () => {
+      this.removeNode(this.selectedNode);
+    });
+
+    this.cancelConnectionButton = document.querySelector('#cancel-connection-button');
+    this.cancelConnectionButton.addEventListener('click', () => {
+      this.cancelConnection();
+    });
 
     this.connectionOptions = document.querySelector('#connection-options');
-  
-    this.nodes = [];
-    this.switchMode(this.modes.NONE);
-    this.table = document.querySelector('#netmap');
-    this.grid = this.createGrid(10, 10, this.tileTypes.NONE);
-    this.calculateTableMargin();
 
+    this.generateJsonButton = document.querySelector('#generate-json-button');
+    this.generateJsonButton.addEventListener('click', () => {
+      console.log(this.generateJson());
+    })
+    this.jsonInput = document.querySelector('#json-input');
+    this.loadFromJsonButton = document.querySelector('#load-from-json-button');
+    this.loadFromJsonButton.addEventListener('click', () => {
+      this.createNetmapFromJson(this.jsonInput.value);
+      this.jsonInput.value='';
+    })
+  
+    this.table = document.querySelector('#netmap');
     this.addResizerListeners();
     this.loadOwnerLists();
+
+    this.initNetmap(10, 10);
+  }
+
+  initNetmap (width, height) {
+    this.table.innerHTML = '';
+    this.selectedTile = undefined;
+    this.selectedNode = undefined;
+    this.nodes = [];
+    this.switchMode(this.modes.NONE);
+    this.grid = this.createGrid(width, height);
+    this.updateTileCoords();
+    this.calculateTableMargin();
   }
 
   getObjectFromFormData (formData) {
@@ -65,6 +98,9 @@ export default class {
     formData.forEach((val, key) => {
       obj[key] = val;
     })
+
+    // An unchecked checkbox doesn't return any value. This makes sure it's interpreted as a boolean.
+    obj.startsOwned = !!obj.startsOwned;
     return obj;
   }
   
@@ -94,11 +130,27 @@ export default class {
         break;
       case this.modes.EDIT:
         this.editNodeOptions.classList.remove('hidden');
-        
+        this.fillFormFromData(this.editNodeOptions, this.selectedNode);
         break;
       case this.modes.ADDING_CONNECTION:
         this.connectionOptions.classList.remove('hidden');
         break;
+    }
+  }
+
+  fillFormFromData (form, data) {
+    for (const [key, value] of Object.entries(data)) {
+      const input = form.querySelector(`*[name=${key}]`);
+      if (input) {
+        switch (input.type) {
+          case 'checkbox':
+            input.checked = !!value;
+            break;
+          default:
+            input.value = value;
+            break;
+        }
+      }
     }
   }
 
@@ -143,24 +195,34 @@ export default class {
     }
   }
 
+  updateTileCoords () {
+    for (let i = 0; i < this.grid.length; i++) {
+      for (let j = 0; j < this.grid[i].length; j++) {
+        this.grid[i][j].x = j;
+        this.grid[i][j].y = i;
+      }
+    }
+  }
+
+  getTileFromCoords (x, y, height) {
+    console.log(`${x}, ${y} :)`)
+    const gridY = (y - x) + ((height - 1) / 2);
+    const gridX = x + y + ((1 - height) / 2);
+    return this.grid[gridY][gridX];
+  }
+
   clickTile (tile) {
     if (this.mode === this.modes.ADDING_CONNECTION) {
-      /*
-      const previousTile = $scope.currentConnection[$scope.currentConnection.length - 1];
-      if (tile === previousTile && tile.type !== $scope.tileTypes.NODE) {
-        tile.type = $scope.tileTypes.NONE;
-        $scope.netmap.popFromConnection($scope.currentConnection);
-      } if ((tile.type === $scope.tileTypes.NONE || tile.type === $scope.tileTypes.NODE) && Math.abs(tile.x - previousTile.x) + Math.abs(tile.y - previousTile.y) === 1) {
-          if (tile !== $scope.selectedNode.tile) {
-            $scope.netmap.addToConnection($scope.currentConnection, tile);
-          if (tile.type === $scope.tileTypes.NODE) {
-            $scope.clickTile($scope.currentConnection[0]);
-            $scope.currentConnection = undefined;
-            $scope.mode = $scope.tileTypes.EDIT;
-          }
+      const previousTile = this.currentConnection[this.currentConnection.length - 1];
+
+      if (tile === previousTile && tile.type !== this.tileTypes.NODE) {
+        this.popFromConnection(this.currentConnection);
+      } else if (tile.type === this.tileTypes.NONE || tile.type === this.tileTypes.NODE) {
+        if (Math.abs(tile.x - previousTile.x) + Math.abs(tile.y - previousTile.y) === 1
+          && (tile !== this.currentConnection[0] || previousTile !== this.currentConnection[1])) {
+          this.addToConnection(this.currentConnection, tile);
         }
       }
-      */
     } else {
       if (tile !== this.selectedTile) {
         this.selectTile(tile);
@@ -206,6 +268,7 @@ export default class {
     }
 
     this.calculateTableMargin();
+    this.updateTileCoords();
   }
 
   addResizerListeners () {
@@ -244,16 +307,39 @@ export default class {
   }
 
   addNode (nodeData, tile) {
+    console.log(tile);
     const { name, owner, description, startsOwned, securityLevel } = nodeData;
-    const node = { ...nodeData, tile };
+    const node = {
+      ...nodeData,
+      tile,
+      connections: nodeData.connections || [],
+      // battle: nodeData.battle ? createDatabattleFromJson(JSON.stringify(node.battle)) : createNewDatabattle(10, 10, 99),
+      // event: nodeData.event ? createEventFromJson(JSON.stringify(node.event)) : undefined,
+      // shop: nodeData.shop ? nodeData.shop : undefined
+    };
+
     this.nodes.push(node);
     this.setTileType(tile, this.tileTypes.NODE);
+    if (this.selectedTile === tile) {
+      this.selectedNode = node;
+      this.switchMode(this.modes.EDIT);
+    }
+  }
+
+  updateNode (newNodeData, node) {
+    Object.assign(node, newNodeData);
   }
 
   removeNode (node) {
-    this.setTileType(tile, this.tileTypes.NONE);
+    this.clearConnections(node);
+    this.setTileType(node.tile, this.tileTypes.NONE);
     const index = this.nodes.findIndex((n) => n === node);
     this.nodes.splice(index, 1);
+
+    if (this.selectedNode) {
+      this.selectedNode = undefined;
+      this.switchMode(this.modes.ADD_NODE);
+    }
   }
 
   setTileType (tile, newType) {
@@ -262,47 +348,103 @@ export default class {
     tile.type = newType;
   }
 
-}
-/*
-  netmap.nodes = [];
-
-  netmap.addNode = (node) => {
-    const newNode = {
-      name: node.name,
-      owner: node.owner,
-      desc: node.desc,
-      ownedByUser: node.ownedByUser,
-      securityLevel: parseInt(node.securityLevel, 10),
-      image: node.image,
-      tile: node.tile,
-      connections: [],
-    };
-    if (!node.battle) {
-      newNode.battle = databattleService.createNewDatabattle(10, 10, 99);
-    } else {
-      newNode.battle = databattleService.createDatabattleFromJson(JSON.stringify(node.battle));
+  addToConnection (connection, tile) {
+    connection.push(tile);
+    if (tile.type === this.tileTypes.NODE) {
+      const startNode = this.nodes.find((node) => node.tile.x === connection[0].x && node.tile.y === connection[0].y);
+      const endNode = this.nodes.find((node) => node.tile.x === tile.x && node.tile.y === tile.y);
+      startNode.connections.push({ node: endNode, path: connection });
+      endNode.connections.push({ node: startNode, path: [ ...connection ].reverse() });
+      this.currentConnection = undefined;
+      if (this.selectedNode) {
+        this.switchMode(this.modes.EDIT);
+      } else {
+        this.switchMode(this.modes.NONE);
+      }
     }
+    this.updateConnectionOrientations(connection);
+  }
 
-    if (node.event) {
-      newNode.event = eventService.createEventFromJson(JSON.stringify(node.event));
-    }
+  popFromConnection (connection) {
+    this.setTileType(connection[connection.length - 1], this.tileTypes.NONE);
+    connection.pop();
+    this.updateConnectionOrientations(connection);
+  }
 
-    if (node.shop) {
-      newNode.shop = node.shop;
-    }
-    
-    netmap.nodes.push(newNode);
-    
-    const tile = node.tile;
-    tile.type = service.tileTypes.NODE;
+  addConnection () {
+    this.switchMode(this.modes.ADDING_CONNECTION);
+    this.currentConnection = [this.selectedTile];
   }
 
 
-  netmap.removeConnection = (connection) => {
+  updateConnectionOrientations = (connection) => {
+    let newTileType;
+    if (connection.length > 2) {
+      if (connection[connection.length - 3].y > connection[connection.length - 2].y) {
+        if (connection[connection.length - 2].x > connection[connection.length - 1].x) {
+          this.setTileType(connection[connection.length - 2], this.tileTypes.CONNECTION_LEFT_CORNER);
+          newTileType = this.tileTypes.CONNECTION_VERTICAL;
+        } else if (connection[connection.length - 2].x < connection[connection.length - 1].x) {
+          this.setTileType(connection[connection.length - 2], this.tileTypes.CONNECTION_BOTTOM_CORNER);
+          newTileType = this.tileTypes.CONNECTION_VERTICAL;
+        } else {
+          newTileType = this.tileTypes.CONNECTION_HORIZONTAL;
+        }
+      } else if (connection[connection.length - 3].y < connection[connection.length - 2].y) {
+        if (connection[connection.length - 2].x > connection[connection.length - 1].x) {
+          this.setTileType(connection[connection.length - 2], this.tileTypes.CONNECTION_TOP_CORNER);
+          newTileType = this.tileTypes.CONNECTION_VERTICAL;
+        } else if (connection[connection.length - 2].x < connection[connection.length - 1].x) {
+          this.setTileType(connection[connection.length - 2], this.tileTypes.CONNECTION_RIGHT_CORNER);
+          newTileType = this.tileTypes.CONNECTION_VERTICAL;
+        } else {
+          newTileType = this.tileTypes.CONNECTION_HORIZONTAL;
+        }
+      } else if (connection[connection.length - 3].x > connection[connection.length - 2].x) {
+        if (connection[connection.length - 2].y > connection[connection.length - 1].y) {
+          this.setTileType(connection[connection.length - 2], this.tileTypes.CONNECTION_RIGHT_CORNER);
+          newTileType = this.tileTypes.CONNECTION_HORIZONTAL;
+        } else if (connection[connection.length - 2].y < connection[connection.length - 1].y) {
+          this.setTileType(connection[connection.length - 2], this.tileTypes.CONNECTION_BOTTOM_CORNER);
+          newTileType = this.tileTypes.CONNECTION_HORIZONTAL;
+        } else {
+          newTileType = this.tileTypes.CONNECTION_VERTICAL;
+        }
+      } else if (connection[connection.length - 3].x < connection[connection.length - 2].x) {
+        if (connection[connection.length - 2].y > connection[connection.length - 1].y) {
+          this.setTileType(connection[connection.length - 2], this.tileTypes.CONNECTION_TOP_CORNER);
+          newTileType = this.tileTypes.CONNECTION_HORIZONTAL;
+        } else if (connection[connection.length - 2].y < connection[connection.length - 1].y) {
+          this.setTileType(connection[connection.length - 2], this.tileTypes.CONNECTION_LEFT_CORNER);
+          newTileType = this.tileTypes.CONNECTION_HORIZONTAL;
+        } else {
+          newTileType = this.tileTypes.CONNECTION_VERTICAL;
+        }
+      }
+    } else {
+      if (connection[0].y !== connection[1].y) {
+        newTileType = this.tileTypes.CONNECTION_HORIZONTAL;
+      } else {
+        newTileType = this.tileTypes.CONNECTION_VERTICAL;
+      }
+    }
+
+    if (connection[connection.length - 1].type !== this.tileTypes.NODE) {
+      this.setTileType(connection[connection.length - 1], newTileType);
+    }
+  }
+
+  clearConnections (node) {
+    while (node.connections.length > 0) {
+      this.removeConnection(node.connections[0]);
+    }
+  }
+
+  removeConnection (connection) {
     const tiles = [connection.path[0], connection.path[connection.path.length - 1]];
     
     tiles.forEach((tile) => {
-      const node = netmap.nodes.find((node) => node.tile === tile);
+      const node = this.getNodeFromTile(tile);
 
       // Either find the connection, or the connection equal to the reverse of the array.
       const connectionIndex = node.connections.findIndex((c) => {
@@ -319,92 +461,296 @@ export default class {
       });
       if (connectionIndex !== -1) {
         connection.path.forEach((tile) => {
-          if (tile.type !== service.tileTypes.NODE) {
-            tile.type = service.tileTypes.NONE;
+          if (tile.type !== this.tileTypes.NODE) {
+            this.setTileType(tile, this.tileTypes.NONE);
           }
         });
         node.connections.splice(connectionIndex, 1);
       }
     });
   }
+
+  cancelConnection () {
+    this.switchMode(this.modes.EDIT);
+    this.currentConnection.forEach((tile) => {
+      if (tile.type !== this.tileTypes.NODE) {
+        this.setTileType(tile, this.tileTypes.NONE);
+      }
+    });
+    this.currentConnection = undefined;
+  }
+
+
+  generateJson () {
+    const netmap = {};
   
-  netmap.addToConnection = (connection, tile) => {
-    connection.push(tile);
-    if (tile.type === service.tileTypes.NODE) {
-      const startNode = netmap.nodes.find((node) => node.tile === connection[0]);
-      const endNode = netmap.nodes.find((node) => node.tile === tile);
-      startNode.connections.push({ node: endNode, path: connection });
-      endNode.connections.push({ node: startNode, path: [ ...connection ].reverse() });
-    }
-    netmap.updateConnectionOrientations(connection);
-  }
-  netmap.popFromConnection = (connection) => {
-    connection.pop();
-  }
-
-  netmap.updateConnectionOrientations = (connection) => {
-    let newTileType;
-    if (connection.length > 2) {
-      if (connection[connection.length - 3].y > connection[connection.length - 2].y) {
-        if (connection[connection.length - 2].x > connection[connection.length - 1].x) {
-          connection[connection.length - 2].type = service.tileTypes.CONNECTION_LEFT_CORNER;
-          newTileType = service.tileTypes.CONNECTION_VERTICAL;
-        } else if (connection[connection.length - 2].x < connection[connection.length - 1].x) {
-          connection[connection.length - 2].type = service.tileTypes.CONNECTION_BOTTOM_CORNER;
-          newTileType = service.tileTypes.CONNECTION_VERTICAL;
-        } else {
-          newTileType = service.tileTypes.CONNECTION_HORIZONTAL;
-        }
-      } else if (connection[connection.length - 3].y < connection[connection.length - 2].y) {
-        if (connection[connection.length - 2].x > connection[connection.length - 1].x) {
-          connection[connection.length - 2].type = service.tileTypes.CONNECTION_TOP_CORNER;
-          newTileType = service.tileTypes.CONNECTION_VERTICAL;
-        } else if (connection[connection.length - 2].x < connection[connection.length - 1].x) {
-          connection[connection.length - 2].type = service.tileTypes.CONNECTION_RIGHT_CORNER;
-          newTileType = service.tileTypes.CONNECTION_VERTICAL;
-        } else {
-          newTileType = service.tileTypes.CONNECTION_HORIZONTAL;
-        }
-      } else if (connection[connection.length - 3].x > connection[connection.length - 2].x) {
-        if (connection[connection.length - 2].y > connection[connection.length - 1].y) {
-          connection[connection.length - 2].type = service.tileTypes.CONNECTION_RIGHT_CORNER;
-          newTileType = service.tileTypes.CONNECTION_HORIZONTAL;
-        } else if (connection[connection.length - 2].y < connection[connection.length - 1].y) {
-          connection[connection.length - 2].type = service.tileTypes.CONNECTION_BOTTOM_CORNER;
-          newTileType = service.tileTypes.CONNECTION_HORIZONTAL;
-        } else {
-          newTileType = service.tileTypes.CONNECTION_VERTICAL;
-        }
-      } else if (connection[connection.length - 3].x < connection[connection.length - 2].x) {
-        if (connection[connection.length - 2].y > connection[connection.length - 1].y) {
-          connection[connection.length - 2].type = service.tileTypes.CONNECTION_TOP_CORNER;
-          newTileType = service.tileTypes.CONNECTION_HORIZONTAL;
-        } else if (connection[connection.length - 2].y < connection[connection.length - 1].y) {
-          connection[connection.length - 2].type = service.tileTypes.CONNECTION_LEFT_CORNER;
-          newTileType = service.tileTypes.CONNECTION_HORIZONTAL;
-        } else {
-          newTileType = service.tileTypes.CONNECTION_VERTICAL;
-        }
+    netmap.height = this.grid.length;
+    netmap.width = this.grid[0].length;
+    netmap.size = (netmap.height + netmap.width) / 2;
+    netmap.nodes = [];
+    this.nodes.forEach((node) => {
+      const x = ((node.tile.x - node.tile.y + netmap.height) - 1) / 2;
+      const y = (node.tile.x + node.tile.y) / 2;
+      const newNode = {
+        ...node,
+        coords: { x, y },
+        connections: [],
+      };
+      /*
+      if (node.battle) {
+        newNode.battle = JSON.parse(databattleService.getJsonFromDatabattle(node.battle));
       }
-    } else {
-      if (connection[0].y !== connection[1].y) {
-        newTileType = service.tileTypes.CONNECTION_HORIZONTAL;
-      } else {
-        newTileType = service.tileTypes.CONNECTION_VERTICAL;
+      if (node.event) {
+        newNode.event = JSON.parse(eventService.getJsonFromEvent(node.event));
       }
-    }
+      if (node.shop) {
+        newNode.shop = JSON.parse(angular.toJson(node.shop));
+      }
+      */
+      node.connections.forEach((connection) => {
+        const segments = [];
+        connection.path.forEach((tile) => {
+          const tileX = ((tile.x - tile.y + netmap.height) - 1) / 2;
+          const tileY = (tile.x + tile.y) / 2;
+          if (tile.type === this.tileTypes.CONNECTION_VERTICAL) {
+            segments.push({
+              point1: {
+                x: tileX + 0.25,
+                y: tileY + 0.25,
+              },
+              point2: {
+                x: tileX + 0.75,
+                y: tileY + 0.75,
+              },
+            });
+          } else if (tile.type === this.tileTypes.CONNECTION_HORIZONTAL) {
+            segments.push({
+              point1: {
+                x: tileX + 0.25,
+                y: tileY + 0.75,
+              },
+              point2: {
+                x: tileX + 0.75,
+                y: tileY + 0.25,
+              },
+            });
+          } else if (tile.type === this.tileTypes.CONNECTION_BOTTOM_CORNER) {
+            segments.push({
+              point1: {
+                x: tileX + 0.25,
+                y: tileY + 0.75,
+              },
+              point2: {
+                x: tileX + 0.75,
+                y: tileY + 0.75,
+              },
+            });
+          } else if (tile.type === this.tileTypes.CONNECTION_TOP_CORNER) {
+            segments.push({
+              point1: {
+                x: tileX + 0.25,
+                y: tileY + 0.25,
+              },
+              point2: {
+                x: tileX + 0.75,
+                y: tileY + 0.25,
+              },
+            });
+          } else if (tile.type === this.tileTypes.CONNECTION_LEFT_CORNER) {
+            segments.push({
+              point1: {
+                x: tileX + 0.25,
+                y: tileY + 0.25,
+              },
+              point2: {
+                x: tileX + 0.25,
+                y: tileY + 0.75,
+              },
+            });
+          } else if (tile.type === this.tileTypes.CONNECTION_RIGHT_CORNER) {
+            segments.push({
+              point1: {
+                x: tileX + 0.75,
+                y: tileY + 0.25,
+              },
+              point2: {
+                x: tileX + 0.75,
+                y: tileY + 0.75,
+              },
+            });
+          }
+        });
 
-    if (connection[connection.length - 1].type !== service.tileTypes.NODE) {
-      connection[connection.length - 1].type = newTileType;
-    }
+        const points = [];
+        points.push({
+          x: x + 0.5,
+          y: y + 0.5,
+        });
+        segments.forEach((segment, index) => {
+          const previousPoint = points[points.length - 1]
+          if (Math.abs(segment.point1.x - previousPoint.x) + Math.abs(segment.point1.y - previousPoint.y)
+            < Math.abs(segment.point2.x - previousPoint.x) + Math.abs(segment.point2.y - previousPoint.y)) {
+            points.push(segment.point1);
+            if (index === segments.length - 1) {
+              points.push(segment.point2);
+            }
+          } else {
+            points.push(segment.point2);
+            if (index === segments.length - 1) {
+              points.push(segment.point1);
+            }
+          }
+        });
+        const lastTile = connection.path[connection.path.length - 1];
+        points.push({
+          x: (((lastTile.x - lastTile.y + netmap.height) - 1) / 2) + 0.5,
+          y: ((lastTile.x + lastTile.y) / 2) + 0.5,
+        });
+
+        // The connection lines are purely aesthetic, so the only relevant points are those at which the direction changes.
+        const relevantPoints = [points[0]];
+        let previousPoint = points[0];
+        let previousSlope = (points[0].x - points[1].x) / (points[0].y - points[1].y);
+        points.slice(1).forEach((point) => {
+          const slope = (previousPoint.x - point.x) / (previousPoint.y - point.y);
+          if (slope !== previousSlope) {
+            relevantPoints.push(previousPoint);
+          }
+          previousPoint = point;
+          previousSlope = slope;
+        });
+        relevantPoints.push(points[points.length - 1]);
+        newNode.connections.push({ node: connection.node.name, path: relevantPoints });
+      });
+      netmap.nodes.push(newNode);
+    });
+    return JSON.stringify(netmap);
+  }
+  
+  createNetmapFromJson (netmapJson) {
+    const json = JSON.parse(netmapJson);
+    this.initNetmap(json.width, json.height);
+    json.nodes.forEach((node) => {
+      const tile = this.getTileFromCoords(node.coords.x, node.coords.y, json.height);
+      this.addNode(node, tile);
+    });
+    json.nodes.forEach((node) => {
+      node.connections.forEach((connection) => {
+        const endTile = connection.path[connection.path.length - 1];
+        const { x, y } = this.getTileFromCoords(endTile.x, endTile.y, json.height);
+        console.log(`${x}, ${y}`);
+        console.log(this.nodes);
+        const destNode = this.nodes.find((n) => n.tile.x === x && n.tile.y === y);
+        if (!destNode.connections.find((con) => con.node.tile.x === node.tile.x && con.node.tile.y === node.tile.y)) {
+          const newConnection = [node.tile];
+          let previousPoint;
+          let x = node.tile.x;
+          let y = node.tile.y;
+          let finished = false;
+          connection.path.forEach((point) => {
+            
+            if (previousPoint) {
+              let deltaX = point.x - previousPoint.x;
+              let deltaY = point.y - previousPoint.y;
+              if (Math.abs(deltaX) !== 0.25 && Math.abs(deltaY) !== 0.25) {
+                if (deltaX === deltaY) {
+                  if (deltaX < 0) {
+                    deltaX = -0.5;
+                    deltaY = -0.5;
+                  } else {
+                    deltaX = 0.5;
+                    deltaY = 0.5;
+                  }
+                } else if (deltaX === deltaY * -1) {
+                  if (deltaX < 0) {
+                    deltaX = -0.5;
+                    deltaY = 0.5; 
+                  } else {
+                    deltaX = 0.5;
+                    deltaY = -0.5;
+                  }
+                } else if (deltaY === 0) {
+                  if (deltaX < 0) {
+                    deltaX = -0.5;
+                  } else if (deltaX > 0) {
+                    deltaX = 0.5;
+                  }
+                } else if (deltaX === 0) {
+                  if (deltaY < 0) {
+                    deltaY = -0.5;
+                  } else if (deltaY > 0) {
+                    deltaY = 0.5;
+                  }
+                }
+              }
+
+              let iterations;
+              if (deltaX === 0) {
+                iterations = (point.y - previousPoint.y) / deltaY;
+              } else if (deltaY === 0) {
+                iterations = (point.x - previousPoint.x) / deltaX;
+              } else {
+                iterations = Math.max((point.x - previousPoint.x) / deltaX, (point.y - previousPoint.y) / deltaY);
+              }
+              let index = 0;
+              while (index < iterations) {
+                index += 1;
+                if (deltaX === deltaY) {
+                  if (deltaX < 0) {
+                    x -= 1;
+                  } else if (deltaX > 0) {
+                    x += 1;
+                  }
+                } else if (deltaX === deltaY * -1) {
+                  if (deltaX < 0) {
+                    y += 1;
+                  } else if (deltaX > 0) {
+                    y -= 1;
+                  }
+                } else if (deltaX === 0) {
+                  if (deltaY < 0) {
+                    if (newConnection.length > 1 && newConnection[newConnection.length - 2].x === newConnection[newConnection.length - 1].x) {
+                      x -= 1;
+                    } else {
+                      y -= 1;
+                    }
+                  } else {
+                    if (newConnection.length > 1 && newConnection[newConnection.length - 2].x === newConnection[newConnection.length - 1].x) {
+                      x += 1;
+                    } else {
+                      y += 1;
+                    }
+                  }
+                } else if (deltaY === 0) {
+                  if (deltaX < 0) {
+                    if (newConnection.length > 1 && newConnection[newConnection.length - 2].y === newConnection[newConnection.length - 1].y) {
+                      y += 1;
+                    } else {
+                      x -= 1;
+                    }
+                  } else {
+                    if (newConnection.length > 1 && newConnection[newConnection.length - 2].y === newConnection[newConnection.length - 1].y) {
+                      y -= 1;
+                    } else {
+                      x += 1;
+                    }
+                  }
+                }
+                const tile = this.grid[y][x];
+                if (!finished) {
+                  this.addToConnection(newConnection, tile);
+                }
+                if (tile.type === this.tileTypes.NODE) {
+                  finished = true;
+                }
+              }
+            }
+            previousPoint = point;
+          });
+        }
+      });
+    });
   }
 
-  netmap.getTileFromCoords = (x, y) => {
-    let gridY = (y - x) + ((json.height - 1) / 2);
-    let gridX = x + y + ((1 - json.height) / 2);
-    return netmap.tiles[gridY][gridX];
-  }
-
-  return netmap;
 }
-*/
+

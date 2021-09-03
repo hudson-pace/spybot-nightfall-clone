@@ -43,41 +43,41 @@ table {
 .tile.selected {
   border: 3px solid pink;
 }
-.connection-horizontal {
+.connection-horizontal div {
   background-color: black;
   height: 100%;
   width: 5px;
   display: inline-block;
 }
-.connection-vertical {
+.connection-vertical div {
   background-color: black;
   height: 100%;
   width: 5px;
   display: inline-block;
   transform: rotate(90deg);
 }
-.connection-top-corner {
+.connection-top-corner div {
   background-color: black;
   height: 100%;
   width: 5px;
   display: inline-block;
   transform: rotate(45deg) translateX(-18px);
 }
-.connection-bottom-corner {
+.connection-bottom-corner div {
   background-color: black;
   height: 100%;
   width: 5px;
   display: inline-block;
   transform: rotate(45deg) translateX(18px);
 }
-.connection-right-corner {
+.connection-right-corner div {
   background-color: black;
   height: 100%;
   width: 5px;
   display: inline-block;
   transform: rotate(-45deg) translateX(18px);
 }
-.connection-left-corner {
+.connection-left-corner div {
   background-color: black;
   height: 100%;
   width: 5px;
@@ -178,11 +178,12 @@ input.resize {
 }
 
 .table-container {
-  display: flex;
+  display: inline-flex;
   justify-content: center;
+  min-width: max-content;
 }
 .table-container table {
-  flex-shrink: 0;
+  flex: 1 0 auto;
 }
 
 .vertical-resizer {
