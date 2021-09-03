@@ -84,6 +84,14 @@ table {
   display: inline-block;
   transform: rotate(-45deg) translateX(-18px);
 }
+
+.test-class-one div {
+  background-color: black;
+  height: 100%;
+  width: 8px;
+  transform: translateX(20px);
+}
+
 input.resize {
   width: 20px;
   padding: 0 5px;

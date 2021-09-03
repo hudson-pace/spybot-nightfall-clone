@@ -49,7 +49,7 @@ export default class {
 
     this.clearConnectionsButton = document.querySelector('#clear-connections-button');
     this.clearConnectionsButton.addEventListener('click', () => {
-      this.clearConnections(this.selectedNode);
+      this.clearConnections(this.selectedTile);
     })
 
     this.removeNodeButton = document.querySelector('#remove-node-button');
@@ -87,10 +87,13 @@ export default class {
     this.selectedTile = undefined;
     this.selectedNode = undefined;
     this.nodes = [];
+    this.connections = [];
     this.switchMode(this.modes.NONE);
     this.grid = this.createGrid(width, height);
     this.updateTileCoords();
     this.calculateTableMargin();
+
+    this.setTileType(this.grid[5][4], 'test-class-one');
   }
 
   getObjectFromFormData (formData) {
@@ -312,7 +315,6 @@ export default class {
     const node = {
       ...nodeData,
       tile,
-      connections: nodeData.connections || [],
       // battle: nodeData.battle ? createDatabattleFromJson(JSON.stringify(node.battle)) : createNewDatabattle(10, 10, 99),
       // event: nodeData.event ? createEventFromJson(JSON.stringify(node.event)) : undefined,
       // shop: nodeData.shop ? nodeData.shop : undefined
@@ -331,7 +333,7 @@ export default class {
   }
 
   removeNode (node) {
-    this.clearConnections(node);
+    this.clearConnections(node.tile);
     this.setTileType(node.tile, this.tileTypes.NONE);
     const index = this.nodes.findIndex((n) => n === node);
     this.nodes.splice(index, 1);
@@ -351,10 +353,7 @@ export default class {
   addToConnection (connection, tile) {
     connection.push(tile);
     if (tile.type === this.tileTypes.NODE) {
-      const startNode = this.nodes.find((node) => node.tile.x === connection[0].x && node.tile.y === connection[0].y);
-      const endNode = this.nodes.find((node) => node.tile.x === tile.x && node.tile.y === tile.y);
-      startNode.connections.push({ node: endNode, path: connection });
-      endNode.connections.push({ node: startNode, path: [ ...connection ].reverse() });
+      this.connections.push(connection);
       this.currentConnection = undefined;
       if (this.selectedNode) {
         this.switchMode(this.modes.EDIT);
@@ -377,7 +376,8 @@ export default class {
   }
 
 
-  updateConnectionOrientations = (connection) => {
+  updateConnectionOrientations (connection) {
+    /*
     let newTileType;
     if (connection.length > 2) {
       if (connection[connection.length - 3].y > connection[connection.length - 2].y) {
@@ -432,42 +432,20 @@ export default class {
     if (connection[connection.length - 1].type !== this.tileTypes.NODE) {
       this.setTileType(connection[connection.length - 1], newTileType);
     }
+    */
   }
 
-  clearConnections (node) {
-    while (node.connections.length > 0) {
-      this.removeConnection(node.connections[0]);
-    }
-  }
-
-  removeConnection (connection) {
-    const tiles = [connection.path[0], connection.path[connection.path.length - 1]];
-    
-    tiles.forEach((tile) => {
-      const node = this.getNodeFromTile(tile);
-
-      // Either find the connection, or the connection equal to the reverse of the array.
-      const connectionIndex = node.connections.findIndex((c) => {
-        if (c === connection) {
-          return true;
-        }
-        let isReversedPath = true;
-        c.path.forEach((tile, index) => {
-          if (tile !== connection.path[connection.path.length - (1 + index)]) {
-            isReversedPath = false;
+  clearConnections (tile) {
+    for (let i = this.connections.length - 1; i >= 0; i--) {
+      if (this.connections[i].includes(tile)) {
+        this.connections[i].forEach((t) => {
+          if (t.type !== this.tileTypes.NODE) {
+            this.setTileType(t, this.tileTypes.NONE);
           }
         });
-        return isReversedPath;
-      });
-      if (connectionIndex !== -1) {
-        connection.path.forEach((tile) => {
-          if (tile.type !== this.tileTypes.NODE) {
-            this.setTileType(tile, this.tileTypes.NONE);
-          }
-        });
-        node.connections.splice(connectionIndex, 1);
+        this.connections.splice(i, 1);
       }
-    });
+    }
   }
 
   cancelConnection () {
@@ -482,21 +460,15 @@ export default class {
 
 
   generateJson () {
-    const netmap = {};
-  
-    netmap.height = this.grid.length;
-    netmap.width = this.grid[0].length;
-    netmap.size = (netmap.height + netmap.width) / 2;
-    netmap.nodes = [];
+    // netmap.nodes = [];
+    /*
     this.nodes.forEach((node) => {
       const x = ((node.tile.x - node.tile.y + netmap.height) - 1) / 2;
       const y = (node.tile.x + node.tile.y) / 2;
       const newNode = {
         ...node,
-        coords: { x, y },
         connections: [],
       };
-      /*
       if (node.battle) {
         newNode.battle = JSON.parse(databattleService.getJsonFromDatabattle(node.battle));
       }
@@ -506,125 +478,21 @@ export default class {
       if (node.shop) {
         newNode.shop = JSON.parse(angular.toJson(node.shop));
       }
-      */
-      node.connections.forEach((connection) => {
-        const segments = [];
-        connection.path.forEach((tile) => {
-          const tileX = ((tile.x - tile.y + netmap.height) - 1) / 2;
-          const tileY = (tile.x + tile.y) / 2;
-          if (tile.type === this.tileTypes.CONNECTION_VERTICAL) {
-            segments.push({
-              point1: {
-                x: tileX + 0.25,
-                y: tileY + 0.25,
-              },
-              point2: {
-                x: tileX + 0.75,
-                y: tileY + 0.75,
-              },
-            });
-          } else if (tile.type === this.tileTypes.CONNECTION_HORIZONTAL) {
-            segments.push({
-              point1: {
-                x: tileX + 0.25,
-                y: tileY + 0.75,
-              },
-              point2: {
-                x: tileX + 0.75,
-                y: tileY + 0.25,
-              },
-            });
-          } else if (tile.type === this.tileTypes.CONNECTION_BOTTOM_CORNER) {
-            segments.push({
-              point1: {
-                x: tileX + 0.25,
-                y: tileY + 0.75,
-              },
-              point2: {
-                x: tileX + 0.75,
-                y: tileY + 0.75,
-              },
-            });
-          } else if (tile.type === this.tileTypes.CONNECTION_TOP_CORNER) {
-            segments.push({
-              point1: {
-                x: tileX + 0.25,
-                y: tileY + 0.25,
-              },
-              point2: {
-                x: tileX + 0.75,
-                y: tileY + 0.25,
-              },
-            });
-          } else if (tile.type === this.tileTypes.CONNECTION_LEFT_CORNER) {
-            segments.push({
-              point1: {
-                x: tileX + 0.25,
-                y: tileY + 0.25,
-              },
-              point2: {
-                x: tileX + 0.25,
-                y: tileY + 0.75,
-              },
-            });
-          } else if (tile.type === this.tileTypes.CONNECTION_RIGHT_CORNER) {
-            segments.push({
-              point1: {
-                x: tileX + 0.75,
-                y: tileY + 0.25,
-              },
-              point2: {
-                x: tileX + 0.75,
-                y: tileY + 0.75,
-              },
-            });
-          }
-        });
-
-        const points = [];
-        points.push({
-          x: x + 0.5,
-          y: y + 0.5,
-        });
-        segments.forEach((segment, index) => {
-          const previousPoint = points[points.length - 1]
-          if (Math.abs(segment.point1.x - previousPoint.x) + Math.abs(segment.point1.y - previousPoint.y)
-            < Math.abs(segment.point2.x - previousPoint.x) + Math.abs(segment.point2.y - previousPoint.y)) {
-            points.push(segment.point1);
-            if (index === segments.length - 1) {
-              points.push(segment.point2);
-            }
-          } else {
-            points.push(segment.point2);
-            if (index === segments.length - 1) {
-              points.push(segment.point1);
-            }
-          }
-        });
-        const lastTile = connection.path[connection.path.length - 1];
-        points.push({
-          x: (((lastTile.x - lastTile.y + netmap.height) - 1) / 2) + 0.5,
-          y: ((lastTile.x + lastTile.y) / 2) + 0.5,
-        });
-
-        // The connection lines are purely aesthetic, so the only relevant points are those at which the direction changes.
-        const relevantPoints = [points[0]];
-        let previousPoint = points[0];
-        let previousSlope = (points[0].x - points[1].x) / (points[0].y - points[1].y);
-        points.slice(1).forEach((point) => {
-          const slope = (previousPoint.x - point.x) / (previousPoint.y - point.y);
-          if (slope !== previousSlope) {
-            relevantPoints.push(previousPoint);
-          }
-          previousPoint = point;
-          previousSlope = slope;
-        });
-        relevantPoints.push(points[points.length - 1]);
-        newNode.connections.push({ node: connection.node.name, path: relevantPoints });
-      });
-      netmap.nodes.push(newNode);
     });
-    return JSON.stringify(netmap);
+    */
+
+
+    const netmap = {
+      height: this.grid.length,
+      width: this.grid[0].length,
+
+    }
+    return JSON.stringify({
+      height: this.grid.length,
+      width: this.grid[0].length,
+      nodes: this.nodes,
+      connections: this.connections
+    });
   }
   
   createNetmapFromJson (netmapJson) {
