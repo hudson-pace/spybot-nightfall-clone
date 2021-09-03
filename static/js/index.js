@@ -1,12 +1,12 @@
 import Game from './views/game.js';
 import MainMenu from './views/mainMenu.js';
-import LevelEditor from './views/levelEditor.js';
+import MapEditor from './views/mapEditor.js';
 
 const router = async () => {
   const route = window.location.pathname;
   switch (route) {
     case '/level-editor':
-      const levelEditor = new LevelEditor();
+      const levelEditor = new MapEditor();
       document.querySelector('#app').innerHTML = levelEditor.getHtml();
       levelEditor.runScript();
       break;
@@ -19,7 +19,6 @@ const router = async () => {
       const mainMenu = new MainMenu();
       window.history.pushState(null, null, '/');
       document.querySelector('#app').innerHTML = mainMenu.getHtml();
-      console.log(document.querySelector('#app').innerHTML);
       break;
   }
 }
@@ -38,3 +37,8 @@ document.addEventListener("DOMContentLoaded", () => {
   /* Document has loaded -  run the router! */
   router();
 });
+
+window.addEventListener('popstate', (e) => {
+  e.preventDefault();
+  console.log('pop dat stat');
+})

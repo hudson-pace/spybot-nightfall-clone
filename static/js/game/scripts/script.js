@@ -1,7 +1,6 @@
 import StartMenu from './start-menu.js';
 
 export default () => {
-  console.log('init gam');
   const canvas = document.getElementsByTagName('canvas')[0];
   canvas.height = 500;
   canvas.width = 1000;
