@@ -1,7 +1,5 @@
 export default class {
-  getHtml () {
-    return "";
-  }
-  runScript () {
+  getNode () {
+    return document.createElement('div');
   }
 }

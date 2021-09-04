@@ -1,7 +1,6 @@
 import StartMenu from './start-menu.js';
 
-export default () => {
-  const canvas = document.getElementsByTagName('canvas')[0];
+export default (canvas) => {
   canvas.height = 500;
   canvas.width = 1000;
 

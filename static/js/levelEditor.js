@@ -1,18 +1,34 @@
 export default class {
+  constructor (container, map) {
+    this.container = container;
+    this.mapData = map;
 
-  constructor () {
     this.modes = {
       ADD_NODE: 'add',
       EDIT: 'edit',
       ADDING_CONNECTION: 'adding connection',
       NONE: 'none',
     };
+  
+    if (!this.ownerList) {
+      this.ownerList = [
+        'Cellular Automata Research',
+        'Doctor Donut',
+        'Lucky Monkey Media',
+        'Parker Ellington Davis Consulting',
+        'Pharmhaus',
+        'S.M.A.R.T.',
+        'Unknown',
+        'Warez',
+      ];
+    }
+
     this.tileTypes = {
       NONE: 'none',
       NODE: 'node',
-      CONNECTION: 'connection',
-    };
-    
+      CONNECTION: 'connection'
+    }
+  
     this.connectionTypes = {
       N_S: 'n-s-connector',
       S_N: 's-n-connector',
@@ -25,80 +41,99 @@ export default class {
       NONE: '',
     };
 
-    this.ownerList = [
-      'Cellular Automata Research',
-      'Doctor Donut',
-      'Lucky Monkey Media',
-      'Parker Ellington Davis Consulting',
-      'Pharmhaus',
-      'S.M.A.R.T.',
-      'Unknown',
-      'Warez',
-    ];
+    this.addNodeOptions = this.container.querySelector('#add-node-options');
 
-    this.addNodeOptions = document.querySelector('#add-node-options');
-
-    this.addNodeButton = document.querySelector('#add-node-button');
+    this.addNodeButton = this.container.querySelector('#add-node-button');
     this.addNodeButton.addEventListener('click', () => {
       const data = this.getObjectFromFormData(new FormData(this.addNodeOptions));
       this.addNode(data, this.selectedTile);
     });
 
-    this.editNodeOptions = document.querySelector('#edit-node-options');
+    this.editNodeOptions = this.container.querySelector('#edit-node-options');
     this.editNodeOptions.addEventListener('change', () => {
       const data = this.getObjectFromFormData(new FormData(this.editNodeOptions));
       this.updateNode(data, this.selectedNode);
     });
 
-    this.addConnectionButton = document.querySelector('#add-connection-button');
+    this.addConnectionButton = this.container.querySelector('#add-connection-button');
     this.addConnectionButton.addEventListener('click', () => {
       this.addConnection();
     })
 
-    this.clearConnectionsButton = document.querySelector('#clear-connections-button');
+    this.clearConnectionsButton = this.container.querySelector('#clear-connections-button');
     this.clearConnectionsButton.addEventListener('click', () => {
       this.clearConnections(this.selectedTile);
     })
 
-    this.removeNodeButton = document.querySelector('#remove-node-button');
+    this.removeNodeButton = this.container.querySelector('#remove-node-button');
     this.removeNodeButton.addEventListener('click', () => {
       this.removeNode(this.selectedNode);
     });
 
-    this.cancelConnectionButton = document.querySelector('#cancel-connection-button');
+    this.cancelConnectionButton = this.container.querySelector('#cancel-connection-button');
     this.cancelConnectionButton.addEventListener('click', () => {
       this.cancelConnection();
     });
 
-    this.connectionOptions = document.querySelector('#connection-options');
+    this.connectionOptions = this.container.querySelector('#connection-options');
 
-    this.generateJsonButton = document.querySelector('#generate-json-button');
+    this.generateJsonButton = this.container.querySelector('#generate-json-button');
     this.generateJsonButton.addEventListener('click', () => {
       console.log(this.generateJson());
     })
-    this.jsonInput = document.querySelector('#json-input');
-    this.loadFromJsonButton = document.querySelector('#load-from-json-button');
+    this.jsonInput = this.container.querySelector('#json-input');
+    this.loadFromJsonButton = this.container.querySelector('#load-from-json-button');
     this.loadFromJsonButton.addEventListener('click', () => {
       this.createNetmapFromJson(this.jsonInput.value);
       this.jsonInput.value='';
     })
   
-    this.table = document.querySelector('#netmap');
+    this.table = this.container.querySelector('#netmap');
     this.addResizerListeners();
     this.loadOwnerLists();
 
-    this.initNetmap(10, 10);
-  }
+    this.generateNodesFromMapData();
 
-  initNetmap (width, height) {
-    this.table.innerHTML = '';
+    
     this.selectedTile = undefined;
     this.selectedNode = undefined;
-    this.nodes = [];
-    this.connections = [];
-    this.switchMode(this.modes.NONE);
-    this.grid = this.createGrid(width, height);
+  }
+
+  initMapData () {
+    if (!this.mapData.nodes) {
+      this.mapData.nodes = [];
+    }
+    if (!this.mapData.connections) {
+      this.mapData.connections = [];
+    }
+    if (!this.mapData.height) {
+      this.mapData.height = 10;
+    }
+    if (!this.mapData.width) {
+      this.mapData.width = 10;
+    }
+  }
+
+  generateNodesFromMapData () {
+    this.initMapData();
+    this.table.innerHTML = '';
+    
+    this.grid = this.createGrid(this.mapData.width, this.mapData.height);
+    this.mapData.height = this.grid.length;
+    this.mapData.width = this.grid[0].length;
     this.updateTileCoords();
+    this.mapData.nodes.forEach((node) => {
+      node.tile = this.getTileFromCoords(node.tile.x, node.tile.y);
+      this.addNode(node, node.tile, false);
+    });
+    this.mapData.connections.forEach((connection) => {
+      for (let i = 0; i < connection.length; i++) {
+        connection[i] = this.getTileFromCoords(connection[i].x, connection[i].y);
+      }
+      this.addConnection(connection)
+    });
+
+    this.switchMode(this.modes.NONE);
     this.calculateTableMargin();
   }
 
@@ -120,7 +155,7 @@ export default class {
       option.innerHTML = owner;
       options.push(option);
     })
-    const selects = document.querySelectorAll('select[name="owner"]');
+    const selects = this.container.querySelectorAll('select[name="owner"]');
     selects.forEach((select) => {
       options.forEach((option) => {
         select.appendChild(option.cloneNode(true));
@@ -192,6 +227,10 @@ export default class {
     return tiles;
   };
 
+  replaceGridData (grid, gridData) {
+    
+  }
+
   createTableRow (width) {
     const row = [];
     const tr = document.createElement('tr');
@@ -258,7 +297,7 @@ export default class {
   }
 
   getNodeFromTile (tile) {
-    return this.nodes.find((node) => node.tile === tile);
+    return this.mapData.nodes.find((node) => node.tile === tile);
   }
 
   resizeGrid ([top, right, bottom, left]) {
@@ -278,44 +317,46 @@ export default class {
 
     this.calculateTableMargin();
     this.updateTileCoords();
+    this.mapData.height = this.grid.length;
+    this.mapData.width = this.grid[0].length;
   }
 
   addResizerListeners () {
-    document.querySelector('#resize-top-plus').addEventListener('click', () => {
+    this.container.querySelector('#resize-top-plus').addEventListener('click', () => {
       this.resizeGrid([1, 0, 0, 0]);
     });
-    document.querySelector('#resize-top-minus').addEventListener('click', () => {
+    this.container.querySelector('#resize-top-minus').addEventListener('click', () => {
       this.resizeGrid([-1, 0, 0, 0])
     });
-    document.querySelector('#resize-bottom-plus').addEventListener('click', () => {
+    this.container.querySelector('#resize-bottom-plus').addEventListener('click', () => {
       this.resizeGrid([0, 0, 1, 0])
     });
-    document.querySelector('#resize-bottom-minus').addEventListener('click', () => {
+    this.container.querySelector('#resize-bottom-minus').addEventListener('click', () => {
       this.resizeGrid([0, 0, -1, 0])
     });
-    document.querySelector('#resize-left-plus').addEventListener('click', () => {
+    this.container.querySelector('#resize-left-plus').addEventListener('click', () => {
       this.resizeGrid([0, 0, 0, 1])
     });
-    document.querySelector('#resize-left-minus').addEventListener('click', () => {
+    this.container.querySelector('#resize-left-minus').addEventListener('click', () => {
       this.resizeGrid([0, 0, 0, -1])
     });
-    document.querySelector('#resize-right-plus').addEventListener('click', () => {
+    this.container.querySelector('#resize-right-plus').addEventListener('click', () => {
       this.resizeGrid([0, 1, 0, 0])
     });
-    document.querySelector('#resize-right-minus').addEventListener('click', () => {
+    this.container.querySelector('#resize-right-minus').addEventListener('click', () => {
       this.resizeGrid([0, -1, 0, 0])
     });
   }
 
   calculateTableMargin () {
-    const tableWrapper = document.querySelector('#netmap-table-wrapper');
+    const tableWrapper = this.container.querySelector('#netmap-table-wrapper');
     const height = this.grid.length;
     const width = this.grid[0].length;
     tableWrapper.style.marginTop = `${ ((Math.sqrt(2) * .5 * (height + width)) - height) * 25 }px`;
     tableWrapper.style.marginLeft = `${ ((Math.sqrt(2) * .5 * (height + width + 2)) - width) * 25 }px`;
   }
 
-  addNode (nodeData, tile) {
+  addNode (nodeData, tile, addToList=true) {
     const { name, owner, description, startsOwned, securityLevel } = nodeData;
     const node = {
       ...nodeData,
@@ -325,7 +366,9 @@ export default class {
       // shop: nodeData.shop ? nodeData.shop : undefined
     };
 
-    this.nodes.push(node);
+    if (addToList) {
+      this.mapData.nodes.push(node);
+    }
     this.setTileType(tile, this.tileTypes.NODE);
     if (this.selectedTile === tile) {
       this.selectedNode = node;
@@ -340,8 +383,8 @@ export default class {
   removeNode (node) {
     this.clearConnections(node.tile);
     this.setTileType(node.tile, this.tileTypes.NONE);
-    const index = this.nodes.findIndex((n) => n === node);
-    this.nodes.splice(index, 1);
+    const index = this.mapData.nodes.findIndex((n) => n === node);
+    this.mapData.nodes.splice(index, 1);
 
     if (this.selectedNode) {
       this.selectedNode = undefined;
@@ -362,7 +405,7 @@ export default class {
   addToConnection (connection, tile) {
     connection.push(tile);
     if (tile.type === this.tileTypes.NODE) {
-      this.connections.push(connection);
+      this.mapData.connections.push(connection);
       this.currentConnection = undefined;
       if (this.selectedNode) {
         this.switchMode(this.modes.EDIT);
@@ -390,7 +433,7 @@ export default class {
           this.setTileType(tile, this.tileTypes.CONNECTION);
         }
       });
-      this.connections.push(connection);
+      this.mapData.connections.push(connection);
       this.updateConnectionOrientations(connection, true);
     } else {
       this.switchMode(this.modes.ADDING_CONNECTION);
@@ -441,15 +484,15 @@ export default class {
   }
 
   clearConnections (tile) {
-    for (let i = this.connections.length - 1; i >= 0; i--) {
-      if (this.connections[i].includes(tile)) {
-        this.connections[i].forEach((t) => {
+    for (let i = this.mapData.connections.length - 1; i >= 0; i--) {
+      if (this.mapData.connections[i].includes(tile)) {
+        this.mapData.connections[i].forEach((t) => {
           if (t.type !== this.tileTypes.NODE) {
             this.setTileType(t, this.tileTypes.NONE);
             this.setConnectionType(t, this.connectionTypes.NONE);
           }
         });
-        this.connections.splice(i, 1);
+        this.mapData.connections.splice(i, 1);
       }
     }
   }
@@ -469,7 +512,7 @@ export default class {
   generateJson () {
     // netmap.nodes = [];
     /*
-    this.nodes.forEach((node) => {
+    this.map.nodes.forEach((node) => {
       const x = ((node.tile.x - node.tile.y + netmap.height) - 1) / 2;
       const y = (node.tile.x + node.tile.y) / 2;
       const newNode = {
@@ -489,9 +532,9 @@ export default class {
     */
 
     return JSON.stringify({
-      height: this.grid.length,
-      width: this.grid[0].length,
-      nodes: this.nodes.map((node) => ({
+      height: this.mapData.height,
+      width: this.mapData.length,
+      nodes: this.mapData.nodes.map((node) => ({
         owner: node.owner,
         name: node.name,
         description: node.description,
@@ -500,7 +543,7 @@ export default class {
         x: node.tile.x,
         y: node.tile.y
       })),
-      connections: this.connections.map((connection) => connection.map((tile) => ({
+      connections: this.mapData.connections.map((connection) => connection.map((tile) => ({
         x: tile.x,
         y: tile.y
       }))),
@@ -508,13 +551,7 @@ export default class {
   }
   
   createNetmapFromJson (inputJson) {
-    const json = JSON.parse(inputJson);
-    this.initNetmap(json.width, json.height);
-    json.nodes.forEach((node) => {
-      this.addNode(node, this.getTileFromCoords(node.x, node.y));
-    });
-    json.connections.forEach((connection) => {
-      this.addConnection(connection.map((tile) => this.getTileFromCoords(tile.x, tile.y)));
-    });
+    Object.assign(this.mapData, JSON.parse(inputJson));
+    this.generateNodesFromMapData();
   }
 }

@@ -2,13 +2,15 @@ import initGame from '../game/scripts/script.js';
 import BaseView from './baseView.js';
 
 export default class extends BaseView {
-  getHtml () {
-    return `
-      <canvas class="game-container"></canvas>
-    `;
+  constructor (switchView) {
+    super();
+    this.switchView = switchView;
   }
 
-  runScript () {
-    initGame();
+  getNode () {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'game-container';
+    initGame(canvas);
+    return canvas;
   }
 }
