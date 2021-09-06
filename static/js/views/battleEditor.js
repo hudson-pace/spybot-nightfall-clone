@@ -1,0 +1,86 @@
+import BaseView from './baseView.js';
+
+export default class extends BaseView {
+  constructor (switchView, battleData) {
+    super();
+    this.switchView = switchView;
+    this.battleData = battleData;
+  }
+
+  getHtml () {
+    return`
+      <button id="go-back-button" type="button">Go back</button>
+    `;
+
+    return `
+      <div class="option">
+        <p>Reward: <input type="text" ng-model="databattle.reward"></p>
+      </div>
+      <div class="option">
+        <select ng-model="selectedType">
+          <option ng-repeat="type in tileTypes">{{ type }}</option>
+        </select>
+        <select ng-model="selectedProgram" ng-show="selectedType === tileTypes.ENEMY">
+          <option ng-repeat="program in programList">{{ program.name }}</option>
+        </select>
+        <select ng-model="selectedItem" ng-show="selectedType === tileTypes.ITEM">
+          <option ng-repeat="item in itemList">{{ item }}</option>
+        </select>
+        <input type="text" ng-model="creditAmount" ng-show="selectedType === tileTypes.ITEM && selectedItem === 'credit'"></input>
+      </div>
+      <div class="option">
+        <div ng-if="!netmapWatcher.netmap"><button ng-click="generateJSON()">Generate JSON</button> (Logged to console)</div>
+        <input ng-model="inputJson" type="text"><button ng-click="loadDatabattle(inputJson)">Generate Battle from JSON</button>
+      </div>
+      <div class="option" ng-if="netmapWatcher.netmap">
+        <button ng-click="returnToNetmap()">Return to Netmap</button>
+      </div>
+    </div>
+    <div class="grid-container" oncontextmenu="return false">
+      <div>
+        <div class="horizontal-arrow expand" ng-click="databattle.resize({ top: 1 })"></div>
+        <div class="horizontal-arrow collapse" ng-click="databattle.resize({ top: -1 })"></div>
+      </div>
+      <div class="table-options">
+        <div class="vertical-arrow expand" ng-click="databattle.resize({ left: 1 })"></div>
+        <div class="vertical-arrow collapse" ng-click="databattle.resize({ left: -1 })"></div>
+        <table cellspacing="0" cellpadding="0">
+          <tr ng-repeat="row in databattle.tiles">
+            <td ng-repeat="tile in row">
+              <div class="tile" ng-mousedown="clickTile($event, tile)" ng-mouseenter="mouseEnterTile($event, tile)" ng-mouseup="mouseUp($event)"
+              ng-class="{
+                'none': tile.type === tileTypes.NONE,
+                'basic': tile.type === tileTypes.BASIC,
+                'upload': tile.type === tileTypes.UPLOAD,
+                'enemy': tile.type === tileTypes.ENEMY,
+                'item': tile.type === tileTypes.ITEM,
+              }"
+              ng-style="tile.style">
+                <span ng-if="tile.type === tileTypes.ENEMY">{{ tile.program }}</span>
+                <span ng-if="tile.type === tileTypes.ITEM">{{ tile.item.name }}</span>
+              </div>
+            </td>
+          </tr>
+        </table>
+        <div class="vertical-arrow collapse" ng-click="databattle.resize({ right: -1 })"></div>
+        <div class="vertical-arrow expand" ng-click="databattle.resize({ right: 1 })"></div>
+      </div>
+      <div>
+        <div class="horizontal-arrow collapse" ng-click="databattle.resize({ bottom: -1 })"></div>
+        <div class="horizontal-arrow expand" ng-click="databattle.resize({ bottom: 1 })"></div>
+      </div>
+    `;
+  }
+
+  getNode () {
+    const container = document.createElement('div');
+    container.innerHTML = this.getHtml();
+
+    const goBackButton = container.querySelector('#go-back-button');
+    goBackButton.addEventListener('click', () => {
+      this.switchView('mapEditor');
+    });
+
+    return container;
+  }
+}

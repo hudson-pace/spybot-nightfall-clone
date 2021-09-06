@@ -5,6 +5,7 @@ export default class extends BaseView {
     super();
     this.switchView = switchView;
     this.mapList = mapList;
+    console.log(mapList);
   }
 
   getHtml () {

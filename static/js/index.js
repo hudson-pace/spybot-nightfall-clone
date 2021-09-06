@@ -4,7 +4,11 @@ import Home from './views/home.js';
 import NotFound from './views/notFound.js';
 import MapList from './views/mapList.js';
 
-const mappy = [];
+let maps = JSON.parse(window.localStorage.getItem('maps'));
+if (!Array.isArray(maps)) {
+  maps = [];
+}
+
 const views = {
   'mapEditor': {
     'view': MapEditor,
@@ -17,7 +21,7 @@ const views = {
   },
   'mapList': {
     'view': MapList,
-    'params': mappy,
+    'params': maps,
   },
 }
 
@@ -32,4 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
   switchView('home');
+});
+
+addEventListener('beforeunload', () => {
+  window.localStorage.setItem('maps', JSON.stringify(maps));
 });
