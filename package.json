@@ -5,20 +5,24 @@
   "main": "index.js",
   "scripts": {
     "test": "test",
-    "start": "node index.js"
+    "start": "node index.js",
+    "init-db": "node ./api/db/init.js"
   },
   "author": "Hudson Pace",
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
-    "mongodb": "^4.1.0",
-    "mongoose": "^5.13.7"
+    "pg": "^8.7.1"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^4.29.2",
-    "@typescript-eslint/parser": "^4.29.2",
+    "@typescript-eslint/eslint-plugin": "^5.25.0",
+    "@typescript-eslint/parser": "^5.25.0",
     "eslint": "^7.32.0",
+    "eslint-config-airbnb": "^19.0.4",
     "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-plugin-import": "^2.24.1"
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-react": "^7.30.0",
+    "eslint-plugin-react-hooks": "^4.5.0"
   }
 }

@@ -1,5 +1,5 @@
 import BaseView from './baseView.js';
-import LevelObj from '../levelEditor.js';
+import LevelObj from '../mapEditor.js';
 
 export default class extends BaseView {
   constructor (switchView, map) {
@@ -71,8 +71,9 @@ export default class extends BaseView {
     const returnButton = container.querySelector('#return-button');
     returnButton.addEventListener('click', () => {
       this.switchView('mapList');
-    })
-    new LevelObj(container, this.map);
+    });
+
+    new LevelObj(container, this.map, this.switchView);
     return container;
   }
 }

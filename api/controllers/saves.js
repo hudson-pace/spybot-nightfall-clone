@@ -1,16 +1,16 @@
 const express = require('express');
-const Save = require('../models/save');
+const db = require('../db');
 
 const router = express.Router();
 
 router.get('/', (req, res) => {
-  Save.find((err, saves) => {
-    if (err) {
-      console.error(err);
-      return res.json({ 'err': `400 ${err.message}` }).status(400);
-    }
-    return res.json(saves).status(200);
-  });
+  db.query('SELECT NOW()')
+    .then((res) => {
+      return res.json(res).status(200);
+    })
+    .catch((err) => {
+      return res.json(err).status(400)
+    });
 });
 
 router.post('/', (req, res) => {

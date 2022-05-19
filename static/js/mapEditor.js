@@ -1,7 +1,8 @@
 export default class {
-  constructor (container, map) {
+  constructor (container, map, switchView) {
     this.container = container;
     this.mapData = map;
+    this.switchView = switchView
 
     this.modes = {
       ADD_NODE: 'add',
@@ -80,12 +81,26 @@ export default class {
     this.generateJsonButton = this.container.querySelector('#generate-json-button');
     this.generateJsonButton.addEventListener('click', () => {
       console.log(this.generateJson());
-    })
+    });
     this.jsonInput = this.container.querySelector('#json-input');
     this.loadFromJsonButton = this.container.querySelector('#load-from-json-button');
     this.loadFromJsonButton.addEventListener('click', () => {
       this.createNetmapFromJson(this.jsonInput.value);
       this.jsonInput.value='';
+    });
+
+    this.editDatabattleButton = this.container.querySelector('#edit-databattle-button');
+    this.editDatabattleButton.addEventListener('click', () => {
+      if (this.selectedNode) {
+        this.switchView('battleEditor', this.selectedNode);
+      }
+    });
+
+    this.editShopButton = this.container.querySelector('#edit-shop-button');
+    this.editShopButton.addEventListener('click', () => {
+      if (this.selectedNode) {
+        this.switchView('shopEditor', { node: this.selectedNode, map: this.mapData });
+      }
     })
   
     this.table = this.container.querySelector('#netmap');
@@ -547,6 +562,9 @@ export default class {
         x: tile.x,
         y: tile.y
       }))),
+      battle: node.battle,
+      shop: node.shop,
+      event: node.event
     });
   }
   

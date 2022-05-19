@@ -43,7 +43,7 @@ td {
 }
 .tile.node {
   background-color: blue;
-  transform: scale(2);
+  transform: scale(1.5);
 }
 .tile.selected {
   border: 2px solid yellow;
